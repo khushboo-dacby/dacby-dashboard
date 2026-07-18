@@ -14,7 +14,7 @@ import {
 function normalizeAttributeValue(value) {
   return String(value).trim().toLowerCase();
 }
-
+// fdfd 
 function getCombinationItems(productDetails, combinationId) {
   const vendors = productDetails?.details?.vendors ?? {};
   return Object.values(vendors).flatMap((vendor) =>
