@@ -1,0 +1,78 @@
+{
+  "spec_id": "ps5-cds",
+  "inventory_doc": {
+    "spec_id": "ps5-cds",
+    "product_title": "Assassin's Creed Black Flag Resynced",
+    "code": "D001Y",
+        "category_name": "PS5 Cds",
+    "condition": "Pre Owned",
+    "mrp": 4999,
+    "price": 4699,
+        "sell": true,
+    "sell_max_price": 3200,
+           "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/-iXraESkNGE?si=2OMPW6SNpU835ilD\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+
+   "description": {
+  "Packaging": "Pre-Owned Game Case",
+  "Type": "Blu-ray Disc",
+  "Global_Attributes": {
+    "brand": "Ubisoft",
+    "genre": "Action Adventure, Open World, Pirate, Stealth",
+    "language": "English",
+    "mode": "Single-player",
+    "platform": "PlayStation 5",
+    "publisher": "Ubisoft",
+    "rating": "Rating To Be Announced",
+    "release_date": "9th July 2026",
+    "release_year": 2026
+  },
+  "Gameplay": {
+    "skills": 9,
+    "features": [
+      "Play as Edward Kenway in a pirate adventure set during the Golden Age of Piracy.",
+      "Explore a massive open world Caribbean filled with islands, ports, forts, and hidden treasures.",
+      "Command and upgrade the Jackdaw pirate ship for naval exploration and combat.",
+      "Experience intense ship battles, boarding missions, and naval warfare.",
+      "Use stealth, melee combat, ranged weapons, and assassin abilities to complete missions.",
+      "Discover side quests, collectibles, treasure maps, and underwater locations.",
+      "Enhanced visuals and environmental detail designed for PlayStation 5.",
+      "Improved loading times and smoother gameplay performance.",
+      "A modern reimagining of one of the most popular Assassin's Creed games."
+    ]
+  },
+  "summary": "Looking for the best price on a high quality pre-owned copy of Assassin's Creed Black Flag Resynced for PlayStation 5? Buy Assassin's Creed Black Flag Resynced PS5 pre-owned game CD online in India from DACBY, your trusted destination for genuine used PlayStation 5 games, second hand PS5 Blu-ray discs, and affordable gaming titles. Published by Ubisoft, this modern reimagining of the iconic pirate adventure lets players step into the boots of Edward Kenway, a fearless pirate captain and Assassin navigating the dangerous waters of the Caribbean during the Golden Age of Piracy. Explore a vast open world filled with bustling ports, hidden coves, tropical islands, legendary treasures, and powerful naval fleets while experiencing one of the most celebrated entries in the Assassin's Creed franchise. Command the Jackdaw, engage in epic ship battles, master stealth assassinations, uncover ancient secrets, and experience an unforgettable blend of action, exploration, naval warfare, and open world adventure. Optimized for PlayStation 5, Assassin's Creed Black Flag Resynced delivers enhanced visuals, improved environmental detail, faster loading times, immersive gameplay, and a next generation pirate experience built for modern hardware.\n\nWhen you choose to buy a pre-owned Assassin's Creed Black Flag Resynced PS5 game disc online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 5 game sold through DACBY is thoroughly inspected, tested for functionality, and verified for authenticity before being listed for sale. DACBY provides secure payment options, competitive pricing, reliable customer support, and fast shipping across India. Whether you are a long time Assassin's Creed fan, an open world gaming enthusiast, or simply looking for an affordable way to enjoy the latest PS5 releases, DACBY is your trusted online destination for buying used PS5 game CDs, pre-owned PlayStation 5 Blu-ray discs, action adventure games, and premium gaming products at great prices."
+},
+    "vendors": {
+      "VENDOR_001": {
+        "vendor_id": "yyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+        "name": "Dacby Technologies Pvt. Ltd.",
+        "ratings": 0,
+        
+        "vendor_note": "Disc in good condition with original cover",
+        "combination_offered": {
+          "combination_1": {
+            "item_1": {
+              "sku": "assassins-creed-black-flag-resynced-ps5-cd",
+              "mrp": 4999,
+              "price": 4699,
+              "sell": true,
+              "sell_price": 3200,
+              "weight": 0.1,
+              "rating":0,
+              "rating_count":0,
+              "stocks": 0,
+             
+              "images": [       "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FPS5%20CDS%2FAssassin's%20Creed%20Black%20Flag%20Resynced%20PS5%20preorder%2Fblack-flag%20-%20Edited.png?alt=media&token=c5a044af-2624-4b1d-95be-cbb4bc281a84",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FPS5%20CDS%2FAssassin's%20Creed%20Black%20Flag%20Resynced%20PS5%20preorder%2Fa22.jpg?alt=media&token=5cf53ffc-3838-4a11-8af7-039ab756d203",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FPS5%20CDS%2FAssassin's%20Creed%20Black%20Flag%20Resynced%20PS5%20preorder%2Fa33.jpg?alt=media&token=def0dc5b-e11f-4756-ad71-4cf8f3bd6aa7",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FPS5%20CDS%2FAssassin's%20Creed%20Black%20Flag%20Resynced%20PS5%20preorder%2Fa44.jpg?alt=media&token=28a3c7c8-3a7e-4088-80b7-49e396ef2d91"
+                            ]
+            }
+          }
+        }
+      }
+    },
+    "in_stock": false
+      }
+}
+
