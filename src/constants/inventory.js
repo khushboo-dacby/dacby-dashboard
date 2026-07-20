@@ -69,6 +69,42 @@ export const SEARCH_RESULTS = [
             "code": "D004Y"
         }
     },
+     {
+        "docId": "TXTnJ4HuCt2bG4oNe8cZ",
+        "score": 7.462318134231943,
+        "outOfStock": false,
+        "product": {
+            "product_title": "Nikon D3100 Dslr Camera With 18-55mm Kit Lens",
+            "price": 14999,
+            "mrp": 27999,
+            "image": "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Fa4d9a53f-bd16-4ad2-9994-84688bc52f3a_2040x2040.png?alt=media&token=7d93e731-3ccf-4be5-afa8-378286945c98",
+            "sell": true,
+            "category": "Cameras",
+            "sell_max_price": 7800,
+            "outOfStock": false,
+            "variants": 3,
+            "condition": "Pre Owned",
+            "code": "D014Y"
+        }
+    },
+     {
+        "docId": "aJRqoPbV7y5s3AWDGGyc",
+        "score": 6.985802466693666,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Apple Iphone 14",
+            "price": 33899,
+            "mrp": 89900,
+            "image": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+            "sell": false,
+            "category": "Smartphones",
+            "sell_max_price": 10000,
+            "outOfStock": true,
+            "variants": 72,
+            "condition": "Pre Owned",
+            "code": "D019Y"
+        }
+    },
     {
         "docId": "DoSbFOsOB7nSvAHWjbqs",
         "score": 6.748777133558521,
@@ -430,6 +466,368 @@ export const SEARCH_RESULTS = [
         }
     }
 ];
+export const SPECIAL_EDITIONS = [
+    {
+        "docId": "OgKFjmQtJf30igiPdgQR",
+        "score": 7.0651126948789775,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V1 (uncharted 4 Special Edition)",
+            "price": 2799,
+            "mrp": 3999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V1%20(Uncharted%204%20Special%20Edition)%201_2040x2040.png?alt=media&token=b70284a8-5a05-45c6-b578-9fc3b013a257",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1750,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "inoZgkHZMWi16FN5vArD",
+        "score": 7.051816992652733,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 (gt Sport)",
+            "price": 2999,
+            "mrp": 4999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V2%20(GT%20Sport%20Silver)%201_2040x2040.png?alt=media&token=b5ffa5ea-38f8-497d-8776-1ca8a9c15771",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1950,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "UclZcxS0awQBsG1LlWe8",
+        "score": 6.96277396097897,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 (days Of Play Limited Edition)",
+            "price": 2999,
+            "mrp": 4499,
+            "image": "https://dacby-database.web.app/cdn/Controllers%2Fsilverv1%2F8eb3139a-2f63-4907-b88f-66335991ce0f_2040x2040.png?alt=media&token=b09362b5-d300-4eae-8e23-57aa2c3dbf60",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1950,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "PTQepu5hnrcDo5wlUWKi",
+        "score": 6.950404021420069,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V1 (batman Arkham Knight Special Edition)",
+            "price": 2799,
+            "mrp": 3999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%2Fbatman%2F436aa2d7-1052-4c78-891f-aba200e5df76_2040x2040.png?alt=media&token=cde26ef1-1d6c-4047-b0df-4288868e51c2",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1750,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "xFMxRQvnQW2fKvGGk6A8",
+        "score": 6.913360847725265,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V1 (vader Star Wars Controller) Limited Edition",
+            "price": 2799,
+            "mrp": 3999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%2Fps4%20valde%2Fa61d9249-55f3-4c6f-8ad9-3834a6375a55_2040x2040.png?alt=media&token=e8db939f-16f8-4b89-b5f4-f6fcdaf87d21",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2000,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "RYUOEPMQAaKxO9xfJ6ER",
+        "score": 6.909506053635807,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V1 Call Of Duty Limited Edition Controller",
+            "price": 2999,
+            "mrp": 4999,
+            "image": "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FControllers%2Fps4-standard-call-of-duty-limited-edition%20controller%2FX11_2040x2040.png?alt=media&token=9eba8511-829f-4043-bd04-d9857714a4bf",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2000,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "u5Fb2fppCZtltCNG0GXb",
+        "score": 6.9001911655322115,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 Starwars Battlefront Limited Edition Wireless Controller",
+            "price": 2999,
+            "mrp": 4999,
+            "image": "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FControllers%2Fps4-starwars-battlefront%20controller%2FStarxx_2040x2040.png?alt=media&token=cbc548c6-a92a-4627-8c8c-f9dcfaeb7a0e",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2000,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "6zbrNZTfmEgnBsfcHEjD",
+        "score": 6.8967021012192165,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps3 Controller",
+            "price": 1399,
+            "mrp": 2999,
+            "image": "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FControllers%2FPS3%20Dualshock%203%20White%20Controller%2Fyz111_2040x2040.png?alt=media&token=a2acf359-e18a-4090-aa86-dec358f83f11",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 10,
+            "outOfStock": true,
+            "variants": 4,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "CfGoqcxYaB6wTMsz9O8D",
+        "score": 6.885901768730354,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 (500 Million) Limited Edition",
+            "price": 3449,
+            "mrp": 3999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V2%20(500%20million%20Blue)%201_2040x2040.png?alt=media&token=1d19782c-f182-479b-9e29-0a70279798b2",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2550,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "McQpMuz9OOo3cQUbQR4v",
+        "score": 6.868708495794829,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V1",
+            "price": 2399,
+            "mrp": 6999,
+            "image": "https://dacby-database.web.app/cdn/1111111111111111111111111111111%2Fcontroller%2F6a2a75a3-8c3a-407c-9f2f-8f54ea81600e_2040x2040.png?alt=media&token=c68f4e74-e6fa-4076-a5d8-94a18b079d87",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1650,
+            "outOfStock": true,
+            "variants": 11,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "NQse4YFaKXhaljyFVxmw",
+        "score": 6.865407720931465,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 God Of War Limited Edition",
+            "price": 3099,
+            "mrp": 4999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V2%20(God%20Of%20War%20Limited%20Edition)%201_2040x2040.png?alt=media&token=85206e73-a032-41c9-ad55-89d2c85fe186",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1950,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "CNpGQGnxkCF8VucHE3Es",
+        "score": 6.864432485449935,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 (uefa Champions League Blue) Limited Edition",
+            "price": 3099,
+            "mrp": 3999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V2%20(UEFA%20Champions%20League%20Blue)%201_2040x2040.png?alt=media&token=2d268098-aca3-4693-b871-9925de184fc9&width=300",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1950,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "noWxSALcmVzMyRzUoBbb",
+        "score": 6.853388565463131,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 (the Last Of Us 2) Limited Edition",
+            "price": 3099,
+            "mrp": 4499,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V2%20(The%20Last%20Of%20Us%202%20Black)%201_2040x2040.png?alt=media&token=d2220253-1c6b-463f-8a35-9b64fe072efe",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1950,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "MIFZpfaMSYtO9IRxjuAg",
+        "score": 6.850823731682033,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 Destiny 2 Limited Edition",
+            "price": 2999,
+            "mrp": 4499,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V2%20(Destiny%202%20Limited%20Edition)%201_2040x2040.png?alt=media&token=5d0e12a0-4700-4603-9f29-5937e0bb317a",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2200,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "jGnmtduikW83Qeg28daW",
+        "score": 6.834933974513536,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 (rose Gold) Limited Edition",
+            "price": 2899,
+            "mrp": 3999,
+            "image": "https://dacby-database.web.app/cdn/Controllers%2F100%2Fd857cecf-b0db-4c16-92bc-b1bcc68e6cd0_2040x2040.png?alt=media&token=1cf1dfd3-c681-49ca-89d2-eb9ed5a45859",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2000,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "OCaLVTBK53qqfU5SQYSN",
+        "score": 6.834524830737357,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2",
+            "price": 2599,
+            "mrp": 7499,
+            "image": "https://dacby-database.web.app/cdn/Controllers%20new%2FPS4%20Dualshock%20V2%20(Jet%20Black)%203_2040x2040.png?alt=media&token=5ed441ac-625f-4554-8fcd-0bde6b265e2c",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1850,
+            "outOfStock": true,
+            "variants": 21,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "VVcxfAeAxaTguVnv447b",
+        "score": 6.820627675658711,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps2 Controller",
+            "price": 399,
+            "mrp": 950,
+            "image": "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FControllers%2FPS2%20Controller%2FPS211_2040x2040.png?alt=media&token=f8cacdfc-7c14-4020-9ae4-f146c1104da0",
+            "sell": false,
+            "category": "Controllers",
+            "sell_max_price": 400,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "jAy1yux9b56Om42LHHDi",
+        "score": 6.818973725410638,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V1 Ps4 Grey 20th Anniversary (limited-edition) Controller",
+            "price": 2699,
+            "mrp": 3999,
+            "image": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FControllers%2FCrystal%20white%20ps4%20v1%20controller%2FUntitled%20design%20(88).png?alt=media&token=5a30bbb0-e4f7-4088-bb40-115a9a6adfd9",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 1600,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "hoYg03BkKBZa3dzZTwoo",
+        "score": 6.800811024759945,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 Call Of Duty Wwii Limited Edition Controller",
+            "price": 2999,
+            "mrp": 4999,
+            "image": "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FControllers%2Fps4-slim-1tb-codwwii-limited-edition%20controller%2Fwwii11_2040x2040.png?alt=media&token=9294096f-d884-4d00-abeb-576afab5198b",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2300,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    },
+    {
+        "docId": "kZkoL4PqrUPKLU0ggCDl",
+        "score": 6.768210996953727,
+        "outOfStock": true,
+        "product": {
+            "product_title": "Ps4 Dualshock V2 Final Fantasy Luna Xv Limited Edition Controller",
+            "price": 2999,
+            "mrp": 4999,
+            "image": "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FControllers%2Fps4-slim-1-tb-final-fantasy-xv-luna%20Controller%2Fluna11_2040x2040.png?alt=media&token=9ae749c9-56f1-4c85-94c9-366e733416d4",
+            "sell": true,
+            "category": "Controllers",
+            "sell_max_price": 2300,
+            "outOfStock": true,
+            "variants": 1,
+            "condition": "Pre Owned",
+            "code": "D005Y"
+        }
+    }
+]
 export const PRODUCT_DETAILS = {
   rLk0HCQMCNmuhcjzx80k: {
     // Paste the entire JSON here
@@ -2792,6 +3190,2250 @@ export const PRODUCT_DETAILS = {
                         "deduction": 2500,
                         "icon": "Icons.box",
                         "label": "Original Box Missing"
+                    }
+                ],
+                "question": "Accessories Missing",
+                "type": "checkbox"
+            }
+        }
+    }
+  },
+  aJRqoPbV7y5s3AWDGGyc:{
+     "details": {
+        "category_name": "Smartphones",
+        "code": "D019Y",
+        "product_title": "Apple iPhone 14",
+        "spec_id": "iphone-14",
+        "condition": "Pre Owned",
+        "sell": false,
+        "sell_max_price": 10000,
+        "rating": 4.8,
+        "rating_count": 190,
+        "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/H58hEERXo18?si=E476zfKwHDj1dPYf\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+        "updated_at": {
+            "_seconds": 1771432329,
+            "_nanoseconds": 316000000
+        },
+        "created_at": {
+            "_seconds": 1771432329,
+            "_nanoseconds": 316000000
+        },
+        "price": 33899,
+        "mrp": 89900,
+        "in_stock": false,
+        "vendors": {
+            "VENDOR_001": {
+                "name": "Dacby Technologies Pvt. Ltd.",
+                "ratings": 4.7,
+                "total_sales": 320,
+                "vendor_id": "yyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                "vendor_note": "",
+                "combination_offered": {
+                    "combination_10": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-no-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-no-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-no-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-no-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-no-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-no-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_8": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_9": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_4": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-128gb-high-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-128gb-high-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-128gb-high-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-128gb-high-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-128gb-high-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-128gb-high-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_5": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_6": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_7": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-128gb-low-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_12": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-no-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-no-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-no-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-no-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-no-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-512gb-low-no-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_11": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-no-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-no-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-no-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-no-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-no-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "80%-89%",
+                            "sku": "iphone-14-256gb-low-no-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_1": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "sku": "iphone-14-128gb-high-no-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "battery_health": "90%-100%",
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "sku": "iphone-14-128gb-high-no-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "battery_health": "90%-100%",
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "sku": "iphone-14-128gb-high-no-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "battery_health": "90%-100%",
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "sku": "iphone-14-128gb-high-no-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "battery_health": "90%-100%",
+                            "price": 33899,
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "sku": "iphone-14-128gb-high-no-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "battery_health": "90%-100%",
+                            "price": 33899,
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "sku": "iphone-14-128gb-high-no-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "battery_health": "90%-100%",
+                            "price": 33899,
+                            "mrp": 54900,
+                            "storage": "6/128",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_2": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-no-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-no-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-no-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-no-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "price": 36999,
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-no-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "price": 36999,
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-256gb-high-no-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "price": 36999,
+                            "mrp": 64900,
+                            "storage": "6/256",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        }
+                    },
+                    "combination_3": {
+                        "item2": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-no-visible-marks-red",
+                            "color": "Red",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red11_2040x2040.jpg?alt=media&token=e4fca45e-feeb-4af5-8d36-9ff27e8f0887",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red22_2040x2040.png?alt=media&token=8840d633-dbd2-476b-9d46-5dd23b44662c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red33_2040x2040.png?alt=media&token=7a739c85-ad14-42cb-8ac2-d67a4ef40b0a",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20red441_2040x2040.jpg?alt=media&token=33b84d5d-687a-4902-940e-9985c0d9d633"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item6": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-no-visible-marks-purple",
+                            "color": "Purple",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple11_2040x2040.jpg?alt=media&token=195288af-7e2c-49ae-b664-82b669b61842",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple22_2040x2040.png?alt=media&token=a7668787-e9a7-437c-8499-839291c4066e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple33_2040x2040.png?alt=media&token=79438986-eb39-45e6-9450-cb6e2473c647",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20purple%20441_2040x2040.jpg?alt=media&token=29b13e09-4c8d-4df0-b793-8b8e06865ac7"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item5": {
+                            "price": 49999,
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-no-visible-marks-yellow",
+                            "color": "Yellow",
+                            "sell": false,
+                            "stocks": 0,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow11_2040x2040.jpg?alt=media&token=1d9d5e9d-3ee8-42c7-a9b8-00f8df15f483",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow22_2040x2040.png?alt=media&token=1a55190f-3fa9-4601-9cd7-39c5e1c372a1",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow33_2040x2040.png?alt=media&token=7dfdaf22-b590-4edd-a855-e08c33e2748c",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20yellow44_2040x2040.png?alt=media&token=8e442a04-b76f-4e7f-a947-9ed09625c31d"
+                            ],
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "oneDayDelivery": true
+                        },
+                        "item1": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-no-visible-marks-midnight",
+                            "color": "Midnight",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight11_2040x2040.jpg?alt=media&token=96844a23-c0c5-4450-a553-2309ac62d58e",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight22_2040x2040.png?alt=media&token=57349c4a-56ad-42f3-9a44-212111ad95ca",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight33_2040x2040.png?alt=media&token=50b4cf56-0ad7-44b2-bbce-80a81b635471",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20midnight441_2040x2040.jpg?alt=media&token=d4de15d1-f7ad-4d34-8b9a-a027d2bd60f8"
+                            ],
+                            "price": 38999,
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        },
+                        "item4": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-no-visible-marks-starlight",
+                            "color": "Starlight",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight11_2040x2040.jpg?alt=media&token=a0b26e54-8f07-4993-9471-0d76a13d2881",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight22_2040x2040.png?alt=media&token=65bb35df-16e7-4a78-b475-0927a3529732",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight33_2040x2040.png?alt=media&token=7f19db0f-b50e-4c08-8ff4-d755505534bc",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20starlight441_2040x2040.jpg?alt=media&token=54f5e13e-b750-4615-b3a8-c592e0609003"
+                            ],
+                            "price": 38999,
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "sell_price": 10000,
+                            "weight": 0.5,
+                            "physical_condition": "Very Light Marks",
+                            "battery_health": "90%-100%",
+                            "sku": "iphone-14-512gb-high-no-visible-marks-blue",
+                            "color": "Blue",
+                            "sell": false,
+                            "rating": 4.8,
+                            "rating_count": 190,
+                            "images": [
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue11_2040x2040.jpg?alt=media&token=fd10f5f0-5e0f-469f-89a9-1ad3aad37b05",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%2022_2040x2040.png?alt=media&token=fdc7184f-7e02-481e-b18d-8983e769fc11",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue33_2040x2040.png?alt=media&token=76a879ea-d545-4c3b-8a01-6cc0e99ad979",
+                                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FiPhone%2014_%2F14%20blue%20441_2040x2040.jpg?alt=media&token=747b6d6c-e0c4-4272-b391-272b4508b1bf"
+                            ],
+                            "price": 38999,
+                            "mrp": 89900,
+                            "storage": "6/512",
+                            "stocks": 0,
+                            "oneDayDelivery": true
+                        }
+                    }
+                }
+            }
+        },
+        "id": "aJRqoPbV7y5s3AWDGGyc",
+        "extra_coins": 0
+    },
+    "specifications": {
+        "description": {
+            "Connectivity": {
+                "Wi-Fi": "Wi-Fi 6 (802.11ax) with 2x2 MIMO",
+                "Bluetooth": "Bluetooth 5.3",
+                "Cellular": "5G (sub-6 GHz), Gigabit-class LTE with 4x4 MIMO and LAA, Dual SIM (nano-SIM + eSIM)",
+                "USB": "Lightning connector",
+                "Other": "NFC with reader mode, Emergency SOS via satellite, Crash Detection"
+            },
+            "Design": {
+                "Body_Type": "Smartphone",
+                "Construction": "Aerospace-grade aluminum frame, Ceramic Shield front, color-infused glass back",
+                "Dimensions": "146.7 mm × 71.5 mm × 7.80 mm",
+                "Weight": "172 g"
+            },
+            "Global_Attributes": {
+                "brand": "Apple",
+                "genre": "Smartphone",
+                "type": "iPhone",
+                "platform": "iOS",
+                "publisher": "Apple",
+                "release_date": "September 16, 2022",
+                "release_year": 2022
+            },
+            "Performance": {
+                "Processor": "A15 Bionic chip with 6-core CPU (2 performance + 4 efficiency), 5-core GPU, 16-core Neural Engine",
+                "RAM": "6GB LPDDR4X",
+                "Storage": "128GB / 256GB / 512GB NVMe",
+                "Display": "6.1-inch Super Retina XDR OLED, 2532 × 1170 resolution at 460 ppi, HDR, True Tone, Wide color (P3), Haptic Touch, 1200 nits peak brightness (HDR), 800 nits typical max brightness",
+                "Battery": "Up to 20 hours video playback, up to 80 hours audio playback, fast-charge capable (50% in 30 minutes with 20W adapter)",
+                "Camera": {
+                    "Rear": "12MP Main (f/1.5, sensor-shift OIS), 12MP Ultra Wide (f/2.4, 120° FOV)",
+                    "Front": "12MP TrueDepth (f/1.9) with autofocus",
+                    "Video": "4K Dolby Vision HDR up to 60 fps, Cinematic mode up to 4K HDR at 30 fps, Action mode up to 2.8K at 60 fps"
+                },
+                "Features": "IP68 dust and water resistant (6 meters for 30 minutes), Face ID, Emergency SOS via satellite, Crash Detection, iOS 16 (upgradable)"
+            },
+            "summary": "The iPhone 14 features the powerful A15 Bionic chip, a 6.1-inch Super Retina XDR display, advanced dual-camera system with sensor-shift stabilization, and important safety features including Emergency SOS via satellite and Crash Detection. It delivers exceptional performance, all-day battery life, and stunning photos and videos. Buy used iPhone 14, pre-owned Apple smartphones, or second-hand mobile accessories in India."
+        },
+        "minimum_price": 1000,
+        "updated_at": {
+            "_nanoseconds": 663000000,
+            "_seconds": 1771425709
+        },
+        "color_codes": {
+            "Midnight": "#000000",
+            "Starlight": "#FFFFFF"
+        },
+        "configuration_icons": {
+            "Storage": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fstorage_icon.png?alt=media&token=06fd3c54-774f-404c-b721-219274614ceb",
+            "Ram": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fram_icon.png?alt=media&token=7dae249e-1fb1-4ce2-9ce8-0fbba3ff572d",
+            "Physical Condition": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fphysical_condition_icon.png?alt=media&token=1d568f91-0c48-49ff-a2c7-4c36710b3360",
+            "Battery health": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fbattery_health_icon.png?alt=media&token=b26ade4a-433c-40db-9ee5-1994d81e4b3b"
+        },
+        "combination": {
+            "combination_1": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Very Light Marks"
+                ],
+                "battery_health": [
+                    "90%-100%"
+                ],
+                "storage": [
+                    "6/128"
+                ]
+            },
+            "combination_10": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Very Light Marks"
+                ],
+                "battery_health": [
+                    "80%-89%"
+                ],
+                "storage": [
+                    "6/128"
+                ]
+            },
+            "combination_11": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Very Light Marks"
+                ],
+                "battery_health": [
+                    "80%-89%"
+                ],
+                "storage": [
+                    "6/256"
+                ]
+            },
+            "combination_12": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Very Light Marks"
+                ],
+                "battery_health": [
+                    "80%-89%"
+                ],
+                "storage": [
+                    "6/512"
+                ]
+            },
+            "combination_2": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Very Light Marks"
+                ],
+                "battery_health": [
+                    "90%-100%"
+                ],
+                "storage": [
+                    "6/256"
+                ]
+            },
+            "combination_3": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Very Light Marks"
+                ],
+                "battery_health": [
+                    "90%-100%"
+                ],
+                "storage": [
+                    "6/512"
+                ]
+            },
+            "combination_4": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Light Marks"
+                ],
+                "battery_health": [
+                    "90%-100%"
+                ],
+                "storage": [
+                    "6/128"
+                ]
+            },
+            "combination_5": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Light Marks"
+                ],
+                "battery_health": [
+                    "90%-100%"
+                ],
+                "storage": [
+                    "6/256"
+                ]
+            },
+            "combination_6": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Light Marks"
+                ],
+                "battery_health": [
+                    "90%-100%"
+                ],
+                "storage": [
+                    "6/512"
+                ]
+            },
+            "combination_7": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Light Marks"
+                ],
+                "battery_health": [
+                    "80%-89%"
+                ],
+                "storage": [
+                    "6/128"
+                ]
+            },
+            "combination_8": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Light Marks"
+                ],
+                "battery_health": [
+                    "80%-89%"
+                ],
+                "storage": [
+                    "6/256"
+                ]
+            },
+            "combination_9": {
+                "color": [
+                    "Midnight",
+                    "Starlight",
+                    "Red",
+                    "Blue",
+                    "Purple",
+                    "Yellow"
+                ],
+                "physical_condition": [
+                    "Light Marks"
+                ],
+                "battery_health": [
+                    "80%-89%"
+                ],
+                "storage": [
+                    "6/512"
+                ]
+            }
+        },
+        "option_descriptions": {
+            "Visible Marks": "Visible scratches or scuffs noticeable in regular use. May have a light dent or two. Fully functional, just not pristine.",
+            "No Visible Marks": "Minor surface scratches or scuffs that are only noticeable under close inspection. No dents, no deep scratches. Looks great from a normal viewing distance.",
+            "Low Visible Marks": "Minor surface scratches or scuffs that are only noticeable under close inspection. No dents, no deep scratches. Looks great from a normal viewing distance.",
+            "Medium Visible Marks": "Visible scratches or scuffs noticeable in regular use. May have a light dent or two. Fully functional, just not pristine.",
+            "Light Visible Marks": "Minor surface scratches or scuffs that are only noticeable under close inspection. No dents, no deep scratches. Looks great from a normal viewing distance.",
+            "Very Light Marks": "Looks and feels almost new. Any marks on the frame or back are so faint they're only noticeable under direct light or at very close range. Nothing you'd spot in regular use.",
+            "Light Marks": "Has minor marks on the frame or back from everyday use, the kind you'd expect on a well-cared-for phone. Screen is clean or has very light marks that don't affect display quality. Looks clean from a normal distance. No dents, no deep scratches."
+        },
+        "questions": {
+            "q1": {
+                "deduction": 0,
+                "description": "",
+                "isRequired": true,
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "question": "Does the iPhone power on and boot to iOS without issues?",
+                "type": "radio"
+            },
+            "q2": {
+                "deduction": 0,
+                "description": "",
+                "isRequired": true,
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "question": "Are there any performance, battery, display, camera, or Face ID issues?",
+                "type": "radio"
+            },
+            "q3": {
+                "description": "Please choose the accessories missing",
+                "isRequired": false,
+                "options": [
+                    {
+                        "deduction": 2500,
+                        "icon": "Icons.charger",
+                        "label": "Original 20W USB-C Power Adapter Missing"
+                    },
+                    {
+                        "deduction": 800,
+                        "icon": "Icons.cable",
+                        "label": "USB-C to Lightning Cable Missing"
+                    }
+                ],
+                "question": "Accessories Missing",
+                "type": "checkbox"
+            }
+        }
+    }
+  },
+  TXTnJ4HuCt2bG4oNe8cZ:{
+     "details": {
+        "category_name": "Cameras",
+        "spec_id": "nikon-d3100",
+        "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/BQSartDmdGg?si=uqKo6qg9jRPHWPPZ\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+        "created_at": {
+            "_seconds": 1755520130,
+            "_nanoseconds": 814000000
+        },
+        "sell_max_price": 7800,
+        "code": "D014Y",
+        "mrp": 27999,
+        "condition": "Pre Owned",
+        "add_ons": {
+            "item1": {
+                "id": "JbnNS6lJSsUWHAougdva",
+                "sku": "nikon-af-p-dx-nikkor-70-300-black"
+            },
+            "item2": {
+                "id": "KjbAaJFC5uczlpKB45hh",
+                "sku": "nikon-55-200-mm-black"
+            },
+            "item3": {
+                "id": "YFx22gVDvnaHXaeOLb4N",
+                "sku": "nikon-af-s-dx-18-105-mm-black"
+            },
+            "item4": {
+                "id": "zDW8I9PcNWdDjFsCyHwh",
+                "sku": "nikon-af-70-300-mm-black"
+            }
+        },
+        "rating": 4.3,
+        "rating_count": 77,
+        "product_title": "Nikon D3100 DSLR Camera With 18-55mm Kit Lens",
+        "brand": "Nikon",
+        "type": "DSLR",
+        "in_stock": true,
+        "price": 15999,
+        "sell": false,
+        "vendors": {
+            "VENDOR_001": {
+                "name": "Dacby Technologies Pvt. Ltd.",
+                "ratings": 4.7,
+                "total_sales": 320,
+                "vendor_id": "yyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                "vendor_note": "",
+                "combination_offered": {
+                    "combination_1": {
+                        "item1": {
+                            "images": [
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Fa4d9a53f-bd16-4ad2-9994-84688bc52f3a_2040x2040.png?alt=media&token=7d93e731-3ccf-4be5-afa8-378286945c98",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Fb1b55b4c-a6af-4239-a00a-28b84aceb9c9_2040x2040.png?alt=media&token=374afb9c-f204-486e-9ebb-5d883758e2dd",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Ff44f79f6-1712-4057-9a8f-1e7311d1904a_2040x2040.png?alt=media&token=2180cb3c-f22b-44ed-b906-fa8b9d7508df",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2F7a9e7cac-6a0f-486e-b1e1-62fb94330d4c_2040x2040.png?alt=media&token=8bacc8c2-665c-4abf-8164-83161db25c9d"
+                            ],
+                            "mrp": 27999,
+                            "color": "Black",
+                            "sell_price": 7800,
+                            "price": 15999,
+                            "weight": 4,
+                            "sell": false,
+                            "shutter_count": "Less Than 10K",
+                            "sku": "nikon-d3100-with-18-55-mm-black-low",
+                            "rating": 4.1,
+                            "rating_count": 89,
+                            "stocks": 0,
+                            "accessories": {
+                                "item1": {
+                                    "id": "Uqw1bzvfBie0G5xRgmin",
+                                    "sku": "nikon-18-55mm-afs-dx-vr"
+                                }
+                            },
+                            "oneDayDelivery": true
+                        },
+                        "item3": {
+                            "images": [
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Fa4d9a53f-bd16-4ad2-9994-84688bc52f3a_2040x2040.png?alt=media&token=7d93e731-3ccf-4be5-afa8-378286945c98",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Fb1b55b4c-a6af-4239-a00a-28b84aceb9c9_2040x2040.png?alt=media&token=374afb9c-f204-486e-9ebb-5d883758e2dd",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Ff44f79f6-1712-4057-9a8f-1e7311d1904a_2040x2040.png?alt=media&token=2180cb3c-f22b-44ed-b906-fa8b9d7508df",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2F7a9e7cac-6a0f-486e-b1e1-62fb94330d4c_2040x2040.png?alt=media&token=8bacc8c2-665c-4abf-8164-83161db25c9d"
+                            ],
+                            "mrp": 27999,
+                            "color": "Black",
+                            "sell_price": 5800,
+                            "weight": 4,
+                            "sell": false,
+                            "shutter_count": "Above 1L",
+                            "sku": "nikon-d3100-with-18-55-mm-black-high",
+                            "rating": 4.5,
+                            "rating_count": 200,
+                            "price": 14999,
+                            "stocks": 0,
+                            "accessories": {
+                                "item1": {
+                                    "id": "Uqw1bzvfBie0G5xRgmin",
+                                    "sku": "nikon-18-55mm-afs-dx-vr"
+                                }
+                            },
+                            "oneDayDelivery": true
+                        },
+                        "item2": {
+                            "images": [
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Fa4d9a53f-bd16-4ad2-9994-84688bc52f3a_2040x2040.png?alt=media&token=7d93e731-3ccf-4be5-afa8-378286945c98",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Fb1b55b4c-a6af-4239-a00a-28b84aceb9c9_2040x2040.png?alt=media&token=374afb9c-f204-486e-9ebb-5d883758e2dd",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2Ff44f79f6-1712-4057-9a8f-1e7311d1904a_2040x2040.png?alt=media&token=2180cb3c-f22b-44ed-b906-fa8b9d7508df",
+                                "https://dacby-database.web.app/cdn/11%2Fps4%20cd%2F1%20CAMERAS%2FNIKON%203100D%2F7a9e7cac-6a0f-486e-b1e1-62fb94330d4c_2040x2040.png?alt=media&token=8bacc8c2-665c-4abf-8164-83161db25c9d"
+                            ],
+                            "mrp": 27999,
+                            "color": "Black",
+                            "sell_price": 6800,
+                            "weight": 4,
+                            "sell": false,
+                            "shutter_count": "10K – 1L",
+                            "sku": "nikon-d3100-with-18-55-mm-black-medium",
+                            "rating": 4.7,
+                            "rating_count": 236,
+                            "price": 15999,
+                            "accessories": {
+                                "item1": {
+                                    "id": "Uqw1bzvfBie0G5xRgmin",
+                                    "sku": "nikon-18-55mm-afs-dx-vr"
+                                }
+                            },
+                            "stocks": 1,
+                            "oneDayDelivery": true
+                        }
+                    }
+                }
+            }
+        },
+        "updated_at": {
+            "_seconds": 1784045056,
+            "_nanoseconds": 72000000
+        },
+        "id": "TXTnJ4HuCt2bG4oNe8cZ",
+        "extra_coins": 1000
+    },
+    "specifications": {
+        "description": {
+            "Connectivity": {
+                "Wi-Fi": "Not supported",
+                "HDMI": "Mini HDMI (Type C)",
+                "USB": "USB 2.0 (480 Mbit/sec)",
+                "Remote_Control": "Wired (MC-DC2) or infrared (ML-L3)"
+            },
+            "Design": {
+                "Body_Type": "Compact SLR",
+                "Construction": "Polycarbonate",
+                "Dimensions": "124.5 x 96.5 x 74.5 mm",
+                "Weight": "505 g (with battery and card)"
+            },
+            "Global_Attributes": {
+                "brand": "Nikon",
+                "genre": "Camera",
+                "type": "Digital SLR",
+                "platform": "Nikon DX-format",
+                "publisher": "Nikon",
+                "release_date": "August 19, 2010",
+                "release_year": 2010
+            },
+            "Performance": {
+                "Sensor": "14.2 MP APS-C CMOS (23.1 x 15.4 mm)",
+                "Processor": "EXPEED 2",
+                "ISO_Range": "100-3200 (expandable to 12800)",
+                "Autofocus": "11-point Multi-CAM 1000, 1 cross-type",
+                "Continuous_Shooting": "3 fps",
+                "Video_Resolution": "Full HD 1920x1080 (24p), HD 1280x720 (30p/25p/24p)",
+                "Battery_Life": "550 shots (CIPA, viewfinder)"
+            },
+            "summary": "The Nikon D3100 is an entry-level APS-C DSLR camera ideal for beginners, featuring a 14.2-megapixel CMOS sensor, EXPEED 2 processor, and 11-point autofocus system. With Full HD video recording and a Guide Mode for ease of use, it’s a great choice for photography enthusiasts. Buy used cameras, pre-owned Nikon DSLRs, and second-hand photography gear in India. Sell camera equipment online and explore pre-owned Canon cameras or used photography accessories in India with this camera."
+        },
+        "minimum_price": 1000,
+        "combination": {
+            "combination_1": {
+                "color": [
+                    "Black"
+                ],
+                "shutter_count": [
+                    "Less Than 10K",
+                    "10K – 1L",
+                    "Above 1L"
+                ]
+            }
+        },
+        "configuration_icons": {
+            "Shutter Count": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fshutter_count_icon.png?alt=media&token=b9c58640-245f-47c3-ae34-3ca01b1f950c"
+        },
+        "whats_in_the_box": [
+            {
+                "image_url": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fcamera_icon.png?alt=media&token=d5d53757-d028-4a03-8cb3-57f825a43f46",
+                "label": "Camera"
+            },
+            {
+                "image_url": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fcamera_charger_icon.png?alt=media&token=d93f64ae-dd5a-4b88-a9d3-f41eeab3a4f8",
+                "label": "Compatible\nCharger"
+            },
+            {
+                "image_url": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fbattery_icon.png?alt=media&token=9812e91c-27c1-4afa-a3e7-ff10aa3296ff",
+                "label": "Compatible\nBattery"
+            },
+            {
+                "image_url": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Flens_icon.png?alt=media&token=772c74db-357b-42b5-adb2-a37c94ceec35",
+                "label": "18-55mm\nLens"
+            },
+            {
+                "image_url": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fcamera_lens_cap.png?alt=media&token=5cf82abe-acf2-48ab-80a3-571cbf2741b5",
+                "label": "Lens\nCap"
+            },
+            {
+                "image_url": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fcamera_strap_icon.png?alt=media&token=ed12a123-79cc-4cc8-beb0-7571e46a0dcb",
+                "label": "Strap"
+            }
+        ],
+        "option_descriptions": {
+            "Less than 10K": "Minimal use, little to no visible wear. Feels close to an open box camera.",
+            "10K – 1L": "Light to moderate use. Light visible marks may exist. Fully reliable and great value for money.",
+            "Above 1L": "Used. Some visible wear may exist, but fully functional and dependable."
+        },
+        "questions": {
+            "q1": {
+                "deduction": 0,
+                "description": "",
+                "isRequired": true,
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "question": "Is the camera turning on without any issues?",
+                "type": "radio"
+            },
+            "q2": {
+                "deduction": 0,
+                "description": "",
+                "isRequired": true,
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "question": "Are there any performance or functionality issues?",
+                "type": "radio"
+            },
+            "q3": {
+                "description": "Please choose the accessories missing",
+                "isRequired": false,
+                "options": [
+                    {
+                        "deduction": 2500,
+                        "icon": "Icons.disc_full",
+                        "label": "Original Adapter Missing"
+                    },
+                    {
+                        "deduction": 2500,
+                        "icon": "Icons.usb",
+                        "label": "Original Battery Missing"
                     }
                 ],
                 "question": "Accessories Missing",

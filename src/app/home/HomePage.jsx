@@ -8,7 +8,7 @@ import { useState } from "react";
 
 // Icons from the lucide-react package.
 // Each one is just a small ready-made SVG component we can drop into our JSX.
-import { Package, X, Plus, ArrowRight, ArrowLeft } from "lucide-react";
+import { Package, X, Plus, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 // ---------------------------------------------------------
@@ -35,7 +35,6 @@ export default function HomePage() {
 
   // selectedCategory remembers which category card the user clicked.
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedProductType, setSelectedProductType] = useState(null);
 
   // This function runs when the big "Add New Product" button is clicked.
   // It opens the modal and makes sure we always start fresh at step 1.
@@ -43,7 +42,6 @@ export default function HomePage() {
     setIsModalOpen(true);
     setCurrentStep(1);
     setSelectedCategory(null);
-    setSelectedProductType(null);
   }
 
   // This function closes the modal completely and resets everything.
@@ -51,22 +49,20 @@ export default function HomePage() {
     setIsModalOpen(false);
     setCurrentStep(1);
     setSelectedCategory(null);
-    setSelectedProductType(null);
   }
 
-  // This function runs when the user clicks "Continue" on Step 1.
-  function handleStep1Continue() {
-    // If nothing is selected, do nothing (button will be disabled anyway).
-    if (!selectedCategory) return;
+  function handleCategoryClick(category) {
+    setSelectedCategory(category.name);
 
-    // If the user picked "Others", show them Step 2.
-    if (selectedCategory === "Others") {
+    if (category.name === "Others") {
       setCurrentStep(2);
-      setSelectedProductType(null);
     } else {
-      // For any other category, we simply close the modal.
-      // (You can change this later to add more steps for other categories too.)
-      closeModal();
+      const categoryName = encodeURIComponent(category.name);
+      const categoryCode = encodeURIComponent(category.code);
+
+      router.push(
+        `/add-items?category_name=${categoryName}&code=${categoryCode}`
+      );
     }
   }
 
@@ -76,22 +72,24 @@ export default function HomePage() {
     setCurrentStep(1);
   }
 
-  function handleStep2Continue() {
-    if (!selectedProductType) return;
+  function handleAddVariant() {
+    router.push("/add-variant");
+  }
 
-    if (selectedProductType === "new-product") {
-      closeModal();
-      router.push("/add-product");
-      return;
-    }
+  function handleAddNewProduct() {
+    setCurrentStep(3);
+  }
 
-    if (selectedProductType === "variant") {
-      closeModal();
-      router.push("/add-variant");
-      return;
-    }
+  function handleStep3Back() {
+    setCurrentStep(2);
+  }
 
-    closeModal();
+  function handleAddFreshProduct() {
+    router.push("/add-product");
+  }
+
+  function handleAddSpecialEdition() {
+    router.push("/add-special-edition");
   }
 
   return (
@@ -143,8 +141,8 @@ export default function HomePage() {
                     return (
                       <button
                         key={category.name}
-                        onClick={() => setSelectedCategory(category.name)}
-                        className={`rounded-xl border p-6 text-center hover:border-blue-400 ${
+                        onClick={() => handleCategoryClick(category)}
+                        className={`cursor-pointer rounded-xl border p-6 text-center hover:border-blue-400 ${
                           isSelected
                             ? "border-blue-600 ring-2 ring-blue-600"
                             : "border-gray-200"
@@ -165,21 +163,6 @@ export default function HomePage() {
                   })}
                 </div>
 
-                {/* Continue button: disabled until a category is picked */}
-                <div className="mt-8 flex justify-end">
-                  <button
-                    onClick={handleStep1Continue}
-                    disabled={!selectedCategory}
-                    className={`flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white ${
-                      selectedCategory
-                        ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-blue-300 cursor-not-allowed"
-                    }`}
-                  >
-                    Continue
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
               </div>
             )}
 
@@ -206,12 +189,8 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <button
                     type="button"
-                    onClick={() => setSelectedProductType("variant")}
-                    className={`w-full rounded-xl border-2 p-10 text-center transition-colors hover:bg-green-50 ${
-                      selectedProductType === "variant"
-                        ? "border-green-500"
-                        : "border-gray-200"
-                    }`}
+                    onClick={handleAddVariant}
+                    className="w-full cursor-pointer rounded-xl border-2 border-gray-200 p-10 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
                   >
                     <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-blue-100">
                       <Package className="h-6 w-6 text-blue-600" />
@@ -224,12 +203,8 @@ export default function HomePage() {
 
                   <button
                     type="button"
-                    onClick={() => setSelectedProductType("new-product")}
-                    className={`w-full rounded-xl border-2 p-10 text-center transition-colors hover:bg-green-50 ${
-                      selectedProductType === "new-product"
-                        ? "border-green-500"
-                        : "border-gray-200"
-                    }`}
+                    onClick={handleAddNewProduct}
+                    className="w-full cursor-pointer rounded-xl border-2 border-gray-200 p-10 text-center transition-colors hover:border-green-400 hover:bg-green-50"
                   >
                     <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-green-500">
                       <Plus className="h-6 w-6 text-white" />
@@ -241,8 +216,7 @@ export default function HomePage() {
                   </button>
                 </div>
 
-                {/* Back and Continue buttons */}
-                <div className="mt-8 flex items-center justify-between">
+                <div className="mt-8">
                   <button
                     onClick={handleStep2Back}
                     className="flex items-center gap-2 rounded-lg border border-gray-300 px-6 py-3 font-semibold hover:bg-gray-50"
@@ -250,17 +224,66 @@ export default function HomePage() {
                     <ArrowLeft className="h-4 w-4" />
                     Back
                   </button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div>
+                <div className="mb-10 flex items-start justify-between">
+                  <div>
+                    <h2 className="text-3xl font-bold">Add New Product</h2>
+                    <p className="mt-1 text-gray-500">
+                      Choose the type of new product to add
+                    </p>
+                  </div>
                   <button
-                    onClick={handleStep2Continue}
-                    disabled={!selectedProductType}
-                    className={`flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white ${
-                      selectedProductType
-                        ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-blue-300 cursor-not-allowed"
-                    }`}
+                    type="button"
+                    onClick={closeModal}
+                    className="text-gray-400 hover:text-gray-700"
                   >
-                    Continue
-                    <ArrowRight className="h-4 w-4" />
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={handleAddSpecialEdition}
+                    className="w-full cursor-pointer rounded-xl border-2 border-gray-200 p-10 text-center transition-colors hover:border-amber-300 hover:bg-amber-50"
+                  >
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-amber-200">
+                      <Package className="h-6 w-6 text-amber-700" />
+                    </div>
+                    <p className="text-lg font-semibold">Add Special Edition</p>
+                    <p className="mt-2 text-gray-500">
+                      Add a special edition of an existing product
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleAddFreshProduct}
+                    className="w-full cursor-pointer rounded-xl border-2 border-gray-200 p-10 text-center transition-colors hover:border-green-400 hover:bg-green-50"
+                  >
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-green-200">
+                      <Plus className="h-6 w-6 text-green-600" />
+                    </div>
+                    <p className="text-lg font-semibold">Add Fresh Product</p>
+                    <p className="mt-2 text-gray-500">
+                      Create a completely new product with fresh specifications
+                    </p>
+                  </button>
+                </div>
+
+                <div className="mt-10">
+                  <button
+                    type="button"
+                    onClick={handleStep3Back}
+                    className="flex items-center gap-2 rounded-lg border border-gray-300 px-6 py-3 font-semibold hover:bg-gray-50"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
                   </button>
                 </div>
               </div>

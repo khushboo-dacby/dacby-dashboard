@@ -14,7 +14,242 @@ import {
 function normalizeAttributeValue(value) {
   return String(value).trim().toLowerCase();
 }
-// fdfd 
+
+function makeSkuPart(value) {
+  if (!value) return "";
+
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getSelectedAttribute(selectedAttributes, possibleNames) {
+  const attributeEntries = Object.entries(selectedAttributes);
+
+  for (const possibleName of possibleNames) {
+    const normalizedPossibleName = possibleName
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+
+    const matchingAttribute = attributeEntries.find(([attributeName]) => {
+      const normalizedAttributeName = attributeName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+
+      return normalizedAttributeName === normalizedPossibleName;
+    });
+
+    if (matchingAttribute) return matchingAttribute[1];
+  }
+
+  return "";
+}
+
+function getLaptopPhysicalCondition(value) {
+  const condition = normalizeAttributeValue(value);
+
+  if (condition.includes("very light mark")) return "no-visible-mark";
+  if (condition.includes("light mark")) return "visible-mark";
+
+  return makeSkuPart(value);
+}
+
+function getBatteryLevel(value) {
+  const batteryHealth = normalizeAttributeValue(value);
+
+  if (batteryHealth.includes("90") && batteryHealth.includes("100")) {
+    return "high";
+  }
+
+  if (batteryHealth.includes("85") && batteryHealth.includes("100")) {
+    return "high";
+  }
+
+  if (batteryHealth.includes("80") && batteryHealth.includes("89")) {
+    return "low";
+  }
+
+  if (batteryHealth.includes("75") && batteryHealth.includes("84")) {
+    return "low";
+  }
+
+  return makeSkuPart(value);
+}
+
+function getShutterCountLevel(value) {
+  const shutterCount = normalizeAttributeValue(value);
+
+  if (shutterCount.includes("less than 10k")) return "low";
+  if (shutterCount.includes("10k") && shutterCount.includes("1l")) {
+    return "medium";
+  }
+  if (shutterCount.includes("above 1l")) return "high";
+
+  return makeSkuPart(value);
+}
+
+export function makeVariantSku(productDetails, selectedAttributes) {
+  const details = productDetails?.details ?? {};
+  const categoryName = details.category_name ?? "";
+  const categoryCode = details.code ?? "";
+  const skuParts = [makeSkuPart(details.spec_id || details.product_title)];
+
+  const storage = getSelectedAttribute(selectedAttributes, ["storage"]);
+  const ram = getSelectedAttribute(selectedAttributes, ["ram"]);
+  const color = getSelectedAttribute(selectedAttributes, ["color"]);
+  const physicalCondition = getSelectedAttribute(selectedAttributes, [
+    "physical_condition",
+    "physicalCondition",
+  ]);
+  const batteryHealth = getSelectedAttribute(selectedAttributes, [
+    "battery_health",
+    "batteryHealth",
+    "battery",
+  ]);
+  const shutterCount = getSelectedAttribute(selectedAttributes, [
+    "shutter_count",
+    "shutterCount",
+    "shuttle_count",
+    "shuttleCount",
+  ]);
+
+  function addPart(value) {
+    const skuPart = makeSkuPart(value);
+    if (skuPart) skuParts.push(skuPart);
+  }
+
+  if (categoryCode === "D004Y" || categoryName === "Consoles") {
+    addPart(storage);
+    addPart(color);
+  } else if (categoryCode === "D018Y" || categoryName === "Laptops") {
+    addPart(storage);
+    addPart(ram);
+    addPart(getLaptopPhysicalCondition(physicalCondition));
+    addPart(color);
+    addPart(getBatteryLevel(batteryHealth));
+  } else if (
+    categoryCode === "D014Y" ||
+    categoryName === "Cameras" ||
+    categoryName === "Camera"
+  ) {
+    addPart(color);
+    addPart(getShutterCountLevel(shutterCount));
+  } else if (categoryCode === "D019Y" || categoryName === "Smartphones") {
+    addPart(storage);
+    addPart(getBatteryLevel(batteryHealth));
+    addPart(physicalCondition);
+    addPart(color);
+  } else if (
+    categoryCode === "D005Y" ||
+    categoryCode === "D015Y" ||
+    categoryCode === "D020Y" ||
+    categoryCode === "D021Y"
+  ) {
+    addPart(color);
+  } else if (categoryCode === "D009Y" || categoryCode === "D006Y") {
+    addPart(storage);
+    addPart(color);
+  } else {
+    Object.values(selectedAttributes).forEach((value) => addPart(value));
+  }
+
+  return skuParts.filter(Boolean).join("-");
+}
+
+export function convertFirebaseImageToCdn(imageUrl) {
+  const firebasePrefix =
+    "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/";
+  const cdnPrefix = "https://dacby-database.web.app/cdn/";
+  const trimmedUrl = imageUrl.trim();
+
+  if (!trimmedUrl) return "";
+  if (!trimmedUrl.startsWith(firebasePrefix)) return trimmedUrl;
+
+  const imagePathAndQuery = trimmedUrl.slice(firebasePrefix.length);
+  return `${cdnPrefix}${imagePathAndQuery}`;
+}
+
+function getNextItemKey(combinationItems) {
+  let highestItemNumber = 0;
+
+  Object.keys(combinationItems).forEach((itemKey) => {
+    const itemNumber = Number(itemKey.replace("item", ""));
+
+    if (itemNumber > highestItemNumber) {
+      highestItemNumber = itemNumber;
+    }
+  });
+
+  return `item${highestItemNumber + 1}`;
+}
+
+function getNumberOrZero(value) {
+  const numberValue = Number(value);
+  return Number.isNaN(numberValue) ? 0 : numberValue;
+}
+
+export function createInventoryPayload(
+  productDetails,
+  combination,
+  selectedAttributes,
+  formData
+) {
+  const existingDetails = productDetails.details;
+  const existingVendors = existingDetails.vendors ?? {};
+  const vendorKeys = Object.keys(existingVendors);
+  const vendorKey = existingVendors.VENDOR_001
+    ? "VENDOR_001"
+    : vendorKeys[0] || "VENDOR_001";
+  const existingVendor = existingVendors[vendorKey] ?? {};
+  const existingCombinations = existingVendor.combination_offered ?? {};
+  const existingItems = existingCombinations[combination.id] ?? {};
+  const nextItemKey = getNextItemKey(existingItems);
+
+  const images = [
+    formData.image1,
+    formData.image2,
+    formData.image3,
+    formData.image4,
+  ]
+    .map((imageUrl) => convertFirebaseImageToCdn(imageUrl))
+    .filter(Boolean);
+
+  const newItem = {
+    ...selectedAttributes,
+    sku: formData.sku,
+    images,
+    mrp: getNumberOrZero(formData.mrp),
+    price: getNumberOrZero(formData.price),
+    sell_price: getNumberOrZero(formData.sellPrice),
+    weight: getNumberOrZero(formData.weight),
+    stocks: getNumberOrZero(formData.stocks),
+    sell: formData.availableForSell,
+    rating: 0,
+    rating_count: 0,
+  };
+
+  return {
+    inventory_doc: {
+      ...existingDetails,
+      vendors: {
+        ...existingVendors,
+        [vendorKey]: {
+          ...existingVendor,
+          combination_offered: {
+            ...existingCombinations,
+            [combination.id]: {
+              ...existingItems,
+              [nextItemKey]: newItem,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
 function getCombinationItems(productDetails, combinationId) {
   const vendors = productDetails?.details?.vendors ?? {};
   return Object.values(vendors).flatMap((vendor) =>
@@ -98,10 +333,10 @@ export default function AddVariant() {
     setValueScope("all");
     setShowApplySettings(true);
     setFormData({
-      sku: details?.details.spec_id ?? "",
-      price: details?.details.price ?? "",
-      mrp: details?.details.mrp ?? "",
-      sellPrice: details?.details.sell_max_price ?? "",
+      sku: makeVariantSku(details, {}),
+      price: "",
+      mrp: "",
+      sellPrice: "",
       weight: "",
       stocks: "",
       availableForSell: true,
@@ -220,13 +455,12 @@ export default function AddVariant() {
   }
   function handleSelectCombination(comboId) {
     const combo = combinations.find((item) => item.id === comboId);
-    if (combo) handleSelectorCombination(combo);
 
     setFormData({
-      sku: productDetails.details.spec_id,
-      price: productDetails.details.price,
-      mrp: productDetails.details.mrp,
-      sellPrice: productDetails.details.sell_max_price,
+      sku: makeVariantSku(productDetails, {}),
+      price: "",
+      mrp: "",
+      sellPrice: "",
       weight: "",
       stocks: "",
       availableForSell: true,
@@ -235,19 +469,23 @@ export default function AddVariant() {
       image3: "",
       image4: "",
     });
+
+    if (combo) handleSelectorCombination(combo);
   }
   function handleFormChange(field, value) {
     setFormData({ ...formData, [field]: value });
   }
   function handleSubmit() {
-    console.log("Submitting product:", {
-      product: selectedProduct?.product,
-      combination: selectorCombo,
-      attributes: selectedAttributeValues,
-      ...formData,
-    });
+    const payload = createInventoryPayload(
+      productDetails,
+      selectorCombo,
+      selectedAttributeValues,
+      formData
+    );
 
-    alert("Product submitted! (check the browser console for the data)");
+    console.log("Generated inventory payload:", payload);
+
+    alert("Payload generated! Check the browser console.");
   }
   const selectorCombo = combinations.find(
     (combo) => combo.id === selectorCombinationId
@@ -278,12 +516,22 @@ export default function AddVariant() {
 
     setSelectorCombinationId(combo.id);
     setSelectedAttributeValues(firstAvailableSelection);
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      sku: makeVariantSku(productDetails, firstAvailableSelection),
+    }));
   }
 
   function handleSelectorAttribute(attributeName, value) {
-    setSelectedAttributeValues((currentValues) => ({
-      ...currentValues,
+    const updatedAttributeValues = {
+      ...selectedAttributeValues,
       [attributeName]: value,
+    };
+
+    setSelectedAttributeValues(updatedAttributeValues);
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      sku: makeVariantSku(productDetails, updatedAttributeValues),
     }));
   }
 
@@ -431,9 +679,18 @@ export default function AddVariant() {
                             <button
                               type="button"
                               onClick={() => handleSelectCombination(combo.id)}
-                              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-100"
+                              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ${
+                                selectorCombinationId === combo.id
+                                  ? "bg-indigo-900 text-white"
+                                  : "bg-white text-gray-800 hover:bg-gray-100"
+                              }`}
                             >
-                              Select
+                              {selectorCombinationId === combo.id && (
+                                <CheckCircle2 className="h-4 w-4" />
+                              )}
+                              {selectorCombinationId === combo.id
+                                ? "Selected"
+                                : "Select"}
                             </button>
                             <button
                               type="button"
@@ -772,7 +1029,7 @@ function ProductVariantForm({
             onChange={(value) => onFormChange("sku", value)}
           />
           <p className="mt-2 text-sm text-gray-400">
-            Pre-filled with spec_id. Edit to customize.
+            Pre-filled with spec_id and selected attributes. Edit to customize.
           </p>
         </div>
 
@@ -781,30 +1038,35 @@ function ProductVariantForm({
             label="Price *"
             type="number"
             value={formData.price}
+            placeholder="0"
             onChange={(value) => onFormChange("price", value)}
           />
           <FormField
             label="MRP *"
             type="number"
             value={formData.mrp}
+            placeholder="0"
             onChange={(value) => onFormChange("mrp", value)}
           />
           <FormField
             label="Sell Price *"
             type="number"
             value={formData.sellPrice}
+            placeholder="0"
             onChange={(value) => onFormChange("sellPrice", value)}
           />
           <FormField
             label="Weight (kg) *"
             type="number"
             value={formData.weight}
+            placeholder="0"
             onChange={(value) => onFormChange("weight", value)}
           />
           <FormField
             label="Stocks *"
             type="number"
             value={formData.stocks}
+            placeholder="0"
             onChange={(value) => onFormChange("stocks", value)}
           />
 
