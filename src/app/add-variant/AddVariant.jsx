@@ -1,7 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { SEARCH_RESULTS, PRODUCT_DETAILS } from "@/constants/inventory";
+import { toast } from "sonner";
+import {
+  addCombinationItem,
+  getProductDetail,
+  searchProducts,
+} from "@/app/apis/api";
+// import { updateCombination } from "@/app/apis/api";
 import {
   Search,
   X,
@@ -171,42 +177,17 @@ export function convertFirebaseImageToCdn(imageUrl) {
   return `${cdnPrefix}${imagePathAndQuery}`;
 }
 
-function getNextItemKey(combinationItems) {
-  let highestItemNumber = 0;
-
-  Object.keys(combinationItems).forEach((itemKey) => {
-    const itemNumber = Number(itemKey.replace("item", ""));
-
-    if (itemNumber > highestItemNumber) {
-      highestItemNumber = itemNumber;
-    }
-  });
-
-  return `item${highestItemNumber + 1}`;
-}
-
 function getNumberOrZero(value) {
   const numberValue = Number(value);
   return Number.isNaN(numberValue) ? 0 : numberValue;
 }
 
-export function createInventoryPayload(
-  productDetails,
+export function createCombinationItemPayload(
+  productDocId,
   combination,
   selectedAttributes,
   formData
 ) {
-  const existingDetails = productDetails.details;
-  const existingVendors = existingDetails.vendors ?? {};
-  const vendorKeys = Object.keys(existingVendors);
-  const vendorKey = existingVendors.VENDOR_001
-    ? "VENDOR_001"
-    : vendorKeys[0] || "VENDOR_001";
-  const existingVendor = existingVendors[vendorKey] ?? {};
-  const existingCombinations = existingVendor.combination_offered ?? {};
-  const existingItems = existingCombinations[combination.id] ?? {};
-  const nextItemKey = getNextItemKey(existingItems);
-
   const images = [
     formData.image1,
     formData.image2,
@@ -216,36 +197,19 @@ export function createInventoryPayload(
     .map((imageUrl) => convertFirebaseImageToCdn(imageUrl))
     .filter(Boolean);
 
-  const newItem = {
-    ...selectedAttributes,
-    sku: formData.sku,
-    images,
-    mrp: getNumberOrZero(formData.mrp),
-    price: getNumberOrZero(formData.price),
-    sell_price: getNumberOrZero(formData.sellPrice),
-    weight: getNumberOrZero(formData.weight),
-    stocks: getNumberOrZero(formData.stocks),
-    sell: formData.availableForSell,
-    rating: 0,
-    rating_count: 0,
-  };
-
   return {
-    inventory_doc: {
-      ...existingDetails,
-      vendors: {
-        ...existingVendors,
-        [vendorKey]: {
-          ...existingVendor,
-          combination_offered: {
-            ...existingCombinations,
-            [combination.id]: {
-              ...existingItems,
-              [nextItemKey]: newItem,
-            },
-          },
-        },
-      },
+    productDocId,
+    combinationKey: combination.id,
+    item: {
+      ...selectedAttributes,
+      sku: formData.sku,
+      images,
+      mrp: getNumberOrZero(formData.mrp),
+      price: getNumberOrZero(formData.price),
+      sell_price: getNumberOrZero(formData.sellPrice),
+      weight: getNumberOrZero(formData.weight),
+      stocks: getNumberOrZero(formData.stocks),
+      sell: formData.availableForSell,
     },
   };
 }
@@ -295,17 +259,46 @@ function isCombinationFullyExisting(combo, productDetails) {
   );
 }
 
+function getValidCombinationMap(combinations) {
+  return combinations.reduce((combinationMap, combination) => {
+    const attributes = Object.entries(combination).filter(
+      ([key]) => key !== "id"
+    );
+    const hasValuesForEveryAttribute =
+      attributes.length > 0 &&
+      attributes.every(
+        ([, values]) => Array.isArray(values) && values.length > 0
+      );
+
+    if (hasValuesForEveryAttribute) {
+      combinationMap[combination.id] = Object.fromEntries(attributes);
+    }
+
+    return combinationMap;
+  }, {});
+}
+
 export default function AddVariant() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
   const [combinations, setCombinations] = useState([]);
+  const [savedCombinationMap, setSavedCombinationMap] = useState({});
+  const [updatingCombinations, setUpdatingCombinations] = useState(false);
+  const [submittingProduct, setSubmittingProduct] = useState(false);
   const [openCombinationId, setOpenCombinationId] = useState(null);
   const [selectorCombinationId, setSelectorCombinationId] = useState(null);
   const [selectedAttributeValues, setSelectedAttributeValues] = useState({});
-  const [attributeScope, setAttributeScope] = useState("all");
-  const [valueScope, setValueScope] = useState("all");
+  const [attributeScope, setAttributeScope] = useState("current");
+  const [valueScope, setValueScope] = useState("current");
   const [showApplySettings, setShowApplySettings] = useState(true);
+  const searchRequestId = useRef(0);
+  const detailsRequestId = useRef(0);
   const [formData, setFormData] = useState({
     sku: "",
     price: "",
@@ -319,48 +312,93 @@ export default function AddVariant() {
     image3: "",
     image4: "",
   });
-  const filteredResults = SEARCH_RESULTS.filter((item) => {
-    const title = item.product.product_title.toLowerCase();
-    const code = item.product.code.toLowerCase();
-    const term = searchTerm.toLowerCase();
-    return title.includes(term) || code.includes(term);
-  });
-  function handleSelectProduct(item) {
+  useEffect(() => {
+    const query = searchTerm.trim();
+    const requestId = ++searchRequestId.current;
+
+    if (!query) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      setSearching(true);
+      setSearchError("");
+
+      try {
+        const results = await searchProducts(query);
+        if (requestId !== searchRequestId.current) return;
+        setSearchResults(Array.isArray(results) ? results : []);
+      } catch (error) {
+        if (requestId !== searchRequestId.current) return;
+        setSearchResults([]);
+        setSearchError(error.message || "Failed to search products");
+      } finally {
+        if (requestId === searchRequestId.current) setSearching(false);
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  function handleSearchChange(value) {
+    setSearchTerm(value);
+    if (!value.trim()) {
+      searchRequestId.current += 1;
+      setSearchResults([]);
+      setSearchError("");
+      setSearching(false);
+    }
+  }
+
+  async function handleSelectProduct(item) {
+    const requestId = ++detailsRequestId.current;
     setSelectedProduct(item);
-    const details = PRODUCT_DETAILS[item.docId];
-    setProductDetails(details || null);
-    setAttributeScope("all");
-    setValueScope("all");
+    setProductDetails(null);
+    setDetailsError("");
+    setLoadingDetails(true);
+    setAttributeScope("current");
+    setValueScope("current");
     setShowApplySettings(true);
-    setFormData({
-      sku: makeVariantSku(details, {}),
-      price: "",
-      mrp: "",
-      sellPrice: "",
-      weight: "",
-      stocks: "",
-      availableForSell: true,
-      image1: "",
-      image2: "",
-      image3: "",
-      image4: "",
-    });
-    if (details) {
-      const comboArray = Object.keys(details.specifications.combination).map(
+    setCombinations([]);
+    setSavedCombinationMap({});
+    setOpenCombinationId(null);
+    setSelectorCombinationId(null);
+    setSelectedAttributeValues({});
+
+    try {
+      const details = await getProductDetail(item.docId);
+      if (requestId !== detailsRequestId.current) return;
+
+      setProductDetails(details);
+      setFormData({
+        sku: makeVariantSku(details, {}),
+        price: "",
+        mrp: "",
+        sellPrice: "",
+        weight: "",
+        stocks: "",
+        availableForSell: true,
+        image1: "",
+        image2: "",
+        image3: "",
+        image4: "",
+      });
+
+      const combinationMap = details?.specifications?.combination ?? {};
+      const comboArray = Object.keys(combinationMap).map(
         (comboId) => ({
           id: comboId,
-          ...details.specifications.combination[comboId],
+          ...combinationMap[comboId],
         })
       );
       setCombinations(comboArray);
+      setSavedCombinationMap(getValidCombinationMap(comboArray));
       setOpenCombinationId(comboArray[0]?.id ?? null);
-      setSelectorCombinationId(null);
-      setSelectedAttributeValues({});
-    } else {
-      setCombinations([]);
-      setOpenCombinationId(null);
-      setSelectorCombinationId(null);
-      setSelectedAttributeValues({});
+    } catch (error) {
+      if (requestId !== detailsRequestId.current) return;
+      setDetailsError(error.message || "Failed to fetch product details");
+    } finally {
+      if (requestId === detailsRequestId.current) setLoadingDetails(false);
     }
   }
   function handleAddNewCombination() {
@@ -475,23 +513,66 @@ export default function AddVariant() {
   function handleFormChange(field, value) {
     setFormData({ ...formData, [field]: value });
   }
-  function handleSubmit() {
-    const payload = createInventoryPayload(
-      productDetails,
+  async function handleUpdateCombinations() {
+    const payload = {
+      spec_id: productDetails?.details?.spec_id,
+      combination: getValidCombinationMap(combinations),
+    };
+
+    setUpdatingCombinations(true);
+    try {
+      console.log("Update combinations payload:", payload);
+      // const response = await updateCombination(payload);
+      setProductDetails((currentDetails) => ({
+        ...currentDetails,
+        specifications: {
+          ...currentDetails.specifications,
+          combination: payload.combination,
+        },
+      }));
+      setSavedCombinationMap(payload.combination);
+      toast.success("Combinations updated locally");
+    } catch (error) {
+      toast.error(error.message || "Failed to update combinations");
+    } finally {
+      setUpdatingCombinations(false);
+    }
+  }
+  async function handleSubmit() {
+    const payload = createCombinationItemPayload(
+      selectedProduct.docId,
       selectorCombo,
       selectedAttributeValues,
       formData
     );
 
-    console.log("Generated inventory payload:", payload);
-
-    alert("Payload generated! Check the browser console.");
+    setSubmittingProduct(true);
+    try {
+      const response = await addCombinationItem(payload);
+      toast.success(response?.message || "Product added successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to add product");
+    } finally {
+      setSubmittingProduct(false);
+    }
   }
   const selectorCombo = combinations.find(
     (combo) => combo.id === selectorCombinationId
   );
+  const validCombinationMap = getValidCombinationMap(combinations);
+  const hasIncompleteSavedCombination = combinations.some(
+    (combination) =>
+      Object.hasOwn(savedCombinationMap, combination.id) &&
+      !Object.hasOwn(validCombinationMap, combination.id)
+  );
+  const combinationsHaveChanges =
+    !hasIncompleteSavedCombination &&
+    JSON.stringify(validCombinationMap) !== JSON.stringify(savedCombinationMap);
   const availableCombinations = combinations.filter((combo) => {
-    return !isCombinationFullyExisting(combo, productDetails);
+    return (
+      Object.hasOwn(validCombinationMap, combo.id) &&
+      !isCombinationFullyExisting(combo, productDetails)
+    );
   });
   const selectorAvailableSelections = selectorCombo
     ? getAvailableSelections(selectorCombo, productDetails)
@@ -548,17 +629,17 @@ export default function AddVariant() {
         <input
           type="text"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search by name or code..."
           className="w-full rounded-lg border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 outline-none focus:border-blue-400"
         />
       </div>
 
       <h3 className="mb-3 text-sm text-gray-500">
-        Select Product ({filteredResults.length} results)
+        Select Product ({searchResults.length} results)
       </h3>
       <div className="max-h-[calc(100vh-20rem)] space-y-3 overflow-y-auto px-5 py-5">
-        {filteredResults.map((item) => {
+        {searchResults.map((item) => {
           const isSelected = selectedProduct?.docId === item.docId;
 
           return (
@@ -588,9 +669,20 @@ export default function AddVariant() {
           );
         })}
 
-        {filteredResults.length === 0 && (
-          <p className="text-sm text-gray-400">No products found.</p>
+        {searching && (
+          <p className="text-sm text-gray-500">Searching products...</p>
         )}
+
+        {searchError && (
+          <p className="text-sm text-red-500">{searchError}</p>
+        )}
+
+        {!searching &&
+          !searchError &&
+          searchTerm.trim() &&
+          searchResults.length === 0 && (
+            <p className="text-sm text-gray-400">No products found.</p>
+          )}
       </div>
       {selectedProduct && (
         <div className="mb-8 overflow-hidden rounded-xl border border-gray-200">
@@ -604,7 +696,11 @@ export default function AddVariant() {
           </div>
 
           <div className="p-5">
-            {productDetails ? (
+            {loadingDetails ? (
+              <p className="text-sm text-gray-500">Loading product details...</p>
+            ) : detailsError ? (
+              <p className="text-sm text-red-500">{detailsError}</p>
+            ) : productDetails ? (
               <>
                 <div className="mb-4 rounded-lg bg-green-50 p-4">
                   <p className="text-sm text-gray-500">Spec ID:</p>
@@ -749,10 +845,12 @@ export default function AddVariant() {
         <div className="mb-8 space-y-6">
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-4 font-bold text-white transition-colors hover:bg-green-700"
+            onClick={handleUpdateCombinations}
+            disabled={!combinationsHaveChanges || updatingCombinations}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-4 font-bold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
             <CheckCircle2 className="h-5 w-5" strokeWidth={3} />
-            Save Changes to Database
+            {updatingCombinations ? "Updating Combinations..." : "Update Combinations"}
           </button>
 
           <div className="overflow-hidden rounded-xl border border-gray-200">
@@ -881,6 +979,7 @@ export default function AddVariant() {
           formData={formData}
           onFormChange={handleFormChange}
           onSubmit={handleSubmit}
+          submitting={submittingProduct}
         />
       )}
     </div>
@@ -990,6 +1089,7 @@ function ProductVariantForm({
   formData,
   onFormChange,
   onSubmit,
+  submitting,
 }) {
   function handleSubmit(event) {
     event.preventDefault();
@@ -1126,10 +1226,11 @@ function ProductVariantForm({
         <div className="flex justify-end border-t border-gray-100 pt-6">
           <button
             type="submit"
-            className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-10 py-3 font-semibold text-white hover:bg-green-700"
+            disabled={submitting}
+            className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-10 py-3 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
             <CheckCircle2 className="h-5 w-5" />
-            Submit Product
+            {submitting ? "Submitting Product..." : "Submit Product"}
           </button>
         </div>
       </div>

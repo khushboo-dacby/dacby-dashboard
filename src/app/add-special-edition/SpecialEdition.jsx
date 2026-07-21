@@ -1,22 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   CheckCircle2,
   Package,
   Search,
   X,
 } from "lucide-react";
-import { SPECIAL_EDITIONS } from "@/constants/inventory";
 
-function makeSlug(value) {
-  return String(value)
-    .trim()
+import { getProductDetail, searchProducts } from "@/app/apis/api";
+// import { addSpecialEdition } from "@/app/apis/api";
+
+function generateSpecialEditionSku(specId, productTitle) {
+  const specWords = specId.toLowerCase().split("-");
+  const titleWords = productTitle
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9\s-]/g, "")
+    .split(/\s+/)
+    .filter(Boolean);
+  const uniqueTitleWords = titleWords.filter(
+    (word) => !specWords.includes(word)
+  );
+
+  return [...specWords, ...uniqueTitleWords].join("-");
 }
 
 function convertImageToCdn(imageUrl) {
@@ -29,53 +38,6 @@ function convertImageToCdn(imageUrl) {
 
   return `${cdnPrefix}${trimmedUrl.slice(firebasePrefix.length)}`;
 }
-
-function getSpecId(productTitle) {
-  if (!productTitle) return "";
-
-  const possibleBaseProducts = SPECIAL_EDITIONS.filter((item) => {
-    const possibleTitle = item.product.product_title.toLowerCase();
-    const selectedTitle = productTitle.toLowerCase();
-
-    return (
-      possibleTitle !== selectedTitle && selectedTitle.startsWith(possibleTitle)
-    );
-  });
-
-  possibleBaseProducts.sort((firstItem, secondItem) => {
-    return (
-      secondItem.product.product_title.length -
-      firstItem.product.product_title.length
-    );
-  });
-
-  if (possibleBaseProducts.length > 0) {
-    return makeSlug(possibleBaseProducts[0].product.product_title);
-  }
-
-  const titleBeforeBracket = productTitle.split("(")[0];
-  return makeSlug(titleBeforeBracket);
-}
-
-function getSpecialEditionCategories() {
-  const categoryMap = new Map();
-
-  SPECIAL_EDITIONS.forEach((item) => {
-    const categoryName = item.product.category;
-    const categoryCode = item.product.code;
-
-    if (!categoryMap.has(categoryCode)) {
-      categoryMap.set(categoryCode, {
-        name: categoryName,
-        code: categoryCode,
-      });
-    }
-  });
-
-  return Array.from(categoryMap.values());
-}
-
-const specialEditionCategories = getSpecialEditionCategories();
 
 function makeEmptyForm() {
   return {
@@ -102,30 +64,85 @@ function makeEmptyForm() {
 export default function SpecialEdition() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productDetails, setProductDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState(makeEmptyForm());
+  const searchRequestId = useRef(0);
+  const detailsRequestId = useRef(0);
 
-  const filteredProducts = SPECIAL_EDITIONS.filter((item) => {
-    const productTitle = item.product.product_title.toLowerCase();
-    const categoryName = item.product.category.toLowerCase();
-    const productCode = item.product.code.toLowerCase();
-    const searchValue = searchTerm.trim().toLowerCase();
+  useEffect(() => {
+    const query = searchTerm.trim();
+    const requestId = ++searchRequestId.current;
 
-    return (
-      productTitle.includes(searchValue) ||
-      categoryName.includes(searchValue) ||
-      productCode.includes(searchValue)
-    );
-  });
+    if (!query) return;
 
-  function handleSelectProduct(item) {
+    const timeoutId = window.setTimeout(async () => {
+      setSearching(true);
+      setSearchError("");
+
+      try {
+        const results = await searchProducts(query);
+        if (requestId !== searchRequestId.current) return;
+        setSearchResults(Array.isArray(results) ? results : []);
+      } catch (error) {
+        if (requestId !== searchRequestId.current) return;
+        setSearchResults([]);
+        setSearchError(error.message || "Failed to search products");
+      } finally {
+        if (requestId === searchRequestId.current) setSearching(false);
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const selectedCategory = productDetails?.details
+    ? {
+        name: productDetails.details.category_name,
+        code: productDetails.details.code,
+      }
+    : null;
+  const specialEditionCategories = selectedCategory ? [selectedCategory] : [];
+
+  function handleSearchChange(value) {
+    setSearchTerm(value);
+    if (!value.trim()) {
+      searchRequestId.current += 1;
+      setSearchResults([]);
+      setSearchError("");
+      setSearching(false);
+    }
+  }
+
+  async function handleSelectProduct(item) {
+    const requestId = ++detailsRequestId.current;
     setSelectedProduct(item);
-    const product = item.product;
+    setProductDetails(null);
+    setDetailsError("");
+    setLoadingDetails(true);
 
-    setFormData({
-      ...makeEmptyForm(),
-      categoryCode: product.code,
-    });
+    setFormData(makeEmptyForm());
+
+    try {
+      const details = await getProductDetail(item.docId);
+      if (requestId !== detailsRequestId.current) return;
+      setProductDetails(details);
+      setFormData((currentFormData) => ({
+        ...currentFormData,
+        categoryCode: details?.details?.code || "",
+      }));
+    } catch (error) {
+      if (requestId !== detailsRequestId.current) return;
+      setDetailsError(error.message || "Failed to fetch product details");
+    } finally {
+      if (requestId === detailsRequestId.current) setLoadingDetails(false);
+    }
   }
 
   function handleFormChange(field, value) {
@@ -136,16 +153,19 @@ export default function SpecialEdition() {
   }
 
   function handleProductTitleChange(value) {
-    if (!selectedProduct) return;
+    if (!productDetails) return;
 
     setFormData((currentFormData) => ({
       ...currentFormData,
       productTitle: value,
-      sku: makeSlug(value),
+      sku: generateSpecialEditionSku(
+        productDetails.details.spec_id,
+        value
+      ),
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (!selectedProduct) return;
@@ -170,40 +190,38 @@ export default function SpecialEdition() {
       .filter(Boolean);
 
     const payload = {
-      inventory_doc: {
-        spec_id: getSpecId(selectedProduct.product.product_title),
-        product_title: formData.productTitle,
-        code: selectedCategory?.code ?? "",
-        category_name: selectedCategory?.name ?? "",
-        condition: selectedProduct.product.condition,
-        mrp,
-        price,
-        rating: 0,
-        rating_count: 0,
-        sell: formData.sell,
-        sell_max_price: sellMaxPrice,
-        in_stock: stocks > 0,
-        yt_iframe: formData.youtubeIframe,
-        vendors: {
-          VENDOR_001: {
-            vendor_id: "VENDOR_001",
-            vendor_note: formData.vendorNote,
-            name: formData.vendorName,
-            combination_offered: {
-              combination_1: {
-                item_1: {
-                  sell_price: sellPrice,
-                  sell: formData.sell,
-                  sku: formData.sku,
-                  weight,
-                  mrp,
-                  price,
-                  rating: 0,
-                  rating_count: 0,
-                  yt_iframe: "",
-                  images,
-                  stocks,
-                },
+      spec_id: productDetails?.details?.spec_id || "",
+      product_title: formData.productTitle,
+      code: selectedCategory?.code ?? "",
+      category_name: selectedCategory?.name ?? "",
+      condition: selectedProduct.product.condition,
+      mrp,
+      price,
+      rating: 0,
+      rating_count: 0,
+      sell: formData.sell,
+      sell_max_price: sellMaxPrice,
+      in_stock: stocks > 0,
+      yt_iframe: formData.youtubeIframe,
+      vendors: {
+        VENDOR_001: {
+          vendor_id: "VENDOR_001",
+          vendor_note: formData.vendorNote,
+          name: formData.vendorName,
+          combination_offered: {
+            combination_1: {
+              item_1: {
+                sell_price: sellPrice,
+                sell: formData.sell,
+                sku: formData.sku,
+                weight,
+                mrp,
+                price,
+                rating: 0,
+                rating_count: 0,
+                yt_iframe: "",
+                images,
+                stocks,
               },
             },
           },
@@ -211,8 +229,16 @@ export default function SpecialEdition() {
       },
     };
 
-    console.log("Special edition payload:", payload);
-    alert("Special edition payload generated. Check the browser console.");
+    setSubmitting(true);
+    try {
+      console.log("Special edition payload:", payload);
+      // const response = await addSpecialEdition(payload);
+      toast.success("Special edition added successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to add special edition");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -240,20 +266,26 @@ export default function SpecialEdition() {
       <div className="mx-auto max-w-7xl space-y-12 px-5 py-6 md:px-8 md:py-6 lg:px-11 lg:py-9">
         <SearchProductStep
           searchTerm={searchTerm}
-          filteredProducts={filteredProducts}
+          products={searchResults}
           selectedProduct={selectedProduct}
-          onSearchChange={setSearchTerm}
+          searching={searching}
+          searchError={searchError}
+          loadingDetails={loadingDetails}
+          detailsError={detailsError}
+          onSearchChange={handleSearchChange}
           onSelectProduct={handleSelectProduct}
         />
 
-        {selectedProduct && (
+        {selectedProduct && productDetails && (
         <ProductDetailsStep
           selectedProduct={selectedProduct}
+          productDetails={productDetails}
           categories={specialEditionCategories}
           formData={formData}
           onFormChange={handleFormChange}
           onProductTitleChange={handleProductTitleChange}
           onSubmit={handleSubmit}
+          submitting={submitting}
         />
         )}
       </div>
@@ -263,8 +295,12 @@ export default function SpecialEdition() {
 
 function SearchProductStep({
   searchTerm,
-  filteredProducts,
+  products,
   selectedProduct,
+  searching,
+  searchError,
+  loadingDetails,
+  detailsError,
   onSearchChange,
   onSelectProduct,
 }) {
@@ -293,10 +329,16 @@ function SearchProductStep({
 
       <div>
         <p className="mb-3 font-semibold">
-          Select Product ({filteredProducts.length} results)
+          Select Product ({products.length} results)
         </p>
-        <div className="max-h-[330px] space-y-3 overflow-y-auto pr-2">
-          {filteredProducts.map((item) => {
+        <div
+          className={`space-y-3 overflow-y-auto pr-2 ${
+            selectedProduct
+              ? "max-h-[330px]"
+              : "max-h-[calc(100vh-24rem)]"
+          }`}
+        >
+          {products.map((item) => {
             const isSelected = selectedProduct?.docId === item.docId;
 
             return (
@@ -334,7 +376,19 @@ function SearchProductStep({
             );
           })}
 
-          {filteredProducts.length === 0 && (
+          {searching && (
+            <p className="rounded-xl border border-slate-200 p-6 text-center text-slate-500">
+              Searching products...
+            </p>
+          )}
+
+          {searchError && (
+            <p className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
+              {searchError}
+            </p>
+          )}
+
+          {!searching && !searchError && searchTerm.trim() && products.length === 0 && (
             <p className="rounded-xl border border-slate-200 p-6 text-center text-slate-400">
               No products found.
             </p>
@@ -359,19 +413,28 @@ function SearchProductStep({
           </div>
         </div>
       )}
+
+      {loadingDetails && (
+        <p className="text-sm text-slate-500">Loading product details...</p>
+      )}
+      {detailsError && (
+        <p className="text-sm text-red-600">{detailsError}</p>
+      )}
     </section>
   );
 }
 
 function ProductDetailsStep({
   selectedProduct,
+  productDetails,
   categories,
   formData,
   onFormChange,
   onProductTitleChange,
   onSubmit,
+  submitting,
 }) {
-  const specId = getSpecId(selectedProduct.product.product_title);
+  const specId = productDetails?.details?.spec_id || "";
 
   return (
     <form onSubmit={onSubmit} className="space-y-7">
@@ -487,8 +550,13 @@ function ProductDetailsStep({
       </div>
 
       <div className="flex justify-end border-t border-slate-200 pt-6">
-        <button type="submit" className="flex cursor-pointer items-center gap-2 rounded-lg bg-green-600 px-8 py-3 font-semibold text-white hover:bg-green-700">
-          <CheckCircle2 className="h-5 w-5" /> Submit Product
+        <button
+          type="submit"
+          disabled={submitting}
+          className="flex cursor-pointer items-center gap-2 rounded-lg bg-green-600 px-8 py-3 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+        >
+          <CheckCircle2 className="h-5 w-5" />
+          {submitting ? "Submitting Product..." : "Submit Product"}
         </button>
       </div>
     </form>

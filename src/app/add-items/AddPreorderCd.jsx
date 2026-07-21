@@ -291,7 +291,7 @@ export default function AddPreorderCd({ categoryName, code }) {
     //   setIsSubmitting(false);
     // }
   }
-
+  
   return (
     <main className="min-h-screen bg-slate-50 text-slate-800">
       <header className="flex items-start justify-between border-b border-slate-200 bg-white px-6 py-4 md:px-10">
