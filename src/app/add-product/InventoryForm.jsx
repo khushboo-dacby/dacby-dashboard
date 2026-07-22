@@ -23,7 +23,8 @@ import useQuestionsState from "@/hooks/useQuestionsState";
 import useWhatsInTheBoxState from "@/hooks/useWhatsInTheBoxState";
 import { keepPayloadKeys, parseNumberIfPossible } from "@/utils/payload";
 import { generateSKUForItem } from "@/utils/sku";
-
+import { addProductToInventory } from "@/app/apis/api";
+import { toast } from "sonner";
 function slugify(value) {
   return String(value || "")
     .toLowerCase()
@@ -55,7 +56,10 @@ function generateVisibleSku(fields, item, attributeDefinitions = []) {
     return getCdSku(fields.product_title);
   }
 
-  return generateSKUForItem(fields.spec_id, item, attributeDefinitions);
+  return generateSKUForItem(fields.spec_id, item, attributeDefinitions, {
+    categoryName: fields.category_name,
+    categoryCode: fields.code,
+  });
 }
 
 function removeEmptyDescriptionSections(description) {
@@ -74,13 +78,14 @@ function removeEmptyDescriptionSections(description) {
 export default function InventoryForm() {
   
   const [resp, setResp] = useState(null);
+  const [previewPayload, setPreviewPayload] = useState(null);
   const [sending, setSending] = useState(false);
 
   const [fields, setFields] = useState({
     brand: "",
     category_name: "",
     code: "",
-    condition: "Pre Owned",
+    condition: "",
     mrp: "",
     price: "",
     product_title: "",
@@ -227,6 +232,7 @@ export default function InventoryForm() {
         const items = v.items.map((it, j) => {
           if (j !== itemIdx) return it;
           let updated = { ...it, [key]: value };
+          if (key === "sku") updated.skuManuallyEdited = true;
           // when changing combination_name, initialize attributes for that combination
           if (key === "combination_name") {
             const comb =
@@ -234,22 +240,23 @@ export default function InventoryForm() {
                 (c) => c.name === value,
               ) || null;
             const attrs = {};
-            const defaults = (comb && comb.selectedValues) || {};
             ((comb && comb.attributes) || []).forEach((a) => {
-              if (a.key)
-                attrs[a.key] =
-                  it.attributes && it.attributes[a.key]
-                    ? it.attributes[a.key]
-                    : defaults[a.key] || "";
+              if (!a.key) return;
+              const key = normalizeAttributeKey(a.key);
+              const currentValue = it.attributes?.[key];
+              attrs[key] = (a.values || []).includes(currentValue)
+                ? currentValue
+                : "";
             });
             updated = { ...updated, attributes: attrs };
           }
-          // always regenerate SKU from spec_id and item fields
-          updated.sku = generateVisibleSku(
-            fields,
-            updated,
-            specification.attributeDefinitions,
-          );
+          if (key !== "sku" && !updated.skuManuallyEdited) {
+            updated.sku = generateVisibleSku(
+              fields,
+              updated,
+              specification.attributeDefinitions,
+            );
+          }
           return updated;
         });
         return { ...v, items };
@@ -320,7 +327,7 @@ export default function InventoryForm() {
             nextAttributeDefinitions,
           );
 
-          updated.combination_name = matchingCombination;
+          updated.combination_name = it.combination_name || matchingCombination;
 
           updated.sku = generateVisibleSku(
             fields,
@@ -594,97 +601,154 @@ export default function InventoryForm() {
   }
 
   function buildGeneratedCombinations(attributeDefinitions = []) {
-  const defs = (attributeDefinitions || []).filter((attr) => {
-    const key = String(attr.key || "").trim();
-    const values = Array.isArray(attr.values) ? attr.values : [];
-    return key && values.length > 0;
-  });
+    const defs = (attributeDefinitions || []).filter((attr) => {
+      const key = String(attr.key || "").trim();
+      const values = Array.isArray(attr.values) ? attr.values : [];
+      return key && values.length > 0;
+    });
 
-  if (!defs.length) return [];
+    if (!defs.length) return [];
 
-  // Keep color attribute separate
-  const colorAttr = defs.find(
-    (attr) => String(attr.key).toLowerCase() === "color",
-  );
-
-  // All other attributes participate in combination generation
-  const combinationDefs = defs.filter(
-    (attr) => String(attr.key).toLowerCase() !== "color",
-  );
-
-  const valueGroups = combinationDefs.map((attr) =>
-    (attr.values || [])
-      .map((value) => String(value).trim())
-      .filter(Boolean),
-  );
-
-  const generated = [];
-
-  const walk = (prefix = [], depth = 0) => {
-    if (depth === valueGroups.length) {
-      generated.push(prefix);
-      return;
-    }
-
-    valueGroups[depth].forEach((value) =>
-      walk([...prefix, value], depth + 1),
+    const colorAttribute = defs.find(
+      (attr) => normalizeAttributeKey(attr.key) === "color",
     );
-  };
+    const commonAttribute =
+      colorAttribute && colorAttribute.values.length >= 2
+        ? colorAttribute
+        : defs.reduce((largest, attribute) =>
+            attribute.values.length > largest.values.length
+              ? attribute
+              : largest,
+          );
+    const combinationDefs = defs.filter(
+      (attribute) => attribute !== commonAttribute,
+    );
+    const valueGroups = combinationDefs.map((attribute) =>
+      attribute.values
+        .map((value) => String(value).trim())
+        .filter(Boolean),
+    );
+    const generated = [];
 
-  walk();
+    const walk = (prefix = [], depth = 0) => {
+      if (depth === valueGroups.length) {
+        generated.push(prefix);
+        return;
+      }
 
-  return generated.map((values, index) => {
-    const attributes = [];
-
-    // Always keep all colors together
-    if (colorAttr) {
-      attributes.push({
-        key: colorAttr.key,
-        values: [...colorAttr.values],
-      });
-    }
-
-    // Add remaining attributes one by one
-    combinationDefs.forEach((attr, attrIdx) => {
-      attributes.push({
-        key: attr.key,
-        values: [values[attrIdx]],
-      });
-    });
-
-    const selectedValues = {};
-
-    attributes.forEach((attr) => {
-      selectedValues[attr.key] =
-        attr.key.toLowerCase() === "color"
-          ? [...attr.values]
-          : attr.values[0];
-    });
-
-    return {
-      name: `combination_${index + 1}`,
-      attributes,
-      selectedValues,
-      include_colors: false,
+      valueGroups[depth].forEach((value) =>
+        walk([...prefix, value], depth + 1),
+      );
     };
-  });
-}
+
+    walk();
+
+    return generated.map((values, index) => {
+      const attributes = [
+        {
+          key: commonAttribute.key,
+          values: [...commonAttribute.values],
+        },
+      ];
+
+      combinationDefs.forEach((attribute, attributeIndex) => {
+        attributes.push({
+          key: attribute.key,
+          values: [values[attributeIndex]],
+        });
+      });
+
+      const selectedValues = {};
+      attributes.forEach((attribute) => {
+        selectedValues[attribute.key] =
+          attribute === attributes[0]
+            ? [...attribute.values]
+            : attribute.values[0];
+      });
+
+      return {
+        name: `combination_${index + 1}`,
+        attributes,
+        selectedValues,
+        include_colors: false,
+      };
+    });
+  }
 
   function updateAttributeDefinitions(updater) {
     setSpecification((prev) => {
       const nextAttributeDefinitions = updater(prev.attributeDefinitions || []);
-      const defs = (nextAttributeDefinitions || []).filter((attr) => {
-        const key = String(attr.key || "").trim();
-        const values = Array.isArray(attr.values) ? attr.values : [];
-        return key && values.length > 0;
-      });
 
       return {
         ...prev,
         attributeDefinitions: nextAttributeDefinitions || [],
-        combinations: defs.length ? buildGeneratedCombinations(defs) : [],
       };
     });
+  }
+
+  function updateCombinations(updater) {
+    setSpecification((prev) => {
+      const combinations = updater(prev.combinations || []);
+      const valuesByKey = combinations.reduce((acc, combination) => {
+        (combination.attributes || []).forEach((attribute) => {
+          const key = normalizeAttributeKey(attribute.key);
+          if (!key) return;
+          if (!acc[key]) acc[key] = new Set();
+          (attribute.values || []).forEach((value) => {
+            const formattedValue = formatAttributeValue(value);
+            if (formattedValue) acc[key].add(formattedValue);
+          });
+        });
+        return acc;
+      }, {});
+      const existingDefinitions = prev.attributeDefinitions || [];
+      const existingKeys = new Set(
+        existingDefinitions.map((attribute) =>
+          normalizeAttributeKey(attribute.key),
+        ),
+      );
+      const addedDefinitions = Object.entries(valuesByKey)
+        .filter(([key]) => !existingKeys.has(key))
+        .map(([key, values]) => ({
+          key,
+          icon: "",
+          values: Array.from(values),
+          input: "",
+        }));
+      const attributeDefinitions = existingDefinitions.map((attribute) => {
+        const key = normalizeAttributeKey(attribute.key);
+        const combinationValues = valuesByKey[key];
+        if (!combinationValues) return attribute;
+        return {
+          ...attribute,
+          values: Array.from(
+            new Set([...(attribute.values || []), ...combinationValues]),
+          ),
+        };
+      });
+
+      return {
+        ...prev,
+        combinations,
+        attributeDefinitions: [...attributeDefinitions, ...addedDefinitions],
+      };
+    });
+  }
+
+  function addCombinationsFromAttributes() {
+    const generated = buildGeneratedCombinations(
+      specification.attributeDefinitions || [],
+    );
+
+    if (!generated.length) {
+      toast.error("Add attributes and values before generating combinations");
+      return;
+    }
+
+    updateCombinations(() => generated);
+    toast.success(
+      `${generated.length} combination${generated.length === 1 ? "" : "s"} regenerated from scratch`,
+    );
   }
 
   function addAttributeDefinition() {
@@ -1003,19 +1067,9 @@ export default function InventoryForm() {
             const key =
               c.name || `combination_${Math.random().toString(36).slice(2, 8)}`;
             const obj = {};
-            const selectedValues =
-              c.selectedValues && typeof c.selectedValues === "object"
-                ? c.selectedValues
-                : {};
             (c.attributes || []).forEach((a) => {
               if (!a.key) return;
-              const value = selectedValues[a.key];
-              obj[normalizeAttributeKey(a.key)] =
-                value !== undefined
-                  ? Array.isArray(value)
-                    ? value
-                    : [value]
-                  : a.values || [];
+              obj[normalizeAttributeKey(a.key)] = a.values || [];
             });
             if (c.include_colors)
               obj.color = (specification.color_codes || []).map((cc) => ({
@@ -1069,7 +1123,7 @@ export default function InventoryForm() {
           spec_id: fields.spec_id || undefined,
           product_title: fields.product_title || undefined,
           code: fields.code || undefined,
-          brand: fields.brand || undefined,
+          ...(fields.brand?.trim() && { brand: fields.brand.trim() }),
           category_name: fields.category_name || undefined,
           condition: fields.condition || undefined,
           mrp: fields.mrp ? Number(fields.mrp) : 0,
@@ -1082,7 +1136,7 @@ export default function InventoryForm() {
           sell_max_price: fields.sell_max_price
             ? Number(fields.sell_max_price)
             : 0,
-          type: fields.type || undefined,
+          ...(fields.type?.trim() && { type: fields.type.trim() }),
           in_stock: inStock,
           yt_iframe: fields.yt_iframe || undefined,
           // images,
@@ -1140,9 +1194,32 @@ export default function InventoryForm() {
       );
 
       console.log("Inventory payload preview:", payloadWithAllKeys);
-      setResp({ ok: true, preview: true, payload: payloadWithAllKeys });
+      setPreviewPayload(payloadWithAllKeys);
+      setResp(payloadWithAllKeys);
+      toast.success("Inventory preview generated successfully");
     } catch (err) {
-      setResp({ error: String(err) });
+      const message =
+        err instanceof Error ? err.message : "Failed to add product";
+      setResp({ error: message });
+      toast.error(message);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handleFinalSubmit() {
+    if (!previewPayload) return;
+
+    setSending(true);
+    try {
+      const response = await addProductToInventory(previewPayload);
+      setResp(response);
+      setPreviewPayload(null);
+      toast.success(response?.message || "Product added successfully");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to add product";
+      toast.error(message);
     } finally {
       setSending(false);
     }
@@ -1153,7 +1230,7 @@ export default function InventoryForm() {
       brand: "",
       category_name: "",
       code: "",
-      condition: "pre-Owned",
+      condition: "",
       mrp: "",
       price: "",
       product_title: "",
@@ -1185,6 +1262,7 @@ export default function InventoryForm() {
     resetOptionDescriptions();
     resetDescription();
     setResp(null);
+    setPreviewPayload(null);
   }
 
   return (
@@ -1258,6 +1336,8 @@ export default function InventoryForm() {
             updateOptionDescriptionForValue={updateOptionDescriptionForValue}
             updateAttributeDefinitionInput={updateAttributeDefinitionInput}
             addAttributeDefinitionValue={addAttributeDefinitionValue}
+            updateCombinations={updateCombinations}
+            addCombinationsFromAttributes={addCombinationsFromAttributes}
           />
 
           <VendorsSection
@@ -1284,7 +1364,12 @@ export default function InventoryForm() {
           <FormActions sending={sending} onReset={handleReset} />
         </form>
 
-        <ResponsePreview resp={resp} />
+        <ResponsePreview
+          resp={resp}
+          isPreview={Boolean(previewPayload)}
+          sending={sending}
+          onFinalSubmit={handleFinalSubmit}
+        />
       </div>
     </div>
   );

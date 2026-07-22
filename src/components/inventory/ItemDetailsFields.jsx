@@ -7,11 +7,11 @@ export default function ItemDetailsFields({
 }) {
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <div>
-          <label className="block text-sm font-medium mb-1">SKU (auto)</label>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="min-w-0">
+          <label className="block text-sm font-medium mb-1">SKU</label>
           <input
-            className="border rounded px-3 py-2 bg-slate-50"
+            className="w-full min-w-0 border rounded px-3 py-2"
             value={item.sku}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "sku", e.target.value)
@@ -19,10 +19,10 @@ export default function ItemDetailsFields({
             placeholder={specId ? `${specId}-...` : "spec-id-generated-sku"}
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className="block text-sm font-medium mb-1">Weight</label>
           <input
-            className="border rounded px-3 py-2"
+            className="w-full min-w-0 border rounded px-3 py-2"
             value={item.weight}
             type="number"
             onChange={(e) =>
@@ -30,10 +30,10 @@ export default function ItemDetailsFields({
             }
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className="block text-sm font-medium mb-1">Stocks</label>
           <input
-            className="border rounded px-3 py-2"
+            className="w-full min-w-0 border rounded px-3 py-2"
             value={item.stocks}
             type="number"
             onChange={(e) =>
@@ -42,40 +42,40 @@ export default function ItemDetailsFields({
           />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <label className="block text-sm font-medium mb-1">MRP</label>
           <input
             type="number"
-            className="border rounded px-3 py-2"
+            className="w-full min-w-0 border rounded px-3 py-2"
             value={item.mrp}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "mrp", Number(e.target.value || 0))
             }
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className="block text-sm font-medium mb-1">Price</label>
           <input
             type="number"
-            className="border rounded px-3 py-2"
+            className="w-full min-w-0 border rounded px-3 py-2"
             value={item.price}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "price", Number(e.target.value || 0))
             }
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className="block text-sm font-medium mb-1">Sell Price</label>
           <input
             type="number"
-            className="border rounded px-3 py-2"
+            className="w-full min-w-0 border rounded px-3 py-2"
             value={item.sell_price}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "sell_price", Number(e.target.value || 0))
             }
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 md:col-span-3">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"

@@ -1,5 +1,3 @@
-import CombinationAttributesFields from "@/components/inventory/CombinationAttributesFields";
-import DedicatedColorSelector from "@/components/inventory/DedicatedColorSelector";
 import ItemDetailsFields from "@/components/inventory/ItemDetailsFields";
 import VariantAttributeDefinitionsFields from "@/components/inventory/VariantAttributeDefinitionsFields";
 import VendorDetailsFields from "@/components/inventory/VendorDetailsFields";
@@ -65,35 +63,9 @@ export default function VendorsSection({
                         vendorIndex={vendorIndex}
                         itemIndex={itemIndex}
                         specification={specification}
+                        updateItem={updateItem}
                         updateItemAttribute={updateItemAttribute}
-                        addSpecificationValueFromItem={
-                          addSpecificationValueFromItem
-                        }
-                      />
-
-                      <DedicatedColorSelector
-                        item={item}
-                        vendorIndex={vendorIndex}
-                        itemIndex={itemIndex}
-                        specification={specification}
-                        updateItemAttribute={updateItemAttribute}
-                        addColorCodeFromVariant={addColorCodeFromVariant}
                         addValueToCombination={addValueToCombination}
-                      />
-
-                      <CombinationAttributesFields
-                        item={item}
-                        vendorIndex={vendorIndex}
-                        itemIndex={itemIndex}
-                        specification={specification}
-                        updateItemAttribute={updateItemAttribute}
-                        addColorCodeFromVariant={addColorCodeFromVariant}
-                        addValueToCombination={addValueToCombination}
-                        updateItemAttributeKey={updateItemAttributeKey}
-                        finalizeItemAttributeKey={finalizeItemAttributeKey}
-                        saveItemAttributeValue={saveItemAttributeValue}
-                        removeItemAttribute={removeItemAttribute}
-                        addItemAttribute={addItemAttribute}
                       />
 
                       <ItemDetailsFields

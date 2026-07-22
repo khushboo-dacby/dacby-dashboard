@@ -6,8 +6,8 @@ import {
   addCombinationItem,
   getProductDetail,
   searchProducts,
+  updateCombination,
 } from "@/app/apis/api";
-// import { updateCombination } from "@/app/apis/api";
 import {
   Search,
   X,
@@ -522,7 +522,7 @@ export default function AddVariant() {
     setUpdatingCombinations(true);
     try {
       console.log("Update combinations payload:", payload);
-      // const response = await updateCombination(payload);
+      const response = await updateCombination(payload);
       setProductDetails((currentDetails) => ({
         ...currentDetails,
         specifications: {
@@ -531,7 +531,7 @@ export default function AddVariant() {
         },
       }));
       setSavedCombinationMap(payload.combination);
-      toast.success("Combinations updated locally");
+      toast.success(response?.message || "Combinations updated successfully");
     } catch (error) {
       toast.error(error.message || "Failed to update combinations");
     } finally {

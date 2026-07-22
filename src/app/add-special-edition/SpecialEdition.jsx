@@ -11,8 +11,8 @@ import {
   X,
 } from "lucide-react";
 
-import { getProductDetail, searchProducts } from "@/app/apis/api";
-// import { addSpecialEdition } from "@/app/apis/api";
+import { addSpecialEdition, getProductDetail, searchProducts } from "@/app/apis/api";
+import { brandMap, typeMap } from "@/constants/inventory";
 
 function generateSpecialEditionSku(specId, productTitle) {
   const specWords = specId.toLowerCase().split("-");
@@ -42,6 +42,8 @@ function convertImageToCdn(imageUrl) {
 function makeEmptyForm() {
   return {
     categoryCode: "",
+    brand: "",
+    type: "",
     productTitle: "",
     sku: "",
     price: "",
@@ -136,6 +138,8 @@ export default function SpecialEdition() {
       setFormData((currentFormData) => ({
         ...currentFormData,
         categoryCode: details?.details?.code || "",
+        brand: details?.details?.brand || "",
+        type: details?.details?.type || "",
       }));
     } catch (error) {
       if (requestId !== detailsRequestId.current) return;
@@ -189,12 +193,14 @@ export default function SpecialEdition() {
       .map((imageUrl) => convertImageToCdn(imageUrl))
       .filter(Boolean);
 
-    const payload = {
+    const product = {
       spec_id: productDetails?.details?.spec_id || "",
       product_title: formData.productTitle,
       code: selectedCategory?.code ?? "",
       category_name: selectedCategory?.name ?? "",
       condition: selectedProduct.product.condition,
+      ...(formData.brand.trim() ? { brand: formData.brand.trim() } : {}),
+      ...(formData.type.trim() ? { type: formData.type.trim() } : {}),
       mrp,
       price,
       rating: 0,
@@ -228,12 +234,13 @@ export default function SpecialEdition() {
         },
       },
     };
+    const payload = { product };
 
     setSubmitting(true);
     try {
       console.log("Special edition payload:", payload);
-      // const response = await addSpecialEdition(payload);
-      toast.success("Special edition added successfully");
+      const response = await addSpecialEdition(payload);
+      toast.success(response?.message || "Special edition added successfully");
     } catch (error) {
       toast.error(error.message || "Failed to add special edition");
     } finally {
@@ -278,6 +285,7 @@ export default function SpecialEdition() {
 
         {selectedProduct && productDetails && (
         <ProductDetailsStep
+          key={selectedProduct.docId}
           selectedProduct={selectedProduct}
           productDetails={productDetails}
           categories={specialEditionCategories}
@@ -435,6 +443,17 @@ function ProductDetailsStep({
   submitting,
 }) {
   const specId = productDetails?.details?.spec_id || "";
+  const categoryName = productDetails?.details?.category_name || "";
+  const showsBrandAndType =
+    categoryName === "Consoles" || categoryName === "Cameras";
+  const brandOptions = brandMap[categoryName] || [];
+  const typeOptions = typeMap[categoryName] || [];
+  const [addingCustomBrand, setAddingCustomBrand] = useState(
+    Boolean(formData.brand) && !brandOptions.includes(formData.brand),
+  );
+  const [addingCustomType, setAddingCustomType] = useState(
+    Boolean(formData.type) && !typeOptions.includes(formData.type),
+  );
 
   return (
     <form onSubmit={onSubmit} className="space-y-7">
@@ -476,6 +495,27 @@ function ProductDetailsStep({
           })}
         </div>
       </div>
+
+      {showsBrandAndType ? (
+        <div className="grid gap-5 md:grid-cols-2">
+          <MappedOrCustomField
+            label="Brand"
+            value={formData.brand}
+            options={brandOptions}
+            addingCustom={addingCustomBrand}
+            onAddingCustomChange={setAddingCustomBrand}
+            onChange={(value) => onFormChange("brand", value)}
+          />
+          <MappedOrCustomField
+            label="Type"
+            value={formData.type}
+            options={typeOptions}
+            addingCustom={addingCustomType}
+            onAddingCustomChange={setAddingCustomType}
+            onChange={(value) => onFormChange("type", value)}
+          />
+        </div>
+      ) : null}
 
       <TextField
         label="Product Title *"
@@ -560,6 +600,48 @@ function ProductDetailsStep({
         </button>
       </div>
     </form>
+  );
+}
+
+function MappedOrCustomField({
+  label,
+  value,
+  options,
+  addingCustom,
+  onAddingCustomChange,
+  onChange,
+}) {
+  return (
+    <div>
+      <label className="mb-2 block font-semibold">{label}</label>
+      <select
+        value={addingCustom ? "__other__" : value}
+        onChange={(event) => {
+          const nextValue = event.target.value;
+          const isOther = nextValue === "__other__";
+          onAddingCustomChange(isOther);
+          onChange(isOther ? "" : nextValue);
+        }}
+        className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-indigo-700"
+      >
+        <option value="">Select {label.toLowerCase()}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+        <option value="__other__">Other</option>
+      </select>
+      {addingCustom ? (
+        <input
+          autoFocus
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={`Enter another ${label.toLowerCase()}`}
+          className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-indigo-700"
+        />
+      ) : null}
+    </div>
   );
 }
 

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Copy, RotateCcw, X } from "lucide-react";
-// import { toast } from "sonner";
-// import { addProductToInventory } from "@/app/apis/api";
+import { toast } from "sonner";
+import { addProductToInventory } from "@/app/apis/api";
 
 const PS5_DESCRIPTION_TEMPLATE = {
   Packaging: "Pre-Owned Game Case",
@@ -35,7 +35,7 @@ const PS5_DESCRIPTION_TEMPLATE = {
     ],
   },
   summary:
-    "Looking for the best price on a high quality pre-owned copy of Little Nightmares III for PlayStation 5? Buy Little Nightmares III PS5 pre-owned game CD online in India from DACBY, your trusted destination for genuine used PlayStation 5 games, second hand PS5 Blu-ray discs, and affordable gaming titles. Published by Bandai Namco Entertainment, Little Nightmares III takes players on a chilling adventure through the mysterious Spiral, a world filled with frightening locations, strange inhabitants, and unsettling dangers. Play as Low and Alone, two friends searching for a path to freedom while surviving terrifying encounters and solving challenging puzzles. Explore haunting environments, uncover hidden secrets, overcome deadly traps, and experience a unique blend of horror, platforming, exploration, and puzzle solving. Optimized for PlayStation 5, Little Nightmares III delivers atmospheric visuals, immersive sound design, responsive gameplay, and a captivating horror adventure designed for modern hardware.\n\nWhen you choose to buy a pre-owned Little Nightmares III PS5 game disc online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 5 game sold through DACBY is thoroughly inspected, tested for functionality, and verified for authenticity before being listed for sale. DACBY provides secure payment options, competitive pricing, reliable customer support, and fast shipping across India. Whether you are a fan of horror games, puzzle platformers, atmospheric adventures, or simply looking for an affordable way to enjoy one of the most anticipated PlayStation 5 releases, DACBY is your trusted online destination for buying used PS5 game CDs, pre-owned PlayStation 5 Blu-ray discs, adventure games, and premium gaming products at great prices.",
+    "Looking for the best price on a high quality pre-owned copy of Little Nightmares III for PlayStation 5? Buy Little Nightmares III PS5 pre-owned game CD online in India from DACBY, your trusted destination for genuine used PlayStation 5 games, second hand PS5 Blu-ray discs, and affordable gaming titles. Published by Bandai Namco Entertainment, Little Nightmares III takes players on a chilling adventure through the mysterious Spiral, a world filled with frightening locations, strange inhabitants, and unsettling dangers. Play as Low and Alone, two friends searching for a path to freedom while surviving terrifying encounters and solving challenging puzzles. Explore haunting environments, uncover hidden secrets, overcome deadly traps, and experience a unique blend of horror, platforming, exploration, and puzzle solving. Optimized for PlayStation 5, Little Nightmares III delivers atmospheric visuals, immersive sound design, responsive gameplay, and a captivating horror adventure designed for modern hardware.\n\nWhen you choose to buy a pre-owned Little Nightmares III PS5 game disc online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 5 game sold through DACBY is thoroughly inspected, tested for functionality, and verified for authenticity before being listed for sale. DACBY provides secure payment options, competitive pricing, reliable customer support, and fast shipping. Whether you are a fan of horror games, puzzle platformers, atmospheric adventures, or simply looking for an affordable way to enjoy one of the most anticipated PlayStation 5 releases, DACBY is your trusted online destination for buying used PS5 game CDs, pre-owned PlayStation 5 Blu-ray discs, adventure games, and premium gaming products at great prices.",
 };
 
 const PS5_DESCRIPTION_JSON = JSON.stringify(PS5_DESCRIPTION_TEMPLATE, null, 2);
@@ -61,10 +61,80 @@ const PS4_DESCRIPTION_TEMPLATE = {
     ],
   },
   summary:
-    "Looking for the best price on a high quality pre-owned copy of Little Nightmares III for PlayStation 4? Buy Little Nightmares III PS4 pre-owned game CD online in India from DACBY, your trusted destination for genuine used PlayStation 4 games, second hand PS4 Blu-ray discs, and affordable gaming titles. Published by Bandai Namco Entertainment, Little Nightmares III takes players on a chilling adventure through the mysterious Spiral, a world filled with frightening locations, strange inhabitants, and unsettling dangers. Play as Low and Alone, two friends searching for a path to freedom while surviving terrifying encounters and solving challenging puzzles. Explore haunting environments, uncover hidden secrets, overcome deadly traps, and experience a unique blend of horror, platforming, exploration, and puzzle solving. Optimized for PlayStation 4, Little Nightmares III delivers atmospheric visuals, immersive sound design, responsive gameplay, and a captivating horror adventure for console players.\n\nWhen you choose to buy a pre-owned Little Nightmares III PS4 game disc online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 4 game sold through DACBY is thoroughly inspected, tested for functionality, and verified for authenticity before being listed for sale. DACBY provides secure payment options, competitive pricing, reliable customer support, and fast shipping across India. Whether you are a fan of horror games, puzzle platformers, atmospheric adventures, or simply looking for an affordable way to enjoy one of the most anticipated PlayStation releases, DACBY is your trusted online destination for buying used PS4 game CDs, pre-owned PlayStation 4 Blu-ray discs, adventure games, and premium gaming products at great prices.",
+    "Looking for the best price on a high quality pre-owned copy of Little Nightmares III for PlayStation 4? Buy Little Nightmares III PS4 pre-owned game CD online in India from DACBY, your trusted destination for genuine used PlayStation 4 games, second hand PS4 Blu-ray discs, and affordable gaming titles. Published by Bandai Namco Entertainment, Little Nightmares III takes players on a chilling adventure through the mysterious Spiral, a world filled with frightening locations, strange inhabitants, and unsettling dangers. Play as Low and Alone, two friends searching for a path to freedom while surviving terrifying encounters and solving challenging puzzles. Explore haunting environments, uncover hidden secrets, overcome deadly traps, and experience a unique blend of horror, platforming, exploration, and puzzle solving. Optimized for PlayStation 4, Little Nightmares III delivers atmospheric visuals, immersive sound design, responsive gameplay, and a captivating horror adventure for console players.\n\nWhen you choose to buy a pre-owned Little Nightmares III PS4 game disc online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 4 game sold through DACBY is thoroughly inspected, tested for functionality, and verified for authenticity before being listed for sale. DACBY provides secure payment options, competitive pricing, reliable customer support, and fast shipping. Whether you are a fan of horror games, puzzle platformers, atmospheric adventures, or simply looking for an affordable way to enjoy one of the most anticipated PlayStation releases, DACBY is your trusted online destination for buying used PS4 game CDs, pre-owned PlayStation 4 Blu-ray discs, adventure games, and premium gaming products at great prices.",
 };
 
 const PS4_DESCRIPTION_JSON = JSON.stringify(PS4_DESCRIPTION_TEMPLATE, null, 2);
+
+const PREORDER_DESCRIPTION_TEMPLATE = {
+  summary:
+    "Short Description:\nPre-order Hell Let Loose Vietnam for PlayStation 5 and experience large-scale tactical warfare set during the Vietnam War. Fight across dense jungles, rural villages, military bases, and battle-scarred landscapes in intense 50 vs 50 multiplayer battles that demand teamwork, communication, and strategy. Reserve your copy today from DACBY and secure your place on the battlefield before launch.\n\nFull Product Description:\nHell Let Loose Vietnam brings the award-winning tactical first-person shooter franchise to a brand-new setting inspired by the Vietnam War. Built for PlayStation 5, this next-generation military shooter delivers authentic large-scale combat where teamwork, communication, and strategic coordination determine victory. Engage in intense 50 vs 50 battles across expansive maps featuring dense jungles, river systems, military compounds, villages, and war-torn environments designed to recreate the challenges of Vietnam-era warfare.\n\nPlayers can choose from multiple military roles including infantry, officer, machine gunner, medic, engineer, scout, tank crew, and commander, each contributing to the success of their team. Coordinate attacks, establish defensive positions, manage resources, deploy vehicles, and work alongside your squad to capture objectives and control the battlefield. Realistic weapon handling, immersive audio design, dynamic environments, and strategic gameplay combine to create a deeply authentic combat experience.\n\nOptimized for PlayStation 5, Hell Let Loose Vietnam features enhanced visuals, improved environmental detail, immersive 3D audio, fast loading times, smooth performance, and support for large-scale multiplayer battles. Whether advancing through dense jungle terrain, defending critical objectives, or coordinating large military operations, every battle offers a unique and intense tactical experience.\n\nPre-order Hell Let Loose Vietnam PS5 online from DACBY and secure your copy before launch. DACBY offers genuine PlayStation 5 games, authentic pre-order titles, competitive prices, secure online payments, trusted customer support, quality assurance, and fast delivery across India. Shop the latest PS5 games, upcoming military shooters, tactical multiplayer titles, and the best PlayStation 5 pre-orders only at DACBY, your trusted destination for gaming products in India.\n\nImportant Note:\nThis is a pre-order product. Release date, packaging details, bonus content, and final game specifications are subject to confirmation by the publisher. Physical units will be dispatched according to publisher availability and official launch schedules.",
+  Global_Attributes: {
+    Packaging: "Original Sealed Retail Box",
+    Type: "Blu-ray Disc",
+    Brand: "Team17",
+    Franchise: "Hell Let Loose",
+    Edition: "Standard Edition",
+    Genre: "First-Person Shooter, Tactical Shooter, Military Simulation",
+    Language: "English (Additional Languages Supported)",
+    Mode: "Online Multiplayer",
+    Platform: "PlayStation 5",
+    Publisher: "Team17",
+    Rating: "teen",
+    Release_Date: "13th August",
+    Release_Year: 2026,
+  },
+};
+
+const PREORDER_DESCRIPTION_JSON = JSON.stringify(
+  PREORDER_DESCRIPTION_TEMPLATE,
+  null,
+  2
+);
+
+function createDescriptionPrompt(productTitle, platform, exampleJson) {
+  const title = productTitle.trim() || "[PRODUCT TITLE]";
+
+  return `Use this JSON as the pattern:
+
+${exampleJson}
+
+Generate the same pattern description for title "${title}" as a pre-owned ${platform} game CD sold on the DACBY website.
+
+Requirements:
+1. Replace all example-game information with accurate information for "${title}".
+2. Keep the exact JSON structure and return only valid JSON.
+3. Include exactly 9 relevant gameplay features.
+4. Write the summary in the same detailed two-paragraph pattern.
+5. Separate summary paragraphs with \\n\\n.
+6. Do not use em dashes.
+7. Use natural SEO, GEO, and AEO keywords relevant to "${title}", pre-owned ${platform} game CDs, and the DACBY website.
+8. Include useful purchase-intent phrases naturally, without keyword stuffing.
+9. Mention DACBY product inspection, authenticity, competitive pricing, secure payment, customer support, and shipping in the second paragraph.
+10. Do not use Markdown or add text outside the JSON.`;
+}
+
+function createPreOrderDescriptionPrompt(productTitle, exampleJson) {
+  const title = productTitle.trim() || "[PRODUCT TITLE]";
+
+  return `Use this JSON as the pattern:
+
+${exampleJson}
+
+Generate the same pattern pre-order description for title "${title}" sold on the DACBY website.
+
+Requirements:
+1. Replace all example-product information with accurate information for "${title}".
+2. Keep the exact JSON structure and return only valid JSON.
+3. Preserve the Short Description, Full Product Description, and Important Note sections in the summary.
+4. Separate summary paragraphs and sections with \\n\\n.
+5. Do not use em dashes.
+6. Use natural SEO, GEO, and AEO keywords relevant to "${title}", gaming pre-orders, buyers in India, and the DACBY website.
+7. Include useful purchase-intent phrases naturally, without keyword stuffing.
+8. Mention DACBY genuine products, competitive pricing, secure payment, customer support, quality assurance, and delivery across India.
+9. Always include the official release date and official age rating for every game. For all preorder titles, the release date field is mandatory and must contain the officially announced release date. Use only verified information from official sources. Do not invent ratings, publishers, platforms, bonuses, specifications, or release dates. If an official rating has not yet been announced, use "Rating Pending".
+10. Do not use Markdown or add text outside the JSON.`;
+}
 
 function makeSlug(value) {
   return String(value)
@@ -72,6 +142,39 @@ function makeSlug(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function formatReleaseDate(value) {
+  if (!value) return "";
+
+  const [year, month, day] = value.split("-").map(Number);
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const remainder = day % 100;
+  const suffix =
+    remainder >= 11 && remainder <= 13
+      ? "th"
+      : day % 10 === 1
+        ? "st"
+        : day % 10 === 2
+          ? "nd"
+          : day % 10 === 3
+            ? "rd"
+            : "th";
+
+  return `${day}${suffix} ${monthNames[month - 1]} ${year}`;
 }
 
 function convertImageToCdn(imageUrl) {
@@ -112,7 +215,7 @@ function getCategorySettings(code) {
   };
 }
 
-function makeEmptyForm(descriptionJson = "") {
+function makeEmptyForm(availableForSell = true) {
   return {
     productTitle: "",
     mrp: "",
@@ -121,13 +224,13 @@ function makeEmptyForm(descriptionJson = "") {
     maxSellPrice: "",
     stocks: "",
     weight: "",
-    availableForSell: true,
+    availableForSell,
     releaseDate: "",
     sku: "",
     vendorName: "Dacby Technologies Pvt. Ltd.",
     vendorNote: "",
     youtubeIframe: "",
-    descriptionJson,
+    descriptionJson: "",
     image1: "",
     image2: "",
     image3: "",
@@ -142,20 +245,25 @@ export default function AddPreorderCd({ categoryName, code }) {
   const isPs4Cd = code === "D002Y";
   const isGameCd = isPs5Cd || isPs4Cd;
   const isPreOrder = code === "D003Y";
-  let initialDescription = "";
+  const requiresDescription = isGameCd || isPreOrder;
+  let descriptionTemplate = "";
 
   if (isPs5Cd) {
-    initialDescription = PS5_DESCRIPTION_JSON;
+    descriptionTemplate = PS5_DESCRIPTION_JSON;
   }
 
   if (isPs4Cd) {
-    initialDescription = PS4_DESCRIPTION_JSON;
+    descriptionTemplate = PS4_DESCRIPTION_JSON;
   }
-  const [formData, setFormData] = useState(
-    makeEmptyForm(initialDescription)
-  );
+
+  if (isPreOrder) {
+    descriptionTemplate = PREORDER_DESCRIPTION_JSON;
+  }
+  const [formData, setFormData] = useState(makeEmptyForm(!isPreOrder));
   const [descriptionError, setDescriptionError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewPayload, setPreviewPayload] = useState(null);
+  const [apiResponse, setApiResponse] = useState(null);
 
   function handleFormChange(field, value) {
     setFormData((currentFormData) => ({
@@ -178,17 +286,31 @@ export default function AddPreorderCd({ categoryName, code }) {
   }
 
   function handleReset() {
-    setFormData(makeEmptyForm(initialDescription));
+    setFormData(makeEmptyForm(!isPreOrder));
     setDescriptionError("");
     setIsSubmitting(false);
+    setPreviewPayload(null);
+    setApiResponse(null);
   }
 
   async function handleCopyDescription() {
+    const platform = isPs5Cd ? "PlayStation 5" : "PlayStation 4";
+    const prompt = isPreOrder
+      ? createPreOrderDescriptionPrompt(
+          formData.productTitle,
+          descriptionTemplate
+        )
+      : createDescriptionPrompt(
+          formData.productTitle,
+          platform,
+          descriptionTemplate
+        );
+
     try {
-      await navigator.clipboard.writeText(formData.descriptionJson);
-      alert("Description JSON copied.");
+      await navigator.clipboard.writeText(prompt);
+      alert("Description prompt copied.");
     } catch {
-      alert("Could not copy automatically. Please select and copy the JSON.");
+      alert("Could not copy the description prompt automatically.");
     }
   }
 
@@ -197,7 +319,7 @@ export default function AddPreorderCd({ categoryName, code }) {
 
     let description;
 
-    if (isGameCd) {
+    if (requiresDescription) {
       try {
         description = JSON.parse(formData.descriptionJson);
 
@@ -241,8 +363,10 @@ export default function AddPreorderCd({ categoryName, code }) {
         sell: formData.availableForSell,
         sell_max_price: maxSellPrice,
         yt_iframe: formData.youtubeIframe,
-        ...(isGameCd ? { description } : {}),
-        ...(isPreOrder ? { release_date: formData.releaseDate } : {}),
+        ...(requiresDescription ? { description } : {}),
+        ...(isPreOrder
+          ? { release_date: formatReleaseDate(formData.releaseDate) }
+          : {}),
         vendors: {
           VENDOR_001: {
             vendor_id: "yyyyyyyyyyyyyyyyyyyyyyyyyyyy",
@@ -273,23 +397,30 @@ export default function AddPreorderCd({ categoryName, code }) {
     };
 
     console.log("Generated product payload:", payload);
+    setPreviewPayload(payload);
+    setApiResponse(null);
+    toast.success("Product preview generated successfully");
+  }
 
-    // API submission is temporarily disabled while the PS4 CD and
-    // preorder payloads are being prepared.
-    // try {
-    //   setIsSubmitting(true);
-    //   const response = await addProductToInventory(payload);
-    //   toast.success(response.message || "Product added successfully!");
-    //   console.log("Inventory API response:", response);
-    // } catch (error) {
-    //   const errorMessage =
-    //     error instanceof Error
-    //       ? error.message
-    //       : "Could not add the product. Please try again.";
-    //   toast.error(errorMessage);
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+  async function handleFinalSubmit() {
+    if (!previewPayload) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await addProductToInventory(previewPayload);
+      toast.success(response?.message || "Product added successfully!");
+      console.log("Inventory API response:", response);
+      setApiResponse(response);
+      setPreviewPayload(null);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Could not add the product. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
   
   return (
@@ -421,14 +552,14 @@ export default function AddPreorderCd({ categoryName, code }) {
           />
         </div>
 
-        {isGameCd && (
+        {requiresDescription && (
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="font-semibold">Description JSON *</p>
                 <p className="mt-1 text-sm text-slate-500">
-                  Copy this JSON, update it for the new title, then paste it
-                  back here.
+                  Enter product title, copy generation prompt, then paste its
+                  JSON result here.
                 </p>
               </div>
               <button
@@ -441,6 +572,7 @@ export default function AddPreorderCd({ categoryName, code }) {
             </div>
             <textarea
               value={formData.descriptionJson}
+              placeholder={descriptionTemplate}
               onChange={(event) => {
                 handleFormChange("descriptionJson", event.target.value);
                 setDescriptionError("");
@@ -529,9 +661,38 @@ export default function AddPreorderCd({ categoryName, code }) {
             }`}
           >
             <CheckCircle2 className="h-5 w-5" />
-            {isSubmitting ? "Adding Product..." : "Add Product"}
+            Preview
           </button>
         </div>
+
+        {previewPayload ? (
+          <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+            <h3 className="text-lg font-bold text-indigo-950">Preview</h3>
+            <pre className="mt-3 max-h-[520px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-800">
+              {JSON.stringify(previewPayload, null, 2)}
+            </pre>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleFinalSubmit}
+                className="flex items-center gap-2 rounded-lg bg-green-600 px-8 py-3 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400"
+              >
+                <CheckCircle2 className="h-5 w-5" />
+                {isSubmitting ? "Adding Product..." : "Final Submit"}
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {apiResponse ? (
+          <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
+            <h3 className="text-lg font-bold text-green-800">Response</h3>
+            <pre className="mt-3 max-h-[420px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-800">
+              {JSON.stringify(apiResponse, null, 2)}
+            </pre>
+          </div>
+        ) : null}
       </form>
     </main>
   );

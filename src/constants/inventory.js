@@ -4,6 +4,7 @@ export function emptyItem() {
     price: "",
     sell_price: "",
     sku: "",
+    skuManuallyEdited: false,
     stocks: "",
     weight: "",
     rating: "",
@@ -33,20 +34,31 @@ export const categories = [
 ];
 
 export const brandMap = {
-  Cameras: ["All Brand", "Canon", "Nikon", "Panasonic", "Go Pro", "Sony"],
-  Consoles: ["Sony", "Microsoft", "Nintendo", "All Brand"],
-  Laptop: ["Dell", "HP", "Apple", "Asus", "All Brand"],
-  Laptops: ["Dell", "HP", "Apple", "Asus", "All Brand"],
-  "Smart Phones": ["Samsung", "Apple", "OnePlus", "All Brand"],
-  "Pre Orders": ["Capcom", "Rockstar Games"],
+  Cameras: [
+    "Canon",
+    "Nikon",
+    "Panasonic",
+    "Go Pro",
+    "Sony",
+    "Fujifilm",
+    "Insta360",
+  ],
+  Consoles: ["Microsoft", "Sony", "Nintendo", "Asus", "Valve"],
 };
 
 export const typeMap = {
-  Cameras: ["Mirrorless", "DSLR", "Action", "Point & Shoot"],
-  Consoles: ["PlayStation", "Xbox", "Nintendo", "PS4"],
-  Laptop: ["Ultrabook", "Gaming", "Notebook"],
-  Laptops: ["Ultrabook", "Gaming", "Notebook"],
-  "Smart Phones": ["Android Phone", "iPhone", "Feature Phone"],
-  Controllers: ["Wireless", "Wired"],
-  "Pre Orders": [],
+  Cameras: ["Mirrorless", "DSLR", "Action", "Bridge Super Zoom", "Point & Shoot"],
+  Consoles: [
+    "Xbox 360",
+    "PS4",
+    "Xbox One",
+    "Switch",
+    "PS3",
+    "ROG Ally",
+    "PS5",
+    "Xbox Series",
+    "Steam Deck",
+    "PS2",
+    "PS Vita",
+  ],
 };

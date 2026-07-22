@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { brandMap, categories, typeMap } from "@/constants/inventory";
 
 const autoSpecIdByCategory = {
@@ -28,11 +29,17 @@ function SelectChevron() {
 }
 
 export default function ProductFields({ fields, setField }) {
+  const [addingCustomType, setAddingCustomType] = useState(false);
+  const [addingCustomBrand, setAddingCustomBrand] = useState(false);
   const autoSpecId = autoSpecIdByCategory[fields.category_name] || "";
   const isSpecIdReadOnly = Boolean(autoSpecId);
   const isPreOrderCategory = fields.category_name === "Pre Orders";
   const isCdCategory =
     fields.category_name === "PS5 CDs" || fields.category_name === "PS4 CDs";
+  const showsTypeAndBrand =
+    fields.category_name === "Consoles" || fields.category_name === "Cameras";
+  const typeOptions = typeMap[fields.category_name] || [];
+  const brandOptions = brandMap[fields.category_name] || [];
 
   return (
     <>
@@ -52,6 +59,8 @@ export default function ProductFields({ fields, setField }) {
                 setField("code", sel.code);
                 setField("brand", "");
                 setField("type", "");
+                setAddingCustomType(false);
+                setAddingCustomBrand(false);
                 setField("spec_id", autoSpecIdByCategory[sel.name] || "");
               }}
             >
@@ -72,53 +81,83 @@ export default function ProductFields({ fields, setField }) {
           </div>
         </div>
 
-        {!isCdCategory ? (
+        {showsTypeAndBrand ? (
           <div>
             <label className="block text-sm font-medium mb-1">Type</label>
             <div className="relative">
               <select
-                className={`block w-full appearance-none rounded-lg border ${!fields.category_name ? "border-slate-200 bg-slate-50 text-slate-400" : "border-slate-200 bg-white text-slate-700"} px-3 py-2 pr-10 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100`}
-                value={fields.type}
-                onChange={(e) => setField("type", e.target.value)}
-                disabled={!fields.category_name}
+                className="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                value={addingCustomType ? "__other__" : fields.type}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const isOther = value === "__other__";
+                  setAddingCustomType(isOther);
+                  setField("type", isOther ? "" : value);
+                }}
               >
                 <option className="bg-white text-slate-900" value="">
                   Select type
                 </option>
-                {(typeMap[fields.category_name] || ["General"]).map((t) => (
+                {typeOptions.map((t) => (
                   <option className="bg-white text-slate-900" key={t} value={t}>
                     {t}
                   </option>
                 ))}
+                <option className="bg-white text-slate-900" value="__other__">
+                  Other
+                </option>
               </select>
               <SelectChevron />
             </div>
+            {addingCustomType ? (
+              <input
+                autoFocus
+                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                value={fields.type}
+                placeholder="Enter another type"
+                onChange={(e) => setField("type", e.target.value)}
+              />
+            ) : null}
           </div>
         ) : null}
 
-        {!isCdCategory ? (
+        {showsTypeAndBrand ? (
           <div>
             <label className="block text-sm font-medium mb-1">Brand</label>
             <div className="relative">
               <select
-                className={`block w-full appearance-none rounded-lg border ${!fields.category_name ? "border-slate-200 bg-slate-50 text-slate-400" : "border-slate-200 bg-white text-slate-700"} px-3 py-2 pr-10 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100`}
-                value={fields.brand}
-                onChange={(e) => setField("brand", e.target.value)}
-                disabled={!fields.category_name}
+                className="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                value={addingCustomBrand ? "__other__" : fields.brand}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const isOther = value === "__other__";
+                  setAddingCustomBrand(isOther);
+                  setField("brand", isOther ? "" : value);
+                }}
               >
                 <option className="bg-white text-slate-900" value="">
                   Select brand
                 </option>
-                {(brandMap[fields.category_name] || brandMap["Cameras"]).map(
-                  (b) => (
-                    <option className="bg-white text-slate-900" key={b} value={b}>
-                      {b}
-                    </option>
-                  ),
-                )}
+                {brandOptions.map((b) => (
+                  <option className="bg-white text-slate-900" key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+                <option className="bg-white text-slate-900" value="__other__">
+                  Other
+                </option>
               </select>
               <SelectChevron />
             </div>
+            {addingCustomBrand ? (
+              <input
+                autoFocus
+                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                value={fields.brand}
+                placeholder="Enter another brand"
+                onChange={(e) => setField("brand", e.target.value)}
+              />
+            ) : null}
           </div>
         ) : null}
 
@@ -129,16 +168,23 @@ export default function ProductFields({ fields, setField }) {
           <select
             className="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             value={fields.condition}
+            required
             onChange={(e) => setField("condition", e.target.value)}
           >
-            <option className="bg-white text-slate-900" value="pre-Owned">
+            <option className="bg-white text-slate-900" value="">
+              Select condition
+            </option>
+            <option className="bg-white text-slate-900" value="Pre Owned">
               Pre Owned
             </option>
-            <option className="bg-white text-slate-900" value="open-box">
+            <option className="bg-white text-slate-900" value="Open Box">
               Open Box
             </option>
-            <option className="bg-white text-slate-900" value="pre-order">
+            <option className="bg-white text-slate-900" value="Pre Order">
               Pre Order
+            </option>
+            <option className="bg-white text-slate-900" value="New">
+              New
             </option>
           </select>
         </div>

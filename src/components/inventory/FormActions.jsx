@@ -6,7 +6,7 @@ export default function FormActions({ sending, onReset }) {
         disabled={sending}
         className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 font-semibold text-white shadow-lg shadow-cyan-200/70 hover:from-cyan-400 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {sending ? "Sending..." : "Submit"}
+        {sending ? "Working..." : "Preview"}
       </button>
       <button
         type="button"

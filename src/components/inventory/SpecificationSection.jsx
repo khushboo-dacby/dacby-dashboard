@@ -1,3 +1,5 @@
+import CombinationEditor from "@/components/inventory/CombinationEditor";
+
 export default function SpecificationSection({
   specification,
   addColorCode,
@@ -13,6 +15,8 @@ export default function SpecificationSection({
   updateOptionDescriptionForValue,
   updateAttributeDefinitionInput,
   addAttributeDefinitionValue,
+  updateCombinations,
+  addCombinationsFromAttributes,
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -197,6 +201,12 @@ export default function SpecificationSection({
           </div>
         </div>
       </div>
+
+      <CombinationEditor
+        combinations={specification.combinations || []}
+        onChange={updateCombinations}
+        onGenerateFromAttributes={addCombinationsFromAttributes}
+      />
     </div>
   );
 }

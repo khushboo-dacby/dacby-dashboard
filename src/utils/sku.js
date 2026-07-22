@@ -14,6 +14,139 @@ function slugify(s) {
     .replace(/(^-|-$)/g, "");
 }
 
+function makeSkuPart(value) {
+  if (!value) return "";
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getSelectedAttribute(attributes, possibleNames) {
+  const entries = Object.entries(attributes || {});
+  for (const possibleName of possibleNames) {
+    const normalizedName = normalizeAttributeKey(possibleName).replaceAll("_", "");
+    const match = entries.find(
+      ([key]) => normalizeAttributeKey(key).replaceAll("_", "") === normalizedName,
+    );
+    if (match) return match[1];
+  }
+  return "";
+}
+
+function getAddVariantPhysicalCondition(value) {
+  const condition = String(value || "").trim().toLowerCase();
+  if (condition.includes("very light mark")) return "no-visible-mark";
+  if (condition.includes("light mark")) return "visible-mark";
+  return makeSkuPart(value);
+}
+
+function getAddVariantBatteryLevel(value) {
+  const batteryHealth = String(value || "").trim().toLowerCase();
+  if (
+    (batteryHealth.includes("90") && batteryHealth.includes("100")) ||
+    (batteryHealth.includes("85") && batteryHealth.includes("100"))
+  ) {
+    return "high";
+  }
+  if (
+    (batteryHealth.includes("80") && batteryHealth.includes("89")) ||
+    (batteryHealth.includes("75") && batteryHealth.includes("84"))
+  ) {
+    return "low";
+  }
+  return makeSkuPart(value);
+}
+
+function getAddVariantShutterLevel(value) {
+  const shutterCount = String(value || "").trim().toLowerCase();
+  if (shutterCount.includes("less than 10k")) return "low";
+  if (shutterCount.includes("10k") && shutterCount.includes("1l")) {
+    return "medium";
+  }
+  if (shutterCount.includes("above 1l")) return "high";
+  return makeSkuPart(value);
+}
+
+function generateCategorySku(specId, attributes, categoryName, categoryCode) {
+  const parts = [makeSkuPart(specId)];
+  const storage = getSelectedAttribute(attributes, ["storage"]);
+  const ram = getSelectedAttribute(attributes, ["ram"]);
+  const color = getSelectedAttribute(attributes, ["color"]);
+  const physicalCondition = getSelectedAttribute(attributes, [
+    "physical_condition",
+    "physicalCondition",
+  ]);
+  const batteryHealth = getSelectedAttribute(attributes, [
+    "battery_health",
+    "batteryHealth",
+    "battery",
+  ]);
+  const shutterCount = getSelectedAttribute(attributes, [
+    "shutter_count",
+    "shutterCount",
+    "shuttle_count",
+    "shuttleCount",
+  ]);
+  const add = (value) => {
+    const part = makeSkuPart(value);
+    if (part) parts.push(part);
+  };
+
+  if (categoryCode === "D004Y" || categoryName === "Consoles") {
+    add(storage);
+    add(color);
+  } else if (categoryCode === "D018Y" || categoryName === "Laptops") {
+    add(storage);
+    add(ram);
+    add(getAddVariantPhysicalCondition(physicalCondition));
+    add(color);
+    add(getAddVariantBatteryLevel(batteryHealth));
+  } else if (
+    categoryCode === "D014Y" ||
+    categoryName === "Cameras" ||
+    categoryName === "Camera"
+  ) {
+    add(color);
+    add(getAddVariantShutterLevel(shutterCount));
+  } else if (categoryCode === "D019Y" || categoryName === "Smartphones") {
+    add(storage);
+    const reservedSmartphoneKeys = new Set([
+      "storage",
+      "battery_health",
+      "batteryhealth",
+      "battery",
+      "physical_condition",
+      "physicalcondition",
+      "color",
+    ]);
+    Object.entries(attributes || {}).forEach(([key, value]) => {
+      const normalizedKey = normalizeAttributeKey(key);
+      const compactKey = normalizedKey.replaceAll("_", "");
+      if (
+        reservedSmartphoneKeys.has(normalizedKey) ||
+        reservedSmartphoneKeys.has(compactKey)
+      ) {
+        return;
+      }
+      add(value);
+    });
+    add(getAddVariantBatteryLevel(batteryHealth));
+    add(physicalCondition);
+    add(color);
+  } else if (["D005Y", "D015Y", "D020Y", "D021Y"].includes(categoryCode)) {
+    add(color);
+  } else if (["D009Y", "D006Y"].includes(categoryCode)) {
+    add(storage);
+    add(color);
+  } else {
+    Object.values(attributes || {}).forEach(add);
+  }
+
+  return parts.filter(Boolean).join("-");
+}
+
 function getAttributeNumericScore(value) {
   const numbers = String(value || "").match(/\d+(\.\d+)?/g);
   if (!numbers || !numbers.length) return null;
@@ -112,7 +245,21 @@ function getSkuValueForKey(key, value, attributeDefinitions = []) {
   return value;
 }
 
-export function generateSKUForItem(specId, item, attributeDefinitions = []) {
+export function generateSKUForItem(
+  specId,
+  item,
+  attributeDefinitions = [],
+  product = {},
+) {
+  if (product.categoryName || product.categoryCode) {
+    return generateCategorySku(
+      specId,
+      item.attributes || {},
+      product.categoryName,
+      product.categoryCode,
+    );
+  }
+
   const parts = [];
   if (specId) parts.push(slugify(specId));
 
