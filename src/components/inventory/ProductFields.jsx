@@ -28,6 +28,26 @@ function SelectChevron() {
   );
 }
 
+function getYouTubeEmbedUrl(iframeCode) {
+  const sourceMatch = String(iframeCode || "").match(/src=["']([^"']+)["']/i);
+  if (!sourceMatch) return "";
+
+  try {
+    const url = new URL(sourceMatch[1]);
+    const allowedHosts = [
+      "youtube.com",
+      "www.youtube.com",
+      "youtube-nocookie.com",
+      "www.youtube-nocookie.com",
+    ];
+    return url.protocol === "https:" && allowedHosts.includes(url.hostname)
+      ? url.toString()
+      : "";
+  } catch {
+    return "";
+  }
+}
+
 export default function ProductFields({ fields, setField }) {
   const [addingCustomType, setAddingCustomType] = useState(false);
   const [addingCustomBrand, setAddingCustomBrand] = useState(false);
@@ -40,6 +60,7 @@ export default function ProductFields({ fields, setField }) {
     fields.category_name === "Consoles" || fields.category_name === "Cameras";
   const typeOptions = typeMap[fields.category_name] || [];
   const brandOptions = brandMap[fields.category_name] || [];
+  const youtubePreviewUrl = getYouTubeEmbedUrl(fields.yt_iframe);
 
   return (
     <>
@@ -271,7 +292,7 @@ export default function ProductFields({ fields, setField }) {
 
       <div className="rounded-xl border border-slate-200 bg-white p-4">
         <label className="block text-sm font-medium mb-1">
-          YouTube Iframe (optional)
+          YouTube Iframe
         </label>
         <textarea
           rows={3}
@@ -279,6 +300,18 @@ export default function ProductFields({ fields, setField }) {
           value={fields.yt_iframe}
           onChange={(e) => setField("yt_iframe", e.target.value)}
         />
+        {youtubePreviewUrl && (
+          <div className="mt-4 w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+            <iframe
+              src={youtubePreviewUrl}
+              title="Global product video preview"
+              className="aspect-video w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        )}
       </div>
 
     </>

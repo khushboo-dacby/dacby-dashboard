@@ -1,0 +1,154 @@
+{
+    "inventory": [
+        {
+            "id": "0Pp20Nrh4xtSEe6NZJad",
+            "spec_id": "ps5-cds",
+            "product_title": "007 First Light",
+            "code": "D001Y",
+            "category_name": "PS5 CDs",
+            "condition": "Pre Owned",
+            "mrp": 6999,
+            "sell": true,
+            "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/J4qY9DYE184?si=Rzs8K9GBtP0BfCqD\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+            "created_at": {
+                "_seconds": 1782806047,
+                "_nanoseconds": 323000000
+            },
+            "price": 6399,
+            "sell_max_price": 4600,
+            "updated_at": {
+                "_seconds": 1784812682,
+                "_nanoseconds": 436000000
+            },
+            "in_stock": true,
+            "vendors": {
+                "VENDOR_001": {
+                    "vendor_id": "VENDOR_001",
+                    "name": "Dacby Technologies Pvt. Ltd.",
+                    "vendor_note": "",
+                    "combination_offered": {
+                        "combination_1": {
+                            "item_1": {
+                                "sell": true,
+                                "sku": "007-first-light-ps5-cds",
+                                "weight": 0.1,
+                                "mrp": 6999,
+                                "rating": 0,
+                                "rating_count": 0,
+                                "yt_iframe": "",
+                                "images": [
+                                    "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FPre%20Order%2F007%20First%20Light%20PS5%2FFL11_2040x2040.png?alt=media&token=241a322a-5458-4bf7-a58f-dfa0cf44a392&width=300"
+                                ],
+                                "sell_price": 4600,
+                                "price": 6399,
+                                "stocks": 1
+                            }
+                        }
+                    }
+                }
+            },
+            "extra_coins": 300,
+            "outofstock": false
+        },
+        {
+            "id": "uxcpTiCvNOsOo1hGpLAq",
+            "category_name": "PC Components",
+            "code": "D009Y",
+            "condition": "Pre Owned",
+            "mrp": 149999,
+            "sell": false,
+            "sell_max_price": 15500,
+            "spec_id": "asus-rog-ga35-g35dx-in016t",
+            "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/gJSLJ0RCk9M?si=-ZBPYPGcFuAUiBGf\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+            "created_at": {
+                "_seconds": 1763388696,
+                "_nanoseconds": 229000000
+            },
+            "in_stock": true,
+            "product_title": "ASUS ROG GA35 G35DX-IN016T Gaming CPU",
+            "price": 99999,
+            "updated_at": {
+                "_seconds": 1765545660,
+                "_nanoseconds": 720000000
+            },
+            "rating": 4.8,
+            "rating_count": 125,
+            "vendors": {
+                "VENDOR_001": {
+                    "name": "Dacby Technologies Pvt. Ltd.",
+                    "ratings": 4.7,
+                    "total_sales": 500,
+                    "vendor_id": "",
+                    "vendor_note": "",
+                    "combination_offered": {
+                        "combination_1": {
+                            "item1": {
+                                "mrp": 149999,
+                                "sku": "asus-rog-ga35-g35dx-in016t-star-black",
+                                "color": "Star Black",
+                                "sell": false,
+                                "sell_price": 15500,
+                                "stocks": 1,
+                                "images": [
+                                    "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FGaming%20PCs%2FASUS%20ROG%20GA35%20G35DX-IN016T%2FGA3511_2040x2040.png?alt=media&token=52658682-1957-4999-903f-2a909e0a8c15&width=300"
+                                ],
+                                "rating": 4.2,
+                                "rating_count": 147,
+                                "price": 99999,
+                                "weight": 1
+                            }
+                        }
+                    }
+                }
+            },
+            "extra_coins": 0,
+            "outofstock": false
+        },
+        {
+            "id": "SPvChbxvWItGTsG7mvqD",
+            "category_name": "Pre Orders",
+            "code": "D003Y",
+            "condition": "Pre Order",
+            "mrp": 5999,
+            "price": 5899,
+            "product_title": "Ace Combat 8: Wings of Theve - PS5",
+            "sell": false,
+            "sell_max_price": 100,
+            "spec_id": "pre-order",
+            "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/c2bgoQhlzqE?si=NLCp6NT4gsk_vryP&amp;start=10\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+            "release_date": "2nd October 2026",
+            "created_at": {
+                "_seconds": 1781617459,
+                "_nanoseconds": 175000000
+            },
+            "in_stock": true,
+            "vendors": {
+                "VENDOR_001": {
+                    "combination_offered": {
+                        "combination_1": {
+                            "item1": {
+                                "images": [
+                                    "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/1%20NEW%20WEBSITE%20LISTING%2FPS5%20CDS%2FMarvels%20Wolverine%20PS5%2Face1.png?alt=media&token=be0d11d8-9de4-407c-b9c2-8475bb1d4b9d&width=300"
+                                ],
+                                "mrp": 5999,
+                                "price": 5899,
+                                "weight": 0.1,
+                                "sku": "ace-combat-8:-wings-of-theve---ps5-pre-order",
+                                "sell": false,
+                                "sell_price": 100,
+                                "stocks": 20
+                            }
+                        }
+                    },
+                    "name": "Dacby Technologies Pvt. Ltd.",
+                    "ratings": 4.7,
+                    "total_sales": 500,
+                    "vendor_id": "",
+                    "vendor_note": ""
+                }
+            },
+            "extra_coins": 0,
+            "outofstock": false
+        }
+    ]
+}

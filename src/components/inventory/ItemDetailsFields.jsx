@@ -1,3 +1,7 @@
+"use client";
+
+import ImagePreview from "./ImagePreview";
+
 export default function ItemDetailsFields({
   item,
   vendorIndex,
@@ -5,6 +9,16 @@ export default function ItemDetailsFields({
   specId,
   updateItem,
 }) {
+  const imageUrls = Array.isArray(item.images) ? item.images.slice(0, 4) : [];
+
+  function updateImageUrl(imageIndex, value) {
+    const nextImageUrls = Array.from({ length: 4 }, (_, index) =>
+      index === imageIndex ? value : imageUrls[index] || "",
+    );
+
+    updateItem(vendorIndex, itemIndex, "images", nextImageUrls);
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -104,17 +118,28 @@ export default function ItemDetailsFields({
         />
       </div>
       <div className="mt-2">
-        <label className="block text-sm mb-1">
-          Item Images (one URL per line)
-        </label>
-        <textarea
-          rows={2}
-          className="w-full border rounded p-2"
-          value={item.imagesText}
-          onChange={(e) =>
-            updateItem(vendorIndex, itemIndex, "imagesText", e.target.value)
-          }
-        />
+        <p className="mb-1 block text-sm">Item Images</p>
+        <ImagePreview imageUrls={imageUrls} />
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {Array.from({ length: 4 }, (_, imageIndex) => (
+            <div key={imageIndex} className="min-w-0">
+              <label
+                className="mb-1 block text-xs text-slate-600"
+                htmlFor={`item-${vendorIndex}-${itemIndex}-image-${imageIndex + 1}`}
+              >
+                Image {imageIndex + 1} URL
+              </label>
+              <input
+                id={`item-${vendorIndex}-${itemIndex}-image-${imageIndex + 1}`}
+                type="url"
+                className="w-full min-w-0 rounded border px-3 py-2"
+                value={imageUrls[imageIndex] || ""}
+                onChange={(e) => updateImageUrl(imageIndex, e.target.value)}
+                placeholder={`Image ${imageIndex + 1} URL`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

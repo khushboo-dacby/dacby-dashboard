@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import ImagePreview from "@/components/inventory/ImagePreview";
 import { toast } from "sonner";
 import {
   addCombinationItem,
@@ -1208,6 +1209,14 @@ function ProductVariantForm({
           <p className="mb-3 font-semibold text-gray-800">
             Product Images (URLs)
           </p>
+          <ImagePreview
+            imageUrls={[
+              formData.image1,
+              formData.image2,
+              formData.image3,
+              formData.image4,
+            ]}
+          />
           <div className="grid gap-5 md:grid-cols-2">
             {["image1", "image2", "image3", "image4"].map(
               (field, index) => (

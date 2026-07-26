@@ -10,7 +10,7 @@ export function emptyItem() {
     rating: "",
     rating_count: "",
     yt_iframe: "",
-    imagesText: "",
+    images: [],
     combination_name: "",
     attributes: {},
     sell: false,

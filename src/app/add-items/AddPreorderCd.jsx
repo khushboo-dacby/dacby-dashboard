@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Copy, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import { addProductToInventory } from "@/app/apis/api";
+import ImagePreview from "@/components/inventory/ImagePreview";
 
 const PS5_DESCRIPTION_TEMPLATE = {
   Packaging: "Pre-Owned Game Case",
@@ -34,8 +35,7 @@ const PS5_DESCRIPTION_TEMPLATE = {
       "Uncover secrets of the Spiral and survive a haunting journey through a terrifying world.",
     ],
   },
-  summary:
-    "Looking for the best price on a high quality pre-owned copy of Little Nightmares III for PlayStation 5? Buy Little Nightmares III PS5 pre-owned game CD online in India from DACBY, your trusted destination for genuine used PlayStation 5 games, second hand PS5 Blu-ray discs, and affordable gaming titles. Published by Bandai Namco Entertainment, Little Nightmares III takes players on a chilling adventure through the mysterious Spiral, a world filled with frightening locations, strange inhabitants, and unsettling dangers. Play as Low and Alone, two friends searching for a path to freedom while surviving terrifying encounters and solving challenging puzzles. Explore haunting environments, uncover hidden secrets, overcome deadly traps, and experience a unique blend of horror, platforming, exploration, and puzzle solving. Optimized for PlayStation 5, Little Nightmares III delivers atmospheric visuals, immersive sound design, responsive gameplay, and a captivating horror adventure designed for modern hardware.\n\nWhen you choose to buy a pre-owned Little Nightmares III PS5 game disc online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 5 game sold through DACBY is thoroughly inspected, tested for functionality, and verified for authenticity before being listed for sale. DACBY provides secure payment options, competitive pricing, reliable customer support, and fast shipping. Whether you are a fan of horror games, puzzle platformers, atmospheric adventures, or simply looking for an affordable way to enjoy one of the most anticipated PlayStation 5 releases, DACBY is your trusted online destination for buying used PS5 game CDs, pre-owned PlayStation 5 Blu-ray discs, adventure games, and premium gaming products at great prices.",
+  "summary": "Looking for the best price on a high quality pre-owned copy of Invincible VS for PlayStation 5? Buy Invincible VS PS5 pre-owned game CD online from DACBY, your trusted destination for genuine used PlayStation 5 games, original PS5 Blu-ray discs, second hand PlayStation 5 games, refurbished gaming products, and affordable console games. Published by Skybound Games, Invincible VS is an explosive 3 vs 3 tag team fighting game set in the acclaimed Invincible universe, bringing together iconic heroes and villains from the popular comic series and animated show. Build your ultimate team, execute devastating combos, unleash cinematic Super Moves, experience an original story, and battle across exciting game modes with fast paced competitive gameplay. Fully compatible with PlayStation 5, Invincible VS delivers stunning visuals, responsive controls, immersive audio, smooth performance, and an action packed superhero fighting experience for both casual players and competitive fighting game fans.\n\nWhether you are looking to buy Invincible VS PS5 online, expand your PlayStation 5 game collection, or enjoy an affordable superhero fighting game, this title offers exceptional replay value through online multiplayer, strategic tag team combat, advanced combo mechanics, and intense competitive matches. Perfect for collectors, fans of the Invincible franchise, comic book enthusiasts, and players who enjoy competitive fighting games, Invincible VS combines accessible gameplay with deep combat systems that reward skill, teamwork, timing, and strategy. A pre-owned Invincible VS PS5 game disc lets you experience premium PlayStation 5 gaming at a great value while owning an original physical Blu-ray disc.\n\nWhen you choose to buy a pre-owned Invincible VS PS5 game CD online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 5 game sold through DACBY is thoroughly inspected, professionally tested for functionality, cleaned, verified for authenticity, and carefully checked to ensure it is in excellent working condition before being listed for sale. DACBY offers competitive pricing, secure payment options, fast shipping, reliable customer support, and a seamless online shopping experience. Whether you are searching for used PS5 game CDs, second hand PlayStation 5 games, genuine Invincible VS PS5 Blu-ray discs, affordable PS5 fighting games, original PlayStation game discs, or trusted pre-owned gaming products, DACBY is your reliable destination for premium quality gaming products at exceptional value."
 };
 
 const PS5_DESCRIPTION_JSON = JSON.stringify(PS5_DESCRIPTION_TEMPLATE, null, 2);
@@ -60,8 +60,8 @@ const PS4_DESCRIPTION_TEMPLATE = {
       "Uncover secrets of the Spiral and survive a haunting journey through a terrifying world.",
     ],
   },
-  summary:
-    "Looking for the best price on a high quality pre-owned copy of Little Nightmares III for PlayStation 4? Buy Little Nightmares III PS4 pre-owned game CD online in India from DACBY, your trusted destination for genuine used PlayStation 4 games, second hand PS4 Blu-ray discs, and affordable gaming titles. Published by Bandai Namco Entertainment, Little Nightmares III takes players on a chilling adventure through the mysterious Spiral, a world filled with frightening locations, strange inhabitants, and unsettling dangers. Play as Low and Alone, two friends searching for a path to freedom while surviving terrifying encounters and solving challenging puzzles. Explore haunting environments, uncover hidden secrets, overcome deadly traps, and experience a unique blend of horror, platforming, exploration, and puzzle solving. Optimized for PlayStation 4, Little Nightmares III delivers atmospheric visuals, immersive sound design, responsive gameplay, and a captivating horror adventure for console players.\n\nWhen you choose to buy a pre-owned Little Nightmares III PS4 game disc online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 4 game sold through DACBY is thoroughly inspected, tested for functionality, and verified for authenticity before being listed for sale. DACBY provides secure payment options, competitive pricing, reliable customer support, and fast shipping. Whether you are a fan of horror games, puzzle platformers, atmospheric adventures, or simply looking for an affordable way to enjoy one of the most anticipated PlayStation releases, DACBY is your trusted online destination for buying used PS4 game CDs, pre-owned PlayStation 4 Blu-ray discs, adventure games, and premium gaming products at great prices.",
+  "summary": "Looking for the best price on a high quality pre-owned copy of Invincible VS for PlayStation 4? Buy Invincible VS PS4 pre-owned game CD online from DACBY, your trusted destination for genuine used PlayStation 4 games, original PS4 Blu-ray discs, second hand PlayStation 4 games, refurbished gaming products, and affordable console games. Published by Skybound Games, Invincible VS is an explosive 3 vs 3 tag team fighting game set in the acclaimed Invincible universe, bringing together iconic heroes and villains from the popular comic series and animated show. Build your ultimate team, execute devastating combos, unleash cinematic Super Moves, experience an original story, and battle across exciting game modes with fast paced competitive gameplay. Fully compatible with PlayStation 4, Invincible VS delivers stunning visuals, responsive controls, immersive audio, smooth performance, and an action packed superhero fighting experience for both casual players and competitive fighting game fans.\n\nWhether you are looking to buy Invincible VS PS4 online, expand your PlayStation 4 game collection, or enjoy an affordable superhero fighting game, this title offers exceptional replay value through online multiplayer, strategic tag team combat, advanced combo mechanics, and intense competitive matches. Perfect for collectors, fans of the Invincible franchise, comic book enthusiasts, and players who enjoy competitive fighting games, Invincible VS combines accessible gameplay with deep combat systems that reward skill, teamwork, timing, and strategy. A pre-owned Invincible VS PS4 game disc lets you experience premium PlayStation 4 gaming at a great value while owning an original physical Blu-ray disc.\n\nWhen you choose to buy a pre-owned Invincible VS PS4 game CD online at DACBY, you can shop with complete confidence and peace of mind. Every pre-owned PlayStation 4 game sold through DACBY is thoroughly inspected, professionally tested for functionality, cleaned, verified for authenticity, and carefully checked to ensure it is in excellent working condition before being listed for sale. DACBY offers competitive pricing, secure payment options, fast shipping, reliable customer support, and a seamless online shopping experience. Whether you are searching for used PS4 game CDs, second hand PlayStation 4 games, genuine Invincible VS PS4 Blu-ray discs, affordable PS4 fighting games, original PlayStation game discs, or trusted pre-owned gaming products, DACBY is your reliable destination for premium quality gaming products at exceptional value."
+
 };
 
 const PS4_DESCRIPTION_JSON = JSON.stringify(PS4_DESCRIPTION_TEMPLATE, null, 2);
@@ -238,6 +238,28 @@ function makeEmptyForm(availableForSell = true) {
   };
 }
 
+function getYouTubeEmbedUrl(embedCode) {
+  const value = String(embedCode || "").trim();
+  const sourceMatch = value.match(/src=["']([^"']+)["']/i);
+  const possibleUrl = sourceMatch?.[1] || value;
+
+  try {
+    const url = new URL(possibleUrl);
+    const allowedHosts = [
+      "youtube.com",
+      "www.youtube.com",
+      "youtube-nocookie.com",
+      "www.youtube-nocookie.com",
+    ];
+
+    return url.protocol === "https:" && allowedHosts.includes(url.hostname)
+      ? url.toString()
+      : "";
+  } catch {
+    return "";
+  }
+}
+
 export default function AddPreorderCd({ categoryName, code }) {
   const router = useRouter();
   const categorySettings = getCategorySettings(code);
@@ -263,7 +285,7 @@ export default function AddPreorderCd({ categoryName, code }) {
   const [descriptionError, setDescriptionError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewPayload, setPreviewPayload] = useState(null);
-  const [apiResponse, setApiResponse] = useState(null);
+  const youtubePreviewUrl = getYouTubeEmbedUrl(formData.youtubeIframe);
 
   function handleFormChange(field, value) {
     setFormData((currentFormData) => ({
@@ -290,7 +312,6 @@ export default function AddPreorderCd({ categoryName, code }) {
     setDescriptionError("");
     setIsSubmitting(false);
     setPreviewPayload(null);
-    setApiResponse(null);
   }
 
   async function handleCopyDescription() {
@@ -398,7 +419,6 @@ export default function AddPreorderCd({ categoryName, code }) {
 
     console.log("Generated product payload:", payload);
     setPreviewPayload(payload);
-    setApiResponse(null);
     toast.success("Product preview generated successfully");
   }
 
@@ -410,7 +430,8 @@ export default function AddPreorderCd({ categoryName, code }) {
       const response = await addProductToInventory(previewPayload);
       toast.success(response?.message || "Product added successfully!");
       console.log("Inventory API response:", response);
-      setApiResponse(response);
+      setFormData(makeEmptyForm(!isPreOrder));
+      setDescriptionError("");
       setPreviewPayload(null);
     } catch (error) {
       const errorMessage =
@@ -595,6 +616,14 @@ export default function AddPreorderCd({ categoryName, code }) {
 
         <div>
           <p className="mb-3 font-semibold">Product Images (URLs)</p>
+          <ImagePreview
+            imageUrls={[
+              formData.image1,
+              formData.image2,
+              formData.image3,
+              formData.image4,
+            ]}
+          />
           <div className="grid gap-5 md:grid-cols-2">
             {["image1", "image2", "image3", "image4"].map((field, index) => (
               <FormField
@@ -632,6 +661,18 @@ export default function AddPreorderCd({ categoryName, code }) {
             rows={3}
             className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-indigo-700"
           />
+          {youtubePreviewUrl && (
+            <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+              <iframe
+                src={youtubePreviewUrl}
+                title="YouTube video preview"
+                className="aspect-video w-full max-w-3xl"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6">
@@ -685,14 +726,6 @@ export default function AddPreorderCd({ categoryName, code }) {
           </div>
         ) : null}
 
-        {apiResponse ? (
-          <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
-            <h3 className="text-lg font-bold text-green-800">Response</h3>
-            <pre className="mt-3 max-h-[420px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-800">
-              {JSON.stringify(apiResponse, null, 2)}
-            </pre>
-          </div>
-        ) : null}
       </form>
     </main>
   );

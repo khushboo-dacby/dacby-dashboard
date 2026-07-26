@@ -1,26 +1,17 @@
-import ItemDetailsFields from "@/components/inventory/ItemDetailsFields";
-import VariantAttributeDefinitionsFields from "@/components/inventory/VariantAttributeDefinitionsFields";
 import VendorDetailsFields from "@/components/inventory/VendorDetailsFields";
+import CombinationVariantsTable from "@/components/inventory/CombinationVariantsTable";
+import { Info } from "lucide-react";
 
 export default function VendorsSection({
   vendors,
   specification,
-  specId,
   addVendor,
   updateVendor,
   removeVendor,
-  addItemToVendor,
-  removeItem,
-  updateItem,
-  updateItemAttribute,
-  addSpecificationValueFromItem,
-  addColorCodeFromVariant,
-  addValueToCombination,
-  updateItemAttributeKey,
-  finalizeItemAttributeKey,
-  saveItemAttributeValue,
-  removeItemAttribute,
-  addItemAttribute,
+  fields,
+  sharedImagesByColor,
+  confirmedImageColors,
+  onSaveVariant,
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -51,52 +42,36 @@ export default function VendorsSection({
               <div className="mb-3">
                 <h4 className="font-medium text-slate-900">Items / Variants</h4>
               </div>
-              <div className="space-y-3">
-                {vendor.items.map((item, itemIndex) => (
-                  <div
-                    key={itemIndex}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-                  >
-                    <div className="grid grid-cols-1 gap-2">
-                      <VariantAttributeDefinitionsFields
-                        item={item}
-                        vendorIndex={vendorIndex}
-                        itemIndex={itemIndex}
-                        specification={specification}
-                        updateItem={updateItem}
-                        updateItemAttribute={updateItemAttribute}
-                        addValueToCombination={addValueToCombination}
-                      />
-
-                      <ItemDetailsFields
-                        item={item}
-                        vendorIndex={vendorIndex}
-                        itemIndex={itemIndex}
-                        specId={specId}
-                        updateItem={updateItem}
-                      />
+              {(specification.combinations || []).length > 0 ? (
+                <CombinationVariantsTable
+                  vendorIndex={vendorIndex}
+                  items={vendor.items}
+                  specification={specification}
+                  fields={fields}
+                  sharedImagesByColor={sharedImagesByColor}
+                  confirmedImageColors={confirmedImageColors}
+                  onSaveVariant={onSaveVariant}
+                />
+              ) : (
+                <div className="mt-4 rounded-xl border border-dashed border-amber-300 bg-amber-50 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-full bg-amber-100 p-2 text-amber-700">
+                      <Info className="h-5 w-5" />
                     </div>
-                    <div className="mt-2 text-right">
-                      <button
-                        type="button"
-                        className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
-                        onClick={() => removeItem(vendorIndex, itemIndex)}
-                      >
-                        Remove Item
-                      </button>
+                    <div>
+                      <h5 className="font-semibold text-amber-950">Create combinations before adding variants</h5>
+                      <p className="mt-1 text-sm text-amber-800">
+                        Variant forms open from the generated combinations table.
+                      </p>
+                      <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-amber-900">
+                        <li>Go to Specification and add attribute names with their values.</li>
+                        <li>Click Generate from Attributes in the Combinations section.</li>
+                        <li>Return here and click Add Variant on each combination row.</li>
+                      </ol>
                     </div>
                   </div>
-                ))}
-              </div>
-              <div className="mt-4 text-right">
-                <button
-                  type="button"
-                  className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50"
-                  onClick={() => addItemToVendor(vendorIndex)}
-                >
-                  + Add Item
-                </button>
-              </div>
+                </div>
+              )}
             </div>
           </div>
         ))}

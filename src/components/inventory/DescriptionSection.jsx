@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Eye } from "lucide-react";
+import DescriptionPreviewModal from "@/components/description-preview/DescriptionPreviewModal";
 
 const editorStyle =
   "min-h-[500px] w-full rounded-xl border border-slate-300 bg-slate-950 p-4 font-mono text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400";
@@ -240,6 +242,12 @@ export default function DescriptionSection({
   const [jsonText, setJsonText] = useState(() => createDescriptionJson(description));
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const jsonChangeTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => window.clearTimeout(jsonChangeTimeoutRef.current);
+  }, []);
 
   function handleModeChange(nextMode) {
     if (nextMode === "json") {
@@ -250,41 +258,51 @@ export default function DescriptionSection({
     setMode(nextMode);
   }
 
-  function handleFormatJson() {
-    const parsedResult = parseJsonWithLocation(jsonText);
-    if (parsedResult.error) {
-      setMessage(parsedResult.error);
-      setMessageType("error");
-      return;
-    }
-    setJsonText(createDescriptionJson(parsedResult.parsed));
-    setMessage("JSON formatted successfully.");
-    setMessageType("success");
-  }
+  function handleJsonChange(nextJsonText) {
+    setJsonText(nextJsonText);
+    setMessage(null);
+    setMessageType("");
+    window.clearTimeout(jsonChangeTimeoutRef.current);
 
-  function handleImportJson() {
-    const parsedResult = parseJsonWithLocation(jsonText);
-    if (parsedResult.error) {
-      setMessage(parsedResult.error);
-      setMessageType("error");
-      return;
-    }
-    if (!parsedResult.parsed || typeof parsedResult.parsed !== "object" || Array.isArray(parsedResult.parsed)) {
-      setMessage("Imported JSON must be an object at the top level.");
-      setMessageType("error");
-      return;
-    }
+    jsonChangeTimeoutRef.current = window.setTimeout(() => {
+      const parsedResult = parseJsonWithLocation(nextJsonText);
+      if (parsedResult.error) {
+        setMessage(parsedResult.error);
+        setMessageType("error");
+        return;
+      }
+      if (
+        !parsedResult.parsed ||
+        typeof parsedResult.parsed !== "object" ||
+        Array.isArray(parsedResult.parsed)
+      ) {
+        setMessage("Description JSON must be an object at the top level.");
+        setMessageType("error");
+        return;
+      }
 
-    const transformedDescription = convertDescriptionObjectToFormState(parsedResult.parsed);
-    resetDescription(transformedDescription);
-    setJsonText(createDescriptionJson(transformedDescription));
-    setMessage("Description imported successfully.");
-    setMessageType("success");
+      const transformedDescription = convertDescriptionObjectToFormState(
+        parsedResult.parsed
+      );
+      resetDescription(transformedDescription);
+      setJsonText(createDescriptionJson(transformedDescription));
+      setMessage("JSON imported and formatted automatically.");
+      setMessageType("success");
+    }, 600);
   }
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <h3 className="text-lg font-semibold text-slate-950">Description</h3>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-lg font-semibold text-slate-950">Description</h3>
+        <button
+          type="button"
+          onClick={() => setShowPreview(true)}
+          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-100"
+        >
+          <Eye className="h-4 w-4" /> Preview
+        </button>
+      </div>
       <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -480,29 +498,9 @@ export default function DescriptionSection({
               <textarea
                 className={editorStyle}
                 value={jsonText}
-                onChange={(e) => {
-                  setJsonText(e.target.value);
-                  setMessage(null);
-                  setMessageType("");
-                }}
+                onChange={(e) => handleJsonChange(e.target.value)}
                 spellCheck={false}
               />
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                className="rounded-lg border border-cyan-200 bg-cyan-500 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-600"
-                onClick={handleImportJson}
-              >
-                Import JSON
-              </button>
-              <button
-                type="button"
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                onClick={handleFormatJson}
-              >
-                Format JSON
-              </button>
             </div>
             {message && (
               <div
@@ -518,6 +516,12 @@ export default function DescriptionSection({
           </>
         )}
       </div>
+      {showPreview && (
+        <DescriptionPreviewModal
+          description={serializeDescriptionState(description)}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </div>
   );
 }

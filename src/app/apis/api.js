@@ -9,6 +9,89 @@ const GET_PRODUCT_DETAIL = `${BASE_URL}/getproductdetails`;
 const UPDATE_COMBINATION = `${BASE_URL}/api/specifications/update-combination`;
 const ADD_COMBINATION_ITEM = `${BASE_URL}/api/inventory/add-combination-item`;
 const ADD_SPECIAL_EDITION = `${BASE_URL}/api/inventory/add-special-edition`;
+const FETCH_INVENTORY = `${BASE_URL}/fetchInventory`;
+
+export async function deleteProduct(productId) {
+  const url = `${BASE_URL}/api/inventory/${productId}`;
+
+  try {
+    const { data } = await axios.delete(url);
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to delete product");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to delete product");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to delete product";
+    throw new Error(message);
+  }
+}
+
+export async function updateSkuImages(productId, sku, images) {
+  const url = `${BASE_URL}/api/inventory/${productId}/skus/${sku}/images`;
+
+  try {
+    const { data } = await axios.patch(
+      url,
+      { images },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to update SKU images");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to update SKU images");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to update SKU images";
+    throw new Error(message);
+  }
+}
+
+export async function fetchInventory(payload = {}) {
+  try {
+    const { data } = await axios.post(FETCH_INVENTORY, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to fetch inventory");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to fetch inventory");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to fetch inventory";
+    throw new Error(message);
+  }
+}
 
 export async function addProductToInventory(payload) {
   try {

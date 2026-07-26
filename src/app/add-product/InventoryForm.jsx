@@ -47,6 +47,15 @@ function getCdSku(productTitle) {
   return slugify(productTitle);
 }
 
+function isValidImageUrl(value) {
+  try {
+    const url = new URL(String(value || "").trim());
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function generateVisibleSku(fields, item, attributeDefinitions = []) {
   if (fields.category_name === "Pre Orders") {
     return getPreOrderSku(fields.product_title, fields.spec_id);
@@ -80,6 +89,8 @@ export default function InventoryForm() {
   const [resp, setResp] = useState(null);
   const [previewPayload, setPreviewPayload] = useState(null);
   const [sending, setSending] = useState(false);
+  const [variantImagesByColor, setVariantImagesByColor] = useState({});
+  const [confirmedImageColors, setConfirmedImageColors] = useState([]);
 
   const [fields, setFields] = useState({
     brand: "",
@@ -222,6 +233,68 @@ export default function InventoryForm() {
             }
           : v,
       ),
+    );
+  }
+
+  function saveCombinationVariant(vendorIndex, row, item, applyImagesToAll) {
+    const savedItem = {
+      ...item,
+      _variantKey: row.key,
+      combination_name: row.combinationName,
+      attributes: { ...row.attributes },
+    };
+    const images = (item.images || []).filter((image) => String(image || "").trim());
+    const matchingColor = String(row.attributes.color || "").trim().toLowerCase();
+
+    setVendors((currentVendors) =>
+      currentVendors.map((vendor, currentVendorIndex) => {
+        const shouldApplyImages =
+          applyImagesToAll && images.length > 0 && matchingColor;
+        let found = false;
+        const sourceItems = currentVendorIndex === vendorIndex
+          ? vendor.items.filter(
+              (currentItem) => currentItem._variantKey || currentItem.combination_name
+            )
+          : vendor.items;
+        const items = sourceItems.map((currentItem) => {
+          const matches =
+            currentVendorIndex === vendorIndex &&
+            (currentItem._variantKey === row.key ||
+              (currentItem.combination_name === row.combinationName &&
+                Object.entries(row.attributes).every(
+                  ([key, value]) => String(currentItem.attributes?.[key] ?? "") === String(value)
+                )));
+
+          if (matches) {
+            found = true;
+            return savedItem;
+          }
+          const itemColor = String(currentItem.attributes?.color || "")
+            .trim()
+            .toLowerCase();
+          return shouldApplyImages && itemColor === matchingColor
+            ? { ...currentItem, images: [...images] }
+            : currentItem;
+        });
+
+        if (currentVendorIndex === vendorIndex && !found) items.push(savedItem);
+        return { ...vendor, items };
+      })
+    );
+
+    if (applyImagesToAll && images.length > 0 && matchingColor) {
+      setVariantImagesByColor((current) => ({
+        ...current,
+        [matchingColor]: images,
+      }));
+      setConfirmedImageColors((current) =>
+        current.includes(matchingColor) ? current : [...current, matchingColor]
+      );
+    }
+    toast.success(
+      applyImagesToAll && matchingColor
+        ? `Variant saved and images applied to ${row.attributes.color} variants`
+        : "Variant saved"
     );
   }
 
@@ -849,11 +922,10 @@ export default function InventoryForm() {
           rating_count: it.rating_count ? Number(it.rating_count) : undefined,
           sell: !!it.sell,
           yt_iframe: it.yt_iframe || undefined,
-          images: it.imagesText
-            ? it.imagesText
-                .split(/\r?\n/)
-                .map((s) => s.trim())
-                .filter(Boolean)
+          images: Array.isArray(it.images) && it.images.some(isValidImageUrl)
+            ? it.images
+                .map((url) => String(url || "").trim())
+                .filter(isValidImageUrl)
             : undefined,
           })),
       }));
@@ -1212,10 +1284,10 @@ export default function InventoryForm() {
 
     setSending(true);
     try {
-      const response = await addProductToInventory(previewPayload);
-      setResp(response);
+      // const response = await addProductToInventory(previewPayload);
+      // setResp(response);
       setPreviewPayload(null);
-      toast.success(response?.message || "Product added successfully");
+      toast.success("Product added successfully");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to add product";
@@ -1257,6 +1329,8 @@ export default function InventoryForm() {
       combinations: [],
       attributeDefinitions: [],
     });
+    setVariantImagesByColor({});
+    setConfirmedImageColors([]);
     resetQuestions();
     resetWhatsInTheBox();
     resetOptionDescriptions();
@@ -1343,7 +1417,6 @@ export default function InventoryForm() {
           <VendorsSection
             vendors={vendors}
             specification={specification}
-            specId={fields.spec_id}
             addVendor={addVendor}
             updateVendor={updateVendor}
             removeVendor={removeVendor}
@@ -1359,6 +1432,10 @@ export default function InventoryForm() {
             saveItemAttributeValue={saveItemAttributeValue}
             removeItemAttribute={removeItemAttribute}
             addItemAttribute={addItemAttribute}
+            fields={fields}
+            sharedImagesByColor={variantImagesByColor}
+            confirmedImageColors={confirmedImageColors}
+            onSaveVariant={saveCombinationVariant}
           />
 
           <FormActions sending={sending} onReset={handleReset} />
