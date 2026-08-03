@@ -182,13 +182,22 @@ export default function ProductDetail({ id }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryCount, setRetryCount] = useState(0);
+  const [descriptionJson, setDescriptionJson] = useState("{}");
+  const [descriptionError, setDescriptionError] = useState("");
 
   useEffect(() => {
     let ignore = false;
 
     getProductDetail(id)
       .then((response) => {
-        if (!ignore) setProductData(Array.isArray(response) ? response[0] : response);
+        if (!ignore) {
+          const nextProductData = Array.isArray(response) ? response[0] : response;
+          setProductData(nextProductData);
+          setDescriptionJson(
+            JSON.stringify(nextProductData?.specifications?.description ?? {}, null, 2)
+          );
+          setDescriptionError("");
+        }
       })
       .catch((requestError) => {
         if (!ignore) setError(requestError.message || "Failed to load product details");
@@ -219,18 +228,12 @@ export default function ProductDetail({ id }) {
   }
 
   async function saveVariant(updatedVariant) {
-    const originalImages = Array.isArray(updatedVariant.item?.images)
-      ? editingVariant?.item?.images || []
-      : [];
     const editedImages = Array.isArray(updatedVariant.item?.images)
       ? updatedVariant.item.images
       : [];
-    const imageCount = Math.max(4, originalImages.length, editedImages.length);
-    const images = Array.from({ length: imageCount }, (_, index) =>
-      Object.hasOwn(editedImages, index)
-        ? editedImages[index]
-        : originalImages[index] || ""
-    );
+    const images = editedImages
+      .map((image) => (typeof image === "string" ? image.trim() : ""))
+      .filter(Boolean);
     const sku = updatedVariant.originalSku || updatedVariant.item.sku;
 
     const imagePayload = {
@@ -282,6 +285,32 @@ export default function ProductDetail({ id }) {
       toast.error(requestError.message || "Failed to update variant images");
       throw requestError;
     }
+  }
+
+  function applyDescription(event) {
+    event.preventDefault();
+
+    let description;
+    try {
+      description = JSON.parse(descriptionJson);
+      if (!description || Array.isArray(description)) {
+        throw new Error("Description must be a JSON object");
+      }
+      setDescriptionError("");
+    } catch {
+      setDescriptionError("Description must contain a valid JSON object.");
+      return;
+    }
+
+    setProductData((current) => ({
+      ...current,
+      specifications: {
+        ...current?.specifications,
+        description,
+      },
+    }));
+    setDescriptionJson(JSON.stringify(description, null, 2));
+    toast.success("Description JSON is valid");
   }
 
   if (isLoading) {
@@ -384,6 +413,44 @@ export default function ProductDetail({ id }) {
             </table>
             {variants.length === 0 && <p className="py-10 text-center text-sm text-slate-500">No variants found.</p>}
           </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <form onSubmit={applyDescription}>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold">Description JSON</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Paste or edit specifications.description JSON. Missing descriptions start as an empty object.
+                </p>
+              </div>
+              <button
+                type="submit"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Apply Description
+              </button>
+            </div>
+            <textarea
+              value={descriptionJson}
+              onChange={(event) => {
+                setDescriptionJson(event.target.value);
+                setDescriptionError("");
+              }}
+              rows={20}
+              spellCheck={false}
+              aria-label="Product description JSON"
+              aria-invalid={Boolean(descriptionError)}
+              className={`mt-5 w-full rounded-xl border bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none ${
+                descriptionError
+                  ? "border-red-500"
+                  : "border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              }`}
+            />
+            {descriptionError && (
+              <p className="mt-2 text-sm font-medium text-red-600">{descriptionError}</p>
+            )}
+          </form>
         </section>
 
         {videoUrl && (
