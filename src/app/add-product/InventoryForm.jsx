@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import DescriptionSection from "@/components/inventory/DescriptionSection";
 import FormActions from "@/components/inventory/FormActions";
 import ProductFields from "@/components/inventory/ProductFields";
@@ -8,7 +8,7 @@ import ResponsePreview from "@/components/inventory/ResponsePreview";
 import SpecificationSection from "@/components/inventory/SpecificationSection";
 import VendorsSection from "@/components/inventory/VendorsSection";
 import WhatsInTheBoxSection from "@/components/inventory/WhatsInTheBoxSection";
-import { emptyItem } from "@/constants/inventory";
+import { emptyItem,phoneOptionsDesc,laptopOptionsDesc,configurationIcons,cameraConfigurationIcons,androidQuestions} from "@/constants/inventory";
 import {
   formatAttributeDisplayName,
   formatAttributeValue,
@@ -37,6 +37,13 @@ function slugify(value) {
 
 function getPreOrderSku(productTitle, specId) {
   return [productTitle, specId].map(slugify).filter(Boolean).join("-");
+}
+
+function normalizeHexColor(value) {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("#")) return trimmed;
+  return trimmed.length === 3 || trimmed.length === 6 ? `#${trimmed}` : trimmed;
 }
 
 function isCdCategory(categoryName) {
@@ -92,6 +99,14 @@ export default function InventoryForm() {
   const [variantImagesByColor, setVariantImagesByColor] = useState({});
   const [confirmedImageColors, setConfirmedImageColors] = useState([]);
 
+  const fieldsRef = useRef(null);
+  const vendorsRef = useRef(null);
+  const specificationRef = useRef(null);
+  const questionsRef = useRef(null);
+  const whatsInTheBoxRef = useRef(null);
+  const optionDescriptionsRef = useRef(null);
+  const descriptionRef = useRef(null);
+
   const [fields, setFields] = useState({
     brand: "",
     category_name: "",
@@ -125,7 +140,6 @@ export default function InventoryForm() {
     combinations: [],
     attributeDefinitions: [],
   });
-  console.log("Current specification state:", specification.attributeDefinitions);
 
   const {
     questions,
@@ -170,6 +184,25 @@ export default function InventoryForm() {
     updateDescriptionFieldValueType,
     removeDescriptionField,
   } = useDescriptionState();
+
+  useEffect(() => {
+    fieldsRef.current = fields;
+    vendorsRef.current = vendors;
+    specificationRef.current = specification;
+    questionsRef.current = questions;
+    whatsInTheBoxRef.current = whatsInTheBox;
+    optionDescriptionsRef.current = optionDescriptions;
+    descriptionRef.current = description;
+  }, [
+    fields,
+    vendors,
+    specification,
+    questions,
+    whatsInTheBox,
+    optionDescriptions,
+    description,
+  ]);
+
   function setField(key, value) {
     setFields((prevFields) => {
       const nextFields = { ...prevFields, [key]: value };
@@ -531,7 +564,10 @@ export default function InventoryForm() {
       );
       const color_codes = exists
         ? prev.color_codes
-        : [...(prev.color_codes || []), { name: colorName, hex: hex || "#000000" }];
+        : [
+            ...(prev.color_codes || []),
+            { name: colorName, hex: hex || "#000000", description: "" },
+          ];
       return { ...prev, color_codes };
     });
   }
@@ -642,7 +678,7 @@ export default function InventoryForm() {
   function addColorCode() {
     setSpecification((prev) => ({
       ...prev,
-      color_codes: [...prev.color_codes, { name: "", hex: "" }],
+      color_codes: [...prev.color_codes, { name: "", hex: "", description: "" }],
     }));
   }
 
@@ -671,6 +707,39 @@ export default function InventoryForm() {
       ...prev,
       color_codes: prev.color_codes.filter((_, i) => i !== idx),
     }));
+  }
+
+  function addColorCodesFromText(rawValue) {
+    const trimmed = (rawValue || "").trim();
+    if (!trimmed) return;
+
+    const normalizedValue = trimmed.startsWith("color_codes")
+      ? trimmed.replace(/^color_codes\s*:\s*/, "")
+      : trimmed;
+
+    try {
+      const parsed = JSON.parse(normalizedValue);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return;
+      }
+
+      const nextColorCodes = Object.entries(parsed)
+        .filter(([, value]) => typeof value === "string")
+        .map(([name, hex]) => ({
+          name: String(name).trim(),
+          hex: normalizeHexColor(hex),
+          description: "",
+        }));
+
+      if (!nextColorCodes.length) return;
+
+      setSpecification((prev) => ({
+        ...prev,
+        color_codes: [...(prev.color_codes || []), ...nextColorCodes],
+      }));
+    } catch {
+      // ignore invalid input
+    }
   }
 
   function buildGeneratedCombinations(attributeDefinitions = []) {
@@ -761,7 +830,31 @@ export default function InventoryForm() {
 
   function updateCombinations(updater) {
     setSpecification((prev) => {
-      const combinations = updater(prev.combinations || []);
+      const previousCombinations = prev.combinations || [];
+      const combinations = updater(previousCombinations) || [];
+      const previousNames = new Set(
+        previousCombinations
+          .map((combination) => combination?.name)
+          .filter(Boolean),
+      );
+      const nextNames = new Set(
+        combinations.map((combination) => combination?.name).filter(Boolean),
+      );
+      const removedCombinationNames = Array.from(previousNames).filter(
+        (name) => !nextNames.has(name),
+      );
+
+      if (removedCombinationNames.length) {
+        setVendors((currentVendors) =>
+          currentVendors.map((vendor) => ({
+            ...vendor,
+            items: (vendor.items || []).filter(
+              (item) => !removedCombinationNames.includes(item?.combination_name),
+            ),
+          })),
+        );
+      }
+
       const valuesByKey = combinations.reduce((acc, combination) => {
         (combination.attributes || []).forEach((attribute) => {
           const key = normalizeAttributeKey(attribute.key);
@@ -898,373 +991,402 @@ export default function InventoryForm() {
     );
     updateAttributeDefinitions((prev) => (prev || []).filter((_, i) => i !== idx));
   }
+const isEmptyObject = (obj) =>
+  !obj || Object.keys(obj).length === 0;
+
+const isEmptyArray = (arr) =>
+  !arr || arr.length === 0;
+  function buildPreviewPayload() {
+    const fields = fieldsRef.current;
+    const vendors = vendorsRef.current;
+    const specification = specificationRef.current;
+    const questions = questionsRef.current;
+    const whatsInTheBox = whatsInTheBoxRef.current;
+    const optionDescriptions = optionDescriptionsRef.current;
+    const description = descriptionRef.current;
+
+    const vendorsNormalized = vendors.map((v) => ({
+      name: v.name || undefined,
+      vendor_note: v.vendor_note || undefined,
+      items: v.items.map((it) => ({
+        sku: it.sku || undefined,
+        combination_name: it.combination_name || undefined,
+        attributes:
+          it.attributes && Object.keys(it.attributes || {}).length
+            ? it.attributes
+            : undefined,
+        weight: it.weight ? Number(it.weight) : undefined,
+        stocks: it.stocks ? Number(it.stocks) : undefined,
+        mrp: it.mrp ? Number(it.mrp) : undefined,
+        price: it.price ? Number(it.price) : undefined,
+        sell_price: it.sell_price ? Number(it.sell_price) : undefined,
+        rating: it.rating ? Number(it.rating) : undefined,
+        rating_count: it.rating_count ? Number(it.rating_count) : undefined,
+        sell: !!it.sell,
+        yt_iframe: it.yt_iframe || undefined,
+        images: Array.isArray(it.images) && it.images.some(isValidImageUrl)
+          ? it.images
+              .map((url) => String(url || "").trim())
+              .filter(isValidImageUrl)
+          : undefined,
+      })),
+    }));
+    const hasSellableItem = vendorsNormalized.some((vendor) =>
+      (vendor.items || []).some((item) => !!item.sell),
+    );
+
+    const makeObjFromArr = (arr) =>
+      (arr || []).reduce((acc, f) => {
+        const key = formatDescriptionKey(f?.key);
+        if (key) {
+          if (f.valueType === "multiple") {
+            acc[key] = String(f.value || "")
+              .split(/\r?\n/)
+              .map((value) => parseNumberIfPossible(value))
+              .filter((value) => value !== "");
+          } else {
+            acc[key] = parseNumberIfPossible(f.value);
+          }
+        }
+        return acc;
+      }, {});
+
+    const descriptionNormalized = {
+      summary: description.summary || undefined,
+    };
+    Object.keys(description).forEach((k) => {
+      if (k === "summary") return;
+      descriptionNormalized[formatDescriptionKey(k)] = makeObjFromArr(description[k]);
+    });
+
+    const images = fields.imagesText
+      ? fields.imagesText
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+    const whatsInTheBoxNormalized = (whatsInTheBox || [])
+      .map((item) => ({
+        image_url: String(item.image_url || "").trim(),
+        label: String(item.label || "").trim(),
+      }))
+      .filter((item) => item.image_url || item.label);
+    const currentAttributeValues = new Set(
+      (specification.attributeDefinitions || []).flatMap((attr) =>
+        (attr.values || []).map((value) => formatAttributeValue(value)),
+      ),
+    );
+    const optionDescriptionsNormalized = (optionDescriptions || []).reduce(
+      (acc, item) => {
+        const option = formatAttributeValue(item.option);
+        const descriptionText = String(item.description || "").trim();
+        if (option && currentAttributeValues.has(option) && descriptionText) {
+          acc[option] = descriptionText;
+        }
+        return acc;
+      },
+      {},
+    );
+    const configurationIconsNormalized = (
+      specification.attributeDefinitions || []
+    ).reduce((acc, attr) => {
+      const key = formatAttributeDisplayName(attr.key);
+      const icon = String(attr.icon || "").trim();
+      if (key && icon) acc[key] = icon;
+      return acc;
+    }, {});
+    const isPreOrder = fields.category_name === "Pre Orders";
+    const isCd = isCdCategory(fields.category_name);
+
+    const vendorsTransformed = (vendorsNormalized || []).reduce(
+      (acc, vendor, vi) => {
+        const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
+        const combination_offered = (vendor.items || []).reduce(
+          (cAcc, it) => {
+            const combName = it.combination_name || "combination_1";
+            if (!cAcc[combName]) cAcc[combName] = {};
+            const itemIndex = Object.keys(cAcc[combName]).length + 1;
+            const itemKey = `item_${itemIndex}`;
+            const itemObj = {
+              sell_price: it.sell_price || 0,
+              sell: !!it.sell,
+              sku: it.sku || undefined,
+              weight: it.weight || 0,
+              mrp: it.mrp || 0,
+              price: it.price || 0,
+              rating: it.rating || 0,
+              rating_count: it.rating_count || 0,
+              yt_iframe: it.yt_iframe || undefined,
+              images: (it.images || []).map(toCDN),
+              stocks: it.stocks || 0,
+            };
+            if (it.attributes && Object.keys(it.attributes || {}).length) {
+              Object.keys(it.attributes).forEach((attrKey) => {
+                if (!(attrKey in itemObj)) {
+                  itemObj[normalizeAttributeKey(attrKey)] = it.attributes[attrKey];
+                }
+              });
+            }
+            cAcc[combName][itemKey] = itemObj;
+            return cAcc;
+          },
+          {},
+        );
+
+        acc[vendorKey] = {
+          vendor_id: vendorKey,
+          name: vendor.name || undefined,
+          ratings: 0,
+          total_sales: 0,
+          combination_offered,
+          vendor_note: vendor.vendor_note || undefined,
+        };
+        return acc;
+      },
+      {},
+    );
+    const cdVendorsTransformed = (vendorsNormalized || []).reduce(
+      (acc, vendor, vi) => {
+        const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
+        const combination_offered = (vendor.items || []).reduce(
+          (cAcc, it) => {
+            if (!cAcc.combination_1) cAcc.combination_1 = {};
+            const itemKey = `item_${Object.keys(cAcc.combination_1).length + 1}`;
+
+            cAcc.combination_1[itemKey] = {
+              sell_price: it.sell_price || 0,
+              sell: !!it.sell,
+              sku: getCdSku(fields.product_title),
+              weight: it.weight || 0,
+              mrp: it.mrp || (fields.mrp ? Number(fields.mrp) : 0),
+              price: it.price || (fields.price ? Number(fields.price) : 0),
+              rating: it.rating || 0,
+              rating_count: it.rating_count || 0,
+              yt_iframe: it.yt_iframe || undefined,
+              images: (it.images || []).map(toCDN),
+              stocks: it.stocks || 0,
+            };
+            return cAcc;
+          },
+          {},
+        );
+
+        acc[vendorKey] = {
+          vendor_id: vendorKey,
+          name: vendor.name || undefined,
+          ratings: 0,
+          total_sales: 0,
+          combination_offered,
+          vendor_note: vendor.vendor_note || undefined,
+        };
+        return acc;
+      },
+      {},
+    );
+    const inStock = (vendorsNormalized || []).some((vendor) =>
+      (vendor.items || []).some((item) => Number(item.stocks) > 0),
+    );
+    const preOrderVendorsTransformed = (vendorsNormalized || []).reduce(
+      (acc, vendor, vi) => {
+        const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
+        const combination_offered = (vendor.items || []).reduce(
+          (cAcc, it) => {
+            if (!cAcc.combination_1) cAcc.combination_1 = {};
+            const itemKey = `item_${Object.keys(cAcc.combination_1).length + 1}`;
+
+            cAcc.combination_1[itemKey] = {
+              sku: getPreOrderSku(fields.product_title, fields.spec_id),
+              mrp: it.mrp || (fields.mrp ? Number(fields.mrp) : 0),
+              price: it.price || (fields.price ? Number(fields.price) : 0),
+              sell: !!it.sell,
+              sell_price: it.sell_price || 0,
+              weight: it.weight || 0,
+              stocks: it.stocks || 0,
+              rating: 0,
+              rating_count: 0,
+              images: (it.images || []).map(toCDN),
+            };
+            return cAcc;
+          },
+          {},
+        );
+
+        acc[vendorKey] = {
+          vendor_id: vendorKey,
+          name: vendor.name || undefined,
+          ratings: 0,
+          total_sales: 0,
+          vendor_note: vendor.vendor_note || "",
+          combination_offered,
+        };
+        return acc;
+      },
+      {},
+    );
+    let finalOptionDescriptions = optionDescriptionsNormalized;
+    let finalConfigurationIcons = configurationIconsNormalized;
+    if (isEmptyObject(finalOptionDescriptions)) {
+      switch (fields.category_name) {
+        case "Smartphones":
+          finalOptionDescriptions = phoneOptionsDesc;
+          break;
+
+        case "Laptops":
+          finalOptionDescriptions = laptopOptionsDesc;
+          break;
+
+        default:
+          finalOptionDescriptions = {};
+      }
+    }
+    if (isEmptyObject(finalConfigurationIcons)) {
+      switch (fields.category_name) {
+        case "Cameras":
+          finalConfigurationIcons = cameraConfigurationIcons;
+          break;
+
+        default:
+          finalConfigurationIcons = configurationIcons;
+      }
+    }
+
+    const payload = {
+      spec_id: fields.spec_id || undefined,
+      specifications_doc: {
+        spec_id: fields.spec_id || undefined,
+        whats_in_the_box: isEmptyArray(whatsInTheBoxNormalized)
+          ? []
+          : whatsInTheBoxNormalized,
+        option_descriptions: finalOptionDescriptions,
+        configuration_icons: finalConfigurationIcons,
+        color_codes: (specification.color_codes || []).reduce((acc, color) => {
+          const colorName = formatAttributeValue(color?.name);
+          if (colorName) {
+            acc[colorName] = color.hex || "#000000";
+          }
+          return acc;
+        }, {}),
+        combination: (specification.combinations || []).reduce((acc, c) => {
+          const key =
+            c.name || `combination_${Math.random().toString(36).slice(2, 8)}`;
+          const obj = {};
+          (c.attributes || []).forEach((a) => {
+            if (!a.key) return;
+            obj[normalizeAttributeKey(a.key)] = a.values || [];
+          });
+          if (c.include_colors)
+            obj.color = (specification.color_codes || []).map((cc) => ({
+              name: formatAttributeValue(cc.name),
+              hex: cc.hex,
+            }));
+          acc[key] = obj;
+          return acc;
+        }, {}),
+        description: descriptionNormalized,
+        minimum_price: fields.minimum_price ? Number(fields.minimum_price) : 0,
+        questions: (function () {
+          return (questions || []).reduce((acc, q, i) => {
+            const key = `q${i + 1}`;
+            if (q.type === "radio" || q.type === "dropdown") {
+              acc[key] = {
+                question: q.question || "",
+                type: q.type,
+                isRequired: !!q.isRequired,
+                description: q.description || "",
+                deduction: Number(q.deduction) || 0,
+                options: (q.options || []).map((o) =>
+                  typeof o === "string" ? o : o.label,
+                ),
+              };
+            } else {
+              acc[key] = {
+                question: q.question || "",
+                type: q.type,
+                isRequired: !!q.isRequired,
+                description: q.description || "",
+                options: (q.options || []).map((o) =>
+                  typeof o === "string"
+                    ? { label: o }
+                    : {
+                        label: o.label,
+                        deduction: Number(o.deduction) || 0,
+                        icon: o.icon || undefined,
+                      },
+                ),
+              };
+            }
+            return acc;
+          }, {});
+        })(),
+      },
+      inventory_doc: {
+        spec_id: fields.spec_id || undefined,
+        product_title: fields.product_title || undefined,
+        code: fields.code || undefined,
+        ...(fields.brand?.trim() && { brand: fields.brand.trim() }),
+        category_name: fields.category_name || undefined,
+        condition: fields.condition || undefined,
+        mrp: fields.mrp ? Number(fields.mrp) : 0,
+        price: fields.price ? Number(fields.price) : 0,
+        rating: fields.rating ? Number(fields.rating) : 0,
+        rating_count: fields.rating_count ? Number(fields.rating_count) : 0,
+        sell: !!fields.sell || hasSellableItem,
+        sell_max_price: fields.sell_max_price ? Number(fields.sell_max_price) : 0,
+        ...(fields.type?.trim() && { type: fields.type.trim() }),
+        in_stock: inStock,
+        yt_iframe: fields.yt_iframe || undefined,
+        vendors: vendorsTransformed,
+      },
+    };
+    const preOrderPayload = {
+      spec_id: fields.spec_id || undefined,
+      inventory_doc: {
+        spec_id: fields.spec_id || undefined,
+        product_title: fields.product_title || undefined,
+        code: fields.code || undefined,
+        ...(fields.brand?.trim() && { brand: fields.brand.trim() }),
+        category_name: "Pre Order",
+        condition: "Pre Order",
+        mrp: fields.mrp ? Number(fields.mrp) : 0,
+        price: fields.price ? Number(fields.price) : 0,
+        sell: !!fields.sell || hasSellableItem,
+        sell_max_price: fields.sell_max_price ? Number(fields.sell_max_price) : 0,
+        release_date: fields.release_date || undefined,
+        in_stock: inStock,
+        yt_iframe: fields.yt_iframe || undefined,
+        description: removeEmptyDescriptionSections(descriptionNormalized),
+        vendors: preOrderVendorsTransformed,
+      },
+    };
+    const cdPayload = {
+      spec_id: fields.spec_id || undefined,
+      inventory_doc: {
+        spec_id: fields.spec_id || undefined,
+        product_title: fields.product_title || undefined,
+        code: fields.code || undefined,
+        category_name: fields.category_name || undefined,
+        condition: fields.condition || undefined,
+        mrp: fields.mrp ? Number(fields.mrp) : 0,
+        price: fields.price ? Number(fields.price) : 0,
+        sell: !!fields.sell || hasSellableItem,
+        sell_max_price: fields.sell_max_price ? Number(fields.sell_max_price) : 0,
+        in_stock: inStock,
+        yt_iframe: fields.yt_iframe || undefined,
+        description: removeEmptyDescriptionSections(descriptionNormalized),
+        vendors: cdVendorsTransformed,
+      },
+    };
+
+    return keepPayloadKeys(
+      isPreOrder ? preOrderPayload : isCd ? cdPayload : payload,
+    );
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setSending(true);
     try {
-      const vendorsNormalized = vendors.map((v) => ({
-        name: v.name || undefined,
-        vendor_note: v.vendor_note || undefined,
-        items: v.items.map((it) => ({
-          sku: it.sku || undefined,
-          combination_name: it.combination_name || undefined,
-          attributes:
-            it.attributes && Object.keys(it.attributes || {}).length
-              ? it.attributes
-              : undefined,
-          weight: it.weight ? Number(it.weight) : undefined,
-          stocks: it.stocks ? Number(it.stocks) : undefined,
-          mrp: it.mrp ? Number(it.mrp) : undefined,
-          price: it.price ? Number(it.price) : undefined,
-          sell_price: it.sell_price ? Number(it.sell_price) : undefined,
-          rating: it.rating ? Number(it.rating) : undefined,
-          rating_count: it.rating_count ? Number(it.rating_count) : undefined,
-          sell: !!it.sell,
-          yt_iframe: it.yt_iframe || undefined,
-          images: Array.isArray(it.images) && it.images.some(isValidImageUrl)
-            ? it.images
-                .map((url) => String(url || "").trim())
-                .filter(isValidImageUrl)
-            : undefined,
-          })),
-      }));
-      const hasSellableItem = vendorsNormalized.some((vendor) =>
-        (vendor.items || []).some((item) => !!item.sell),
-      );
-
-      const makeObjFromArr = (arr) =>
-        (arr || []).reduce((acc, f) => {
-          const key = formatDescriptionKey(f?.key);
-          if (key) {
-            if (f.valueType === "multiple") {
-              acc[key] = String(f.value || "")
-                .split(/\r?\n/)
-                .map((value) => parseNumberIfPossible(value))
-                .filter((value) => value !== "");
-            } else {
-              acc[key] = parseNumberIfPossible(f.value);
-            }
-          }
-          return acc;
-        }, {});
-
-      const descriptionNormalized = {
-        summary: description.summary || undefined,
-      };
-      Object.keys(description).forEach((k) => {
-        if (k === "summary") return;
-        descriptionNormalized[formatDescriptionKey(k)] = makeObjFromArr(description[k]);
-      });
-
-      const images = fields.imagesText
-        ? fields.imagesText
-            .split(/\r?\n/)
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-      const whatsInTheBoxNormalized = (whatsInTheBox || [])
-        .map((item) => ({
-          image_url: String(item.image_url || "").trim(),
-          label: String(item.label || "").trim(),
-        }))
-        .filter((item) => item.image_url || item.label);
-      const currentAttributeValues = new Set(
-        (specification.attributeDefinitions || []).flatMap((attr) =>
-          (attr.values || []).map((value) => formatAttributeValue(value)),
-        ),
-      );
-      const optionDescriptionsNormalized = (optionDescriptions || []).reduce(
-        (acc, item) => {
-          const option = formatAttributeValue(item.option);
-          const descriptionText = String(item.description || "").trim();
-          if (option && currentAttributeValues.has(option) && descriptionText) {
-            acc[option] = descriptionText;
-          }
-          return acc;
-        },
-        {},
-      );
-      const configurationIconsNormalized = (
-        specification.attributeDefinitions || []
-      ).reduce((acc, attr) => {
-        const key = formatAttributeDisplayName(attr.key);
-        const icon = String(attr.icon || "").trim();
-        if (key && icon) acc[key] = icon;
-        return acc;
-      }, {});
-      const isPreOrder = fields.category_name === "Pre Orders";
-      const isCd = isCdCategory(fields.category_name);
-
-      const vendorsTransformed = (vendorsNormalized || []).reduce(
-        (acc, vendor, vi) => {
-          const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
-          const combination_offered = (vendor.items || []).reduce(
-            (cAcc, it) => {
-              const combName = it.combination_name || "combination_1";
-              if (!cAcc[combName]) cAcc[combName] = {};
-              const itemIndex = Object.keys(cAcc[combName]).length + 1;
-              const itemKey = `item_${itemIndex}`;
-              const itemObj = {
-                sell_price: it.sell_price || 0,
-                sell: !!it.sell,
-                sku: it.sku || undefined,
-                weight: it.weight || 0,
-                mrp: it.mrp || 0,
-                price: it.price || 0,
-                rating: it.rating || 0,
-                rating_count: it.rating_count || 0,
-                yt_iframe: it.yt_iframe || undefined,
-                images: (it.images || []).map(toCDN),
-                stocks: it.stocks || 0,
-              };
-              if (it.attributes && Object.keys(it.attributes || {}).length) {
-                Object.keys(it.attributes).forEach((attrKey) => {
-                  if (!(attrKey in itemObj)) {
-                    itemObj[normalizeAttributeKey(attrKey)] = it.attributes[attrKey];
-                  }
-                });
-              }
-              cAcc[combName][itemKey] = itemObj;
-              return cAcc;
-            },
-            {},
-          );
-
-          acc[vendorKey] = {
-            vendor_id: vendorKey,
-            name: vendor.name || undefined,
-            ratings: 0,
-            total_sales: 0,
-            combination_offered,
-            vendor_note: vendor.vendor_note || undefined,
-          };
-          return acc;
-        },
-        {},
-      );
-      const cdVendorsTransformed = (vendorsNormalized || []).reduce(
-        (acc, vendor, vi) => {
-          const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
-          const combination_offered = (vendor.items || []).reduce(
-            (cAcc, it) => {
-              if (!cAcc.combination_1) cAcc.combination_1 = {};
-              const itemKey = `item_${Object.keys(cAcc.combination_1).length + 1}`;
-
-              cAcc.combination_1[itemKey] = {
-                sell_price: it.sell_price || 0,
-                sell: !!it.sell,
-                sku: getCdSku(fields.product_title),
-                weight: it.weight || 0,
-                mrp: it.mrp || (fields.mrp ? Number(fields.mrp) : 0),
-                price: it.price || (fields.price ? Number(fields.price) : 0),
-                rating: it.rating || 0,
-                rating_count: it.rating_count || 0,
-                yt_iframe: it.yt_iframe || undefined,
-                images: (it.images || []).map(toCDN),
-                stocks: it.stocks || 0,
-              };
-              return cAcc;
-            },
-            {},
-          );
-
-          acc[vendorKey] = {
-            vendor_id: vendorKey,
-            name: vendor.name || undefined,
-            ratings: 0,
-            total_sales: 0,
-            combination_offered,
-            vendor_note: vendor.vendor_note || undefined,
-          };
-          return acc;
-        },
-        {},
-      );
-     const inStock = (vendorsNormalized || []).some((vendor) =>
-  (vendor.items || []).some((item) => Number(item.stocks) > 0)
-);
-      const preOrderVendorsTransformed = (vendorsNormalized || []).reduce(
-        (acc, vendor, vi) => {
-          const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
-          const combination_offered = (vendor.items || []).reduce(
-            (cAcc, it) => {
-              if (!cAcc.combination_1) cAcc.combination_1 = {};
-              const itemKey = `item_${Object.keys(cAcc.combination_1).length + 1}`;
-
-              cAcc.combination_1[itemKey] = {
-                sku: getPreOrderSku(fields.product_title, fields.spec_id),
-                mrp: it.mrp || (fields.mrp ? Number(fields.mrp) : 0),
-                price: it.price || (fields.price ? Number(fields.price) : 0),
-                sell: !!it.sell,
-                sell_price: it.sell_price || 0,
-                weight: it.weight || 0,
-                stocks: it.stocks || 0,
-                rating: 0,
-                rating_count: 0,
-                images: (it.images || []).map(toCDN),
-              };
-              return cAcc;
-            },
-            {},
-          );
-
-          acc[vendorKey] = {
-            vendor_id: vendorKey,
-            name: vendor.name || undefined,
-            ratings: 0,
-            total_sales: 0,
-            vendor_note: vendor.vendor_note || "",
-            combination_offered,
-          };
-          return acc;
-        },
-        {},
-      );
-      const payload = {
-        spec_id: fields.spec_id || undefined,
-         specifications_doc: {
-           spec_id: fields.spec_id || undefined,
-          whats_in_the_box: whatsInTheBoxNormalized,
-          option_descriptions: optionDescriptionsNormalized,
-          configuration_icons: configurationIconsNormalized,
-          color_codes: (specification.color_codes || []).reduce((acc, color) => {
-            const colorName = formatAttributeValue(color?.name);
-            if (colorName) {
-              acc[colorName] = color.hex || "#000000";
-            }
-            return acc;
-          }, {}),
-          combination: (specification.combinations || []).reduce((acc, c) => {
-            const key =
-              c.name || `combination_${Math.random().toString(36).slice(2, 8)}`;
-            const obj = {};
-            (c.attributes || []).forEach((a) => {
-              if (!a.key) return;
-              obj[normalizeAttributeKey(a.key)] = a.values || [];
-            });
-            if (c.include_colors)
-              obj.color = (specification.color_codes || []).map((cc) => ({
-                name: formatAttributeValue(cc.name),
-                hex: cc.hex,
-              }));
-            acc[key] = obj;
-            return acc;
-          }, {}),
-          description: descriptionNormalized,
-          minimum_price: fields.minimum_price
-            ? Number(fields.minimum_price)
-            : 0,
-          questions: (function () {
-            return (questions || []).reduce((acc, q, i) => {
-              const key = `q${i + 1}`;
-              if (q.type === "radio" || q.type === "dropdown") {
-                acc[key] = {
-                  question: q.question || "",
-                  type: q.type,
-                  isRequired: !!q.isRequired,
-                  description: q.description || "",
-                  deduction: Number(q.deduction) || 0,
-                  options: (q.options || []).map((o) =>
-                    typeof o === "string" ? o : o.label,
-                  ),
-                };
-              } else {
-                acc[key] = {
-                  question: q.question || "",
-                  type: q.type,
-                  isRequired: !!q.isRequired,
-                  description: q.description || "",
-                  options: (q.options || []).map((o) =>
-                    typeof o === "string"
-                      ? { label: o }
-                      : {
-                          label: o.label,
-                          deduction: Number(o.deduction) || 0,
-                          icon: o.icon || undefined,
-                        },
-                  ),
-                };
-              }
-              return acc;
-            }, {});
-          })(),
-        },
-        inventory_doc: {
-          // id: fields.code || fields.spec_id || undefined,
-          spec_id: fields.spec_id || undefined,
-          product_title: fields.product_title || undefined,
-          code: fields.code || undefined,
-          ...(fields.brand?.trim() && { brand: fields.brand.trim() }),
-          category_name: fields.category_name || undefined,
-          condition: fields.condition || undefined,
-          mrp: fields.mrp ? Number(fields.mrp) : 0,
-          price: fields.price ? Number(fields.price) : 0,
-          rating: fields.rating ? Number(fields.rating) : 0,
-          rating_count: fields.rating_count
-            ? Number(fields.rating_count)
-            : 0,
-          sell: !!fields.sell || hasSellableItem,
-          sell_max_price: fields.sell_max_price
-            ? Number(fields.sell_max_price)
-            : 0,
-          ...(fields.type?.trim() && { type: fields.type.trim() }),
-          in_stock: inStock,
-          yt_iframe: fields.yt_iframe || undefined,
-          // images,
-          vendors: vendorsTransformed,
-        },
-       
-      };
-      const preOrderPayload = {
-        spec_id: fields.spec_id || undefined,
-        inventory_doc: {
-          spec_id: fields.spec_id || undefined,
-          product_title: fields.product_title || undefined,
-          code: fields.code || undefined,
-            ...(fields.brand?.trim() && { brand: fields.brand.trim() }),
-         
-          category_name: "Pre Order",
-          condition: "Pre Order",
-          mrp: fields.mrp ? Number(fields.mrp) : 0,
-          price: fields.price ? Number(fields.price) : 0,
-          sell: !!fields.sell || hasSellableItem,
-          sell_max_price: fields.sell_max_price
-            ? Number(fields.sell_max_price)
-            : 0,
-          release_date: fields.release_date || undefined,
-          in_stock: inStock,
-          yt_iframe: fields.yt_iframe || undefined,
-          description: removeEmptyDescriptionSections(descriptionNormalized),
-          vendors: preOrderVendorsTransformed,
-          
-        },
-      };
-      const cdPayload = {
-        spec_id: fields.spec_id || undefined,
-        inventory_doc: {
-          spec_id: fields.spec_id || undefined,
-          product_title: fields.product_title || undefined,
-          code: fields.code || undefined,
-          category_name: fields.category_name || undefined,
-          condition: fields.condition || undefined,
-          mrp: fields.mrp ? Number(fields.mrp) : 0,
-          price: fields.price ? Number(fields.price) : 0,
-          sell: !!fields.sell || hasSellableItem,
-          sell_max_price: fields.sell_max_price
-            ? Number(fields.sell_max_price)
-            : 0,
-          in_stock: inStock,
-          yt_iframe: fields.yt_iframe || undefined,
-          description: removeEmptyDescriptionSections(descriptionNormalized),
-          vendors: cdVendorsTransformed,
-        },
-      };
-
-      const payloadWithAllKeys = keepPayloadKeys(
-        isPreOrder ? preOrderPayload : isCd ? cdPayload : payload,
-      );
-
+      const payloadWithAllKeys = buildPreviewPayload();
       console.log("Inventory payload preview:", payloadWithAllKeys);
       setPreviewPayload(payloadWithAllKeys);
       setResp(payloadWithAllKeys);
@@ -1277,6 +1399,11 @@ export default function InventoryForm() {
     } finally {
       setSending(false);
     }
+  }
+
+  function handlePreview(e) {
+    e.preventDefault();
+    void handleSubmit(e);
   }
 
   async function handleFinalSubmit() {
@@ -1400,6 +1527,7 @@ export default function InventoryForm() {
             addColorCode={addColorCode}
             updateColorCode={updateColorCode}
             removeColorCode={removeColorCode}
+            addColorCodesFromText={addColorCodesFromText}
             addAttributeDefinition={addAttributeDefinition}
             updateAttributeDefinitionKey={updateAttributeDefinitionKey}
             finalizeAttributeDefinitionKey={finalizeAttributeDefinitionKey}
@@ -1438,7 +1566,7 @@ export default function InventoryForm() {
             onSaveVariant={saveCombinationVariant}
           />
 
-          <FormActions sending={sending} onReset={handleReset} />
+          <FormActions sending={sending} onPreview={handlePreview} onReset={handleReset} />
         </form>
 
         <ResponsePreview

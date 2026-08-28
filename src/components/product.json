@@ -1,16 +1,16 @@
 {
-  "spec_id": "iphone-se-2022",
+  "spec_id": "samsung-galaxy-m42-5g",
   "specifications_doc": {
-    "spec_id": "iphone-se-2022",
+    "spec_id": "samsung-galaxy-m42-5g",
     "whats_in_the_box": [],
     "option_descriptions": {
-      "Visible Marks": "Visible scratches or scuffs noticeable in regular use. May have a light dent or two. Fully functional, just not pristine.",
-      "No Visible Marks": "Minor surface scratches or scuffs that are only noticeable under close inspection. No dents, no deep scratches. Looks great from a normal viewing distance.",
-      "Low Visible Marks": "Minor surface scratches or scuffs that are only noticeable under close inspection. No dents, no deep scratches. Looks great from a normal viewing distance.",
-      "Medium Visible Marks": "Visible scratches or scuffs noticeable in regular use. May have a light dent or two. Fully functional, just not pristine.",
+      "No Visible Marks": "Looks almost untouched. No visible scratches, dents, or scuffs even on close inspection. Excellent cosmetic condition.",
+      "Very Light Marks": "In excellent condition. Any marks on the frame or back are so faint you'd only find them under direct light while actively looking. Nothing you'd notice in regular use.\n- **Screen Glass**: 0 to 1 hairline scratch, or none at all. No cracks or damage.\n- **Display**: Bright and clear. No pressure marks, spots, or discoloration.\n- **Frame & Sides**: 0 to 3 very light hairline scratches, or none at all. No dents.\n- **Back Panel**: Clean with no visible marks from normal distance.",
+      "Light Marks": "Has light signs of everyday use, the kind a careful owner leaves behind. Looks clean from normal distance. Nothing that affects how you use it.\n- **Screen Glass**: 2 to 4 light surface marks possible. No cracks or damage affecting clarity.\n- **Display**: Fully functional. Minor pressure marks may show under specific lighting but won't bother you daily.\n- **Frame & Sides**: 4 to 7 light surface scratches possible. No dents.\n- **Back Panel**: May have light marks or minor scuffs. No cracks or deep scratches.",
       "Light Visible Marks": "Minor surface scratches or scuffs that are only noticeable under close inspection. No dents, no deep scratches. Looks great from a normal viewing distance.",
-      "Very Light Marks": "Looks and feels almost new. Any marks are so faint they're only noticeable under direct light or at very close range. Nothing you'd spot in regular use.",
-      "Light Marks": "Has minor marks from everyday use, the kind you'd expect on a well-cared-for device. Looks clean from a normal distance. No dents, no deep scratches."
+      "Low Visible Marks": "Minor surface scratches or scuffs that are only noticeable under close inspection. No dents, no deep scratches. Looks great from a normal viewing distance.",
+      "Medium Visible Marks": "Visible scratches, scuffs, or small dents noticeable during regular use. Device remains fully functional but shows moderate cosmetic wear.",
+      "Visible Marks": "Visible scratches or scuffs noticeable in regular use. May have a light dent or two. Fully functional, just not pristine."
     },
     "configuration_icons": {
       "Storage": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fstorage_icon.png?alt=media&token=06fd3c54-774f-404c-b721-219274614ceb",
@@ -19,307 +19,161 @@
       "Battery health": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fbattery_health_icon.png?alt=media&token=b26ade4a-433c-40db-9ee5-1994d81e4b3b"
     },
     "color_codes": {
-      "Midnight": "#1f2124",
-      "Starlight": "#f5f3ee",
-      "Red": "#c41e3a"
+      "Black": "#171717",
+      "Gray": "#6F7072"
     },
     "combination": {
       "combination_1": {
         "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
+          "Black",
+          "Gray"
         ],
         "storage": [
-          "4/64"
+          "6/128"
         ],
         "physical_condition": [
           "Very Light Marks"
-        ],
-        "battery_health": [
-          "80%-89%"
         ]
       },
       "combination_2": {
         "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
+          "Black",
+          "Gray"
         ],
         "storage": [
-          "4/64"
+          "6/128"
         ],
         "physical_condition": [
-          "Very Light Marks"
-        ],
-        "battery_health": [
-          "90%-100%"
+          "Light Marks"
         ]
       },
       "combination_3": {
         "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
+          "Black",
+          "Gray"
         ],
         "storage": [
-          "4/64"
+          "8/128"
         ],
         "physical_condition": [
-          "Light Marks"
-        ],
-        "battery_health": [
-          "80%-89%"
+          "Very Light Marks"
         ]
       },
       "combination_4": {
         "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
+          "Black",
+          "Gray"
         ],
         "storage": [
-          "4/64"
+          "8/128"
         ],
         "physical_condition": [
           "Light Marks"
-        ],
-        "battery_health": [
-          "90%-100%"
-        ]
-      },
-      "combination_5": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/128"
-        ],
-        "physical_condition": [
-          "Very Light Marks"
-        ],
-        "battery_health": [
-          "80%-89%"
-        ]
-      },
-      "combination_6": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/128"
-        ],
-        "physical_condition": [
-          "Very Light Marks"
-        ],
-        "battery_health": [
-          "90%-100%"
-        ]
-      },
-      "combination_7": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/128"
-        ],
-        "physical_condition": [
-          "Light Marks"
-        ],
-        "battery_health": [
-          "80%-89%"
-        ]
-      },
-      "combination_8": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/128"
-        ],
-        "physical_condition": [
-          "Light Marks"
-        ],
-        "battery_health": [
-          "90%-100%"
-        ]
-      },
-      "combination_9": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/256"
-        ],
-        "physical_condition": [
-          "Very Light Marks"
-        ],
-        "battery_health": [
-          "80%-89%"
-        ]
-      },
-      "combination_10": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/256"
-        ],
-        "physical_condition": [
-          "Very Light Marks"
-        ],
-        "battery_health": [
-          "90%-100%"
-        ]
-      },
-      "combination_11": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/256"
-        ],
-        "physical_condition": [
-          "Light Marks"
-        ],
-        "battery_health": [
-          "80%-89%"
-        ]
-      },
-      "combination_12": {
-        "color": [
-          "Midnight",
-          "Starlight",
-          "Red"
-        ],
-        "storage": [
-          "4/256"
-        ],
-        "physical_condition": [
-          "Light Marks"
-        ],
-        "battery_health": [
-          "90%-100%"
         ]
       }
     },
-   
-  "description": {
-    "summary": "Short Description:\nBuy a high quality refurbished Apple iPhone SE 2022 at DACBY today. This premium preowned smartphone features the powerful Apple A15 Bionic chip, a compact 4.7 inch Retina HD display, and a high quality 12MP camera system. Fully inspected and rigorously tested, this second hand iPhone SE 2022 is available in multiple storage variants and official Apple colors, making it an excellent choice for everyday use, gaming, photography, business, productivity, and entertainment.\n\nFull Product Description:\nExperience flagship Apple performance in a compact design with a refurbished Apple iPhone SE 2022. Built using a durable aerospace grade aluminum frame with glass front and back, the iPhone SE 2022 combines the classic iPhone design with modern Apple performance. Powered by the Apple A15 Bionic chip featuring a 6 core CPU, 4 core GPU, and 16 core Neural Engine, this smartphone delivers outstanding speed for multitasking, gaming, photography, video editing, productivity, and everyday applications.\n\nThe vibrant 4.7 inch Retina HD display delivers sharp visuals, True Tone technology, wide color support, and exceptional clarity for browsing, streaming, gaming, messaging, and business applications. The advanced 12MP rear camera captures detailed photos and records high quality 4K videos with Smart HDR 4, Deep Fusion, Portrait mode, and Photographic Styles. The 7MP FaceTime HD front camera delivers clear selfies and high quality video calls.\n\nThis preowned iPhone SE 2022 supports 5G connectivity, Wi-Fi 6, Bluetooth 5.0, Touch ID, wireless charging, fast charging, IP67 water and dust resistance, and all day battery life. Available in multiple storage capacities and official Apple finishes, the iPhone SE 2022 is an excellent choice for students, professionals, business users, first time iPhone buyers, and anyone looking for powerful Apple performance in a compact smartphone.\n\nBuy a preowned Apple iPhone SE 2022 online from DACBY and enjoy excellent value for money. DACBY offers genuine refurbished Apple smartphones, authentic second hand iPhones, competitive pricing, secure online payments, trusted customer support, and a thorough multi point quality assurance process. Shop refurbished iPhones, used Apple devices, preowned smartphones, and the best technology deals only at DACBY.\n\nImportant Note:\nThis is a professionally refurbished and fully functional preowned product. Exact storage capacity, color, battery health, cosmetic condition, and included accessories may vary depending on the selected variant. Every device undergoes comprehensive testing to ensure excellent performance, reliability, and quality. The package includes the smartphone along with a compatible high quality charging cable and adapter.",
-    "Connectivity": {
-      "Wi_Fi": "Wi-Fi 6 (802.11ax) with 2x2 MIMO",
-      "Bluetooth": "Bluetooth 5.0",
-      "Cellular": "5G, Gigabit LTE, Dual SIM (nano-SIM + eSIM)",
-      "USB": "Lightning (USB 2.0)",
-      "Navigation": "GPS, GLONASS, Galileo, QZSS, BeiDou",
-      "Other": "NFC with reader mode, Qi wireless charging, Fast Charging"
-    },
-    "Design": {
-      "Body_Type": "Smartphone",
-      "Construction": "Aerospace grade aluminum frame with glass front and glass back",
-      "Dimensions": "138.4 mm x 67.3 mm x 7.3 mm",
-      "Weight": "144 g",
-      "SIM": "Dual SIM (nano-SIM + eSIM)",
-      "Colors": "Midnight, Starlight, (PRODUCT)RED"
-    },
-    "Global_Attributes": {
-      "Brand": "Apple",
-      "Genre": "Smartphone",
-      "Type": "iPhone",
-      "Platform": "iOS",
-      "Publisher": "Apple",
-      "Release_Date": "March 2022",
-      "Release_Year": 2022
-    },
-    "Performance": {
-      "Processor": "Apple A15 Bionic chip",
-      "Chipset": "Apple A15 Bionic (5 nm)",
-      "CPU": "6 core CPU (2 Performance cores + 4 Efficiency cores)",
-      "GPU": "4 core Apple GPU",
-      "Neural_Engine": "16 core Neural Engine",
-      "RAM": "4GB",
-      "Storage": "64GB / 128GB / 256GB NVMe (variant dependent)",
-      "Operating_System": "iOS 15.4 (Upgradeable to the latest supported iOS version)",
-      "Display": "4.7 inch Retina HD LCD, 1334 x 750 resolution at 326 ppi, True Tone, Wide Color (P3), Haptic Touch",
-      "Brightness": "625 nits typical brightness",
-      "Refresh_Rate": "60Hz",
-      "Battery": "Up to 15 hours video playback",
-      "Charging": "20W Fast Charging, Qi wireless charging",
-      "Rear_Camera": "12MP Wide (f/1.8) with Optical Image Stabilization",
-      "Front_Camera": "7MP FaceTime HD camera (f/2.2)",
-      "Video": "4K video recording up to 60 fps, Extended Dynamic Range, Slow motion up to 240 fps at 1080p",
-      "Security": "Touch ID fingerprint sensor",
-      "Water_Resistance": "IP67 water and dust resistant (maximum depth of 1 meter for up to 30 minutes)",
-      "Sensors": "Touch ID, Barometer, Three axis Gyroscope, Accelerometer, Proximity Sensor, Ambient Light Sensor, Digital Compass"
-    }
-  },
-    "minimum_price": 10000,
-    "questions": {
-      "q1": {
-        "question": "Does the iPhone power on and boot to iOS without issues?",
-        "type": "radio",
-        "options": [
-          "Yes",
-          "No"
-        ],
-        "deduction": 0,
-        "isRequired": true,
-        "description": ""
+    "description": {
+      "summary": "**Short Description**:\nBuy a high quality refurbished Samsung Galaxy M42 5G at DACBY. This preowned Samsung smartphone features the Qualcomm Snapdragon 750G processor, a large 6.6 inch HD+ Super AMOLED Infinity-U display, and a versatile 48MP quad rear camera system. Fully inspected, professionally refurbished, and rigorously tested, this second hand Samsung Galaxy M42 5G is available in 6GB/128GB and 8GB/128GB variants, making it a practical choice for everyday use, 5G connectivity, calling, messaging, social media, photography, video streaming, online learning, work, multitasking, and gaming.\n\n**Full Product Description**:\nExperience dependable everyday performance with a refurbished Samsung Galaxy M42 5G from DACBY. Powered by the Qualcomm Snapdragon 750G 5G processor with an Octa Core CPU running at up to 2.2GHz, the Galaxy M42 5G delivers reliable performance for web browsing, social media, messaging, video streaming, online classes, productivity, photography, multitasking, and gaming. With 5G connectivity, dual SIM support, Wi-Fi, Bluetooth, GPS, and USB Type-C connectivity, this Samsung 5G smartphone is designed for everyday communication and entertainment.\n\nThe 6.6 inch HD+ Super AMOLED Infinity-U display features a 720 x 1600 resolution and delivers vibrant colours, deep contrast, and detailed visuals. The Super AMOLED panel provides an immersive viewing experience for YouTube, OTT content, web browsing, reading, social media, video calls, and gaming. The Infinity-U design provides a modern viewing experience while the AMOLED technology delivers rich colours and strong contrast.\n\nThe Samsung Galaxy M42 5G features a 48MP quad rear camera setup consisting of a 48MP primary camera, 8MP ultra-wide camera, 5MP macro camera, and 5MP depth camera. The camera system is suitable for everyday photography, ultra-wide shots, close-up photography, portrait photography, and social media content. The 20MP front camera is designed for selfies, video calls, and social media use. The rear camera supports 4K video recording at 30fps and features such as Single Take, Night Mode, Hyperlapse, Super Slow Motion, Scene Optimizer, and Super Steady video.\n\nThe Samsung Galaxy M42 5G comes with a large 5000mAh battery and supports 15W fast charging for dependable everyday usage. It supports 5G, 4G LTE, 3G, 2G, dual SIM functionality, Wi-Fi, Bluetooth, GPS, USB Type-C, NFC, and expandable storage through a dedicated microSD card slot. Samsung Knox security and Samsung Pay provide additional security and payment features. The combination of 5G connectivity, Super AMOLED display, large battery, expandable storage, and quad camera system makes the Galaxy M42 5G a practical choice for users looking for an affordable refurbished Samsung 5G smartphone.\n\nAvailable in India in Prism Dot Black and Prism Dot Gray, the Samsung Galaxy M42 5G offers a combination of Snapdragon 750G performance, 6.6 inch Super AMOLED display, 48MP quad camera, 20MP selfie camera, 5000mAh battery, 15W fast charging, dual SIM support, expandable storage, Samsung Knox security, Samsung Pay, and 5G connectivity. Whether you are searching for a refurbished Samsung Galaxy M42 5G, preowned Samsung M42 5G, second hand Samsung phone, used Samsung mobile, renewed Samsung smartphone, Samsung 5G phone, affordable Samsung 5G phone, Samsung Super AMOLED phone, refurbished Android phone, or Samsung 5000mAh battery phone, the Galaxy M42 5G offers a balanced combination of performance, display quality, camera capabilities, battery life, and connectivity.\n\nBuy a preowned Samsung Galaxy M42 5G online from DACBY and get a professionally refurbished Samsung smartphone backed by a comprehensive quality inspection process. DACBY professionally tests, cleans, refurbishes, and quality checks products before listing them for sale. Essential device functions including IMEI verification, battery health, display, touchscreen, cameras, speakers, microphone, charging port, buttons, connectivity, and network functionality are checked before the product is listed. DACBY provides competitive pricing, secure payment options, transparent charges, customer support, order tracking, and reliable shipping. Shop refurbished Samsung Galaxy smartphones, used Samsung phones, second hand Android mobiles, renewed smartphones, refurbished 5G phones, and affordable Samsung mobile deals from DACBY with confidence.\n\n**Important Note**:\nThis is a professionally refurbished and fully functional preowned product. Exact RAM, storage capacity, colour, cosmetic condition, software version, and included accessories may vary depending on the selected variant and region. Every device undergoes comprehensive testing to ensure reliable performance and functionality. The package includes the smartphone and a compatible high quality USB Type-C charging cable.",
+      "Connectivity": {
+        "Wi_Fi": "Wi-Fi 802.11 a/b/g/n/ac, Dual Band",
+        "Bluetooth": "Bluetooth 5.0",
+        "Cellular": "5G, 4G LTE, 3G, 2G, Dual SIM",
+        "USB": "USB Type-C 2.0",
+        "Navigation": "GPS, GLONASS, Galileo, BeiDou",
+        "Other": "In-Display Fingerprint Sensor, 15W Fast Charging, Samsung Pay, NFC, 3.5mm Headphone Jack, FM Radio"
       },
-      "q2": {
-        "question": "Are there any performance, battery, display, camera, or Face ID issues?",
-        "type": "radio",
-        "options": [
-          "Yes",
-          "No"
-        ],
-        "deduction": 0,
-        "isRequired": true,
-        "description": ""
+      "Design": {
+        "Body_Type": "Smartphone",
+        "Construction": "Glasstic Body",
+        "Dimensions": "164.4 mm x 75.9 mm x 8.6 mm",
+        "Weight": "193 g",
+        "SIM": "Dual Nano SIM, Dedicated MicroSD Slot",
+        "Colors": "Prism Dot Black, Prism Dot Gray"
       },
-      "q3": {
-        "question": "Accessories Missing",
-        "type": "checkbox",
-        "isRequired": false,
-        "description": "Please choose the accessories missing",
-        "options": [
-          {
-            "label": "Lightning Cable Missing",
-            "deduction": 800,
-            "icon": "Icons.cable"
-          }
-        ]
+      "Global_Attributes": {
+        "Brand": "Samsung",
+        "Genre": "Smartphone",
+        "Type": "Galaxy M42 5G",
+        "Platform": "Android",
+        "Publisher": "Samsung",
+        "Release_Date": "April 2021",
+        "Release_Year": 2021
+      },
+      "Performance": {
+        "Processor": "Qualcomm Snapdragon 750G",
+        "Chipset": "Qualcomm Snapdragon 750G (8nm)",
+        "CPU": "Octa Core CPU, up to 2.2GHz",
+        "GPU": "Adreno 619",
+        "RAM": "6GB / 8GB",
+        "Storage": "128GB (variant dependent)",
+        "Operating_System": "Android 11 with One UI 3.1",
+        "Display": "6.6 inch HD+ Super AMOLED Infinity-U Display, 720 x 1600 resolution",
+        "Brightness": "Standard",
+        "Refresh_Rate": "60Hz",
+        "Battery": "5000mAh",
+        "Charging": "15W Fast Charging",
+        "Rear_Camera": "48MP Main + 8MP Ultra Wide + 5MP Macro + 5MP Depth",
+        "Front_Camera": "20MP Selfie Camera",
+        "Video": "4K video recording at 30fps, Single Take, Super Steady, Hyperlapse",
+        "Security": "In-Display Fingerprint Sensor, Samsung Knox, Face Unlock",
+        "Expandable_Storage": "microSD card support up to 1TB",
+        "5G_Bands": "5G SA/NSA support",
+        "Sensors": "Accelerometer, Gyro Sensor, Geomagnetic Sensor, Proximity Sensor, Light Sensor"
       }
-    }
+    },
+    "minimum_price": 1000,
+   "questions": {
+            "q1": {
+                "isRequired": true,
+                "question": "Does the phone power on and boot to Android without issues?",
+                "type": "radio",
+                "deduction": 0,
+                "description": "",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            "q2": {
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "description": "",
+                "deduction": 0,
+                "type": "radio",
+                "isRequired": true,
+                "question": "Are there any performance, display, camera, fingerprint sensor, speaker, charging, or network issues?"
+            },
+            "q3": {
+                "description": "Please choose the accessories missing",
+                "options": [
+                    {
+                        "icon": "Icons.cable",
+                        "deduction": 800,
+                        "label": "USB-C Cable Missing"
+                    }
+                ],
+                "isRequired": false,
+                "question": "Accessories Missing",
+                "type": "checkbox"
+            }
+        }
   },
   "inventory_doc": {
-    "spec_id": "iphone-se-2022",
-    "product_title": "Apple IPhone SE 2022",
+    "spec_id": "samsung-galaxy-m42-5g",
+    "product_title": "Samsung Galaxy M42 5G",
     "code": "D019Y",
     "category_name": "Smartphones",
     "condition": "Pre Owned",
-    "mrp": 43900,
-    "price": 15999,
-    "rating": 0,
-    "rating_count": 0,
+    "mrp": 21999,
+    "price": 15399,
+    "rating": 4.5,
+    "rating_count": 115,
     "sell": false,
     "sell_max_price": 1000,
     "in_stock": false,
-    "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/ixjdogqKQPE?si=fZFKyuB8j_wZdmf1&amp;start=155\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+    "yt_iframe": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/YtOT23L57zw?si=jUopGMQ9mEHkQ9r_&amp;start=3\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
     "vendors": {
       "VENDOR_001": {
         "vendor_id": "VENDOR_001",
@@ -331,63 +185,42 @@
             "item_1": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-low-very-light-marks-midnight",
+              "sku": "samsung-galaxy-m42-5g-6-128-very-light-marks-black",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 18999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 21999,
+              "price": 15399,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2Fblack-m42%20-%20Edited.png?alt=media&token=6190c2d1-5f5c-4466-ab22-f78c49a27818",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(8).png?alt=media&token=3e8e7e38-4116-4bce-ae6e-ea020ee77c00",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(13).png?alt=media&token=9997603e-ecab-407e-9988-47997657f38b"
               ],
               "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/64",
-              "battery_health": "80%-89%",
+              "color": "Black",
+              "storage": "6/128",
               "physical_condition": "Very Light Marks"
             },
             "item_2": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-low-very-light-marks-starlight",
+              "sku": "samsung-galaxy-m42-5g-6-128-very-light-marks-gray",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 18999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 21999,
+              "price": 15399,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(9).png?alt=media&token=c64c005a-ea13-486b-b86b-d641b515a97b",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(10).png?alt=media&token=dc703343-5d98-4016-bf50-240a1680e013",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(12).png?alt=media&token=bfabaa24-cccb-4472-a9f4-66b150b9a422",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(11).png?alt=media&token=8ffbd771-56f1-4830-bbbe-ec8e58026c7b"
               ],
               "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/64",
-              "battery_health": "80%-89%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/64-low-very-light-marks-red",
-              "weight": 0.5,
-              "mrp": 43900,
-              "price": 18999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/64",
-              "battery_health": "80%-89%",
+              "color": "Gray",
+              "storage": "6/128",
               "physical_condition": "Very Light Marks"
             }
           },
@@ -395,703 +228,128 @@
             "item_1": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-high-very-light-marks-midnight",
+              "sku": "samsung-galaxy-m42-5g-6-128-light-marks-black",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 21999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 21999,
+              "price": 15399,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2Fblack-m42%20-%20Edited.png?alt=media&token=6190c2d1-5f5c-4466-ab22-f78c49a27818",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(8).png?alt=media&token=3e8e7e38-4116-4bce-ae6e-ea020ee77c00",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(13).png?alt=media&token=9997603e-ecab-407e-9988-47997657f38b"
               ],
               "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/64",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
+              "color": "Black",
+              "storage": "6/128",
+              "physical_condition": "Light Marks"
             },
             "item_2": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-high-very-light-marks-starlight",
+              "sku": "samsung-galaxy-m42-5g-6-128-light-marks-gray",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 21999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 21999,
+              "price": 15399,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(9).png?alt=media&token=c64c005a-ea13-486b-b86b-d641b515a97b",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(10).png?alt=media&token=dc703343-5d98-4016-bf50-240a1680e013",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(12).png?alt=media&token=bfabaa24-cccb-4472-a9f4-66b150b9a422",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(11).png?alt=media&token=8ffbd771-56f1-4830-bbbe-ec8e58026c7b"
               ],
               "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/64",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/64-high-very-light-marks-red",
-              "weight": 0.5,
-              "mrp": 43900,
-              "price": 21999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/64",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
+              "color": "Gray",
+              "storage": "6/128",
+              "physical_condition": "Light Marks"
             }
           },
           "combination_3": {
             "item_1": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-low-light-marks-midnight",
+              "sku": "samsung-galaxy-m42-5g-8-128-very-light-marks-black",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 15999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 23999,
+              "price": 16799,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2Fblack-m42%20-%20Edited.png?alt=media&token=6190c2d1-5f5c-4466-ab22-f78c49a27818",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(8).png?alt=media&token=3e8e7e38-4116-4bce-ae6e-ea020ee77c00",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(13).png?alt=media&token=9997603e-ecab-407e-9988-47997657f38b"
               ],
               "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/64",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
+              "color": "Black",
+              "storage": "8/128",
+              "physical_condition": "Very Light Marks"
             },
             "item_2": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-low-light-marks-starlight",
+              "sku": "samsung-galaxy-m42-5g-8-128-very-light-marks-gray",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 15999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 23999,
+              "price": 16799,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(9).png?alt=media&token=c64c005a-ea13-486b-b86b-d641b515a97b",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(10).png?alt=media&token=dc703343-5d98-4016-bf50-240a1680e013",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(12).png?alt=media&token=bfabaa24-cccb-4472-a9f4-66b150b9a422",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(11).png?alt=media&token=8ffbd771-56f1-4830-bbbe-ec8e58026c7b"
               ],
               "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/64",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/64-low-light-marks-red",
-              "weight": 0.5,
-              "mrp": 43900,
-              "price": 15999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/64",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
+              "color": "Gray",
+              "storage": "8/128",
+              "physical_condition": "Very Light Marks"
             }
           },
           "combination_4": {
             "item_1": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-high-light-marks-midnight",
+              "sku": "samsung-galaxy-m42-5g-8-128-light-marks-black",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 18999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 23999,
+              "price": 16799,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2Fblack-m42%20-%20Edited.png?alt=media&token=6190c2d1-5f5c-4466-ab22-f78c49a27818",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(8).png?alt=media&token=3e8e7e38-4116-4bce-ae6e-ea020ee77c00",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblack%2FUntitled%20design%20(13).png?alt=media&token=9997603e-ecab-407e-9988-47997657f38b"
               ],
               "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/64",
-              "battery_health": "90%-100%",
+              "color": "Black",
+              "storage": "8/128",
               "physical_condition": "Light Marks"
             },
             "item_2": {
               "sell_price": 1000,
               "sell": false,
-              "sku": "iphone-se-2022-4/64-high-light-marks-starlight",
+              "sku": "samsung-galaxy-m42-5g-8-128-light-marks-gray",
               "weight": 0.5,
-              "mrp": 43900,
-              "price": 18999,
-              "rating": 0,
-              "rating_count": 0,
+              "mrp": 23999,
+              "price": 16799,
+              "rating": 4.5,
+              "rating_count": 115,
               "yt_iframe": "",
               "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(9).png?alt=media&token=c64c005a-ea13-486b-b86b-d641b515a97b",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(10).png?alt=media&token=dc703343-5d98-4016-bf50-240a1680e013",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(12).png?alt=media&token=bfabaa24-cccb-4472-a9f4-66b150b9a422",
+                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FSAMSUNG%20Mobile%20Phone%2Fm42%2Fblue%2FUntitled%20design%20(11).png?alt=media&token=8ffbd771-56f1-4830-bbbe-ec8e58026c7b"
               ],
               "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/64",
-              "battery_health": "90%-100%",
-              "physical_condition": "Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/64-high-light-marks-red",
-              "weight": 0.5,
-              "mrp": 43900,
-              "price": 18999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/64",
-              "battery_health": "90%-100%",
-              "physical_condition": "Light Marks"
-            }
-          },
-          "combination_5": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-low-very-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 28999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/128",
-              "battery_health": "80%-89%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-low-very-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 28999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/128",
-              "battery_health": "80%-89%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-low-very-light-marks-red",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 28999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/128",
-              "battery_health": "80%-89%",
-              "physical_condition": "Very Light Marks"
-            }
-          },
-          "combination_6": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-high-very-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 31999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/128",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-high-very-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 31999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/128",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-high-very-light-marks-red",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 31999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/128",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
-            }
-          },
-          "combination_7": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-low-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 25999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/128",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-low-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 25999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/128",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-low-light-marks-red",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 25999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/128",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
-            }
-          },
-          "combination_8": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-high-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 28999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/128",
-              "battery_health": "90%-100%",
-              "physical_condition": "Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-high-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 28999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/128",
-              "battery_health": "90%-100%",
-              "physical_condition": "Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/128-high-light-marks-red",
-              "weight": 0.5,
-              "mrp": 48900,
-              "price": 28999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/128",
-              "battery_health": "90%-100%",
-              "physical_condition": "Light Marks"
-            }
-          },
-          "combination_9": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-low-very-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 38999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/256",
-              "battery_health": "80%-89%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-low-very-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 38999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/256",
-              "battery_health": "80%-89%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-low-very-light-marks-red",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 38999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/256",
-              "battery_health": "80%-89%",
-              "physical_condition": "Very Light Marks"
-            }
-          },
-          "combination_10": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-high-very-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 41999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/256",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-high-very-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 41999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/256",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-high-very-light-marks-red",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 41999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/256",
-              "battery_health": "90%-100%",
-              "physical_condition": "Very Light Marks"
-            }
-          },
-          "combination_11": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-low-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 35999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/256",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-low-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 35999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/256",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-low-light-marks-red",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 35999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/256",
-              "battery_health": "80%-89%",
-              "physical_condition": "Light Marks"
-            }
-          },
-          "combination_12": {
-            "item_1": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-high-light-marks-midnight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 38999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-221%20-%20Edited.png?alt=media&token=87f6206f-e714-431e-90dd-6a88224bacdc",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-222%20-%20Edited.png?alt=media&token=8ef975b2-b04a-4baa-983a-ffd019e6f04d",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fmidnight%2Fmidnight-se-223%20-%20Edited.png?alt=media&token=025186b7-6ffc-440b-b789-ca0cb43257c8"
-              ],
-              "stocks": 0,
-              "color": "Midnight",
-              "storage": "4/256",
-              "battery_health": "90%-100%",
-              "physical_condition": "Light Marks"
-            },
-            "item_2": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-high-light-marks-starlight",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 38999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-221%20-%20Edited.png?alt=media&token=64605128-74f7-49fa-aced-a36d2986f410",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-222%20-%20Edited.png?alt=media&token=b7c57bda-12d7-4d3f-a47c-57f193b50eac",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fstarlight%2Fstarlight-se-223%20-%20Edited.png?alt=media&token=9ca47261-0b09-42f5-8253-3f8f9640727b"
-              ],
-              "stocks": 0,
-              "color": "Starlight",
-              "storage": "4/256",
-              "battery_health": "90%-100%",
-              "physical_condition": "Light Marks"
-            },
-            "item_3": {
-              "sell_price": 1000,
-              "sell": false,
-              "sku": "iphone-se-2022-4/256-high-light-marks-red",
-              "weight": 0.5,
-              "mrp": 58900,
-              "price": 38999,
-              "rating": 0,
-              "rating_count": 0,
-              "yt_iframe": "",
-              "images": [
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-221%20-%20Edited.png?alt=media&token=952a805c-d524-422a-9375-2e599a7045d9",
-                "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FApple%20iPhone%2FApple%20iPhone%20SE%202022%2Fred%2Fred-se-222%20-%20Edited.png?alt=media&token=40ad6a7f-ab91-4e46-8d72-62cf24c765eb"
-              ],
-              "stocks": 0,
-              "color": "Red",
-              "storage": "4/256",
-              "battery_health": "90%-100%",
+              "color": "Gray",
+              "storage": "8/128",
               "physical_condition": "Light Marks"
             }
           }

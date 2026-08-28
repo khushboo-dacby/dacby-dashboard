@@ -10,7 +10,32 @@ const UPDATE_COMBINATION = `${BASE_URL}/api/specifications/update-combination`;
 const ADD_COMBINATION_ITEM = `${BASE_URL}/api/inventory/add-combination-item`;
 const ADD_SPECIAL_EDITION = `${BASE_URL}/api/inventory/add-special-edition`;
 const FETCH_INVENTORY = `${BASE_URL}/fetchInventory`;
+const ADD_WARRANTY= `${BASE_URL}/api/warranties`;
+export async function addWarranty(payload){
+try {
+    const { data } = await axios.post(ADD_WARRANTY, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to add warranty");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to add warranty");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to add warranty";
+    throw new Error(message);
+  }
+}
 export async function deleteProduct(productId) {
   const url = `${BASE_URL}/api/inventory/${productId}`;
 

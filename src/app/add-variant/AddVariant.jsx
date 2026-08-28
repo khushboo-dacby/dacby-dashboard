@@ -207,6 +207,8 @@ export function createCombinationItemPayload(
       images,
       mrp: getNumberOrZero(formData.mrp),
       price: getNumberOrZero(formData.price),
+      rating: 4.5,
+      rating_count: 150,
       sell_price: getNumberOrZero(formData.sellPrice),
       weight: getNumberOrZero(formData.weight),
       stocks: getNumberOrZero(formData.stocks),
@@ -549,8 +551,10 @@ export default function AddVariant() {
 
     setSubmittingProduct(true);
     try {
-      const response = await addCombinationItem(payload);
-      toast.success(response?.message || "Product added successfully");
+      //  const response = await addCombinationItem(payload);
+      
+      // toast.success(response?.message || "Product added successfully");
+      console.log("Add combination item payload:", payload);
     } catch (error) {
       toast.error(error.message || "Failed to add product");
     } finally {

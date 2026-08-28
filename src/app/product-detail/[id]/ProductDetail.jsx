@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { getProductDetail, updateSkuImages } from "../../apis/api";
 import ItemDetailsFields from "../../../components/inventory/ItemDetailsFields";
 import WarningPopup from "../../../components/confirmation-modal/WarningPopup";
+import AddWarrantyModal from "../AddWarrantyModal";
+import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
 import { toast } from "sonner";
 
 const ITEM_FIELDS = new Set([
@@ -28,6 +30,25 @@ function formatPrice(value) {
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(Number(value) || 0);
+}
+
+function formatDisplayValue(value, fallback = "—") {
+  if (value === null || value === undefined || value === "") return fallback;
+  if (typeof value === "string" || typeof value === "number") return value;
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) {
+    return value.map((entry) => formatDisplayValue(entry, "")).filter(Boolean).join(", ") || fallback;
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+function formatInputValue(value) {
+  return typeof value === "string" || typeof value === "number" ? value : "";
 }
 
 function getCreatedDate(createdAt) {
@@ -80,7 +101,9 @@ function InfoCard({ label, value, children }) {
   return (
     <div>
       <p className="text-sm text-slate-500">{label}</p>
-      <div className="mt-1 text-lg font-semibold text-slate-900">{children ?? value ?? "—"}</div>
+      <div className="mt-1 text-lg font-semibold text-slate-900">
+        {children ?? formatDisplayValue(value)}
+      </div>
     </div>
   );
 }
@@ -138,7 +161,7 @@ function EditVariantModal({ variant, attributeKeys, specId, onClose, onSave }) {
                   <label key={attribute} className="text-sm font-medium text-slate-700">
                     {titleCase(attribute)}
                     <input
-                      value={item[attribute] ?? ""}
+                      value={formatInputValue(item[attribute])}
                       onChange={(event) => updateAttribute(attribute, event.target.value)}
                       className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
@@ -184,6 +207,7 @@ export default function ProductDetail({ id }) {
   const [retryCount, setRetryCount] = useState(0);
   const [descriptionJson, setDescriptionJson] = useState("{}");
   const [descriptionError, setDescriptionError] = useState("");
+  const [showWarrantyModal, setShowWarrantyModal] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -232,7 +256,9 @@ export default function ProductDetail({ id }) {
       ? updatedVariant.item.images
       : [];
     const images = editedImages
-      .map((image) => (typeof image === "string" ? image.trim() : ""))
+      .map((image) =>
+        typeof image === "string" ? convertFirebaseImageToCdn(image) : ""
+      )
       .filter(Boolean);
     const sku = updatedVariant.originalSku || updatedVariant.item.sku;
 
@@ -333,18 +359,25 @@ export default function ProductDetail({ id }) {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-10 lg:px-20">
       <div className="mx-auto w-full space-y-6">
-        <header className="flex items-center gap-5">
+        <header className="flex flex-wrap items-center gap-5">
           <button type="button" onClick={() => router.back()} aria-label="Go back" className="cursor-pointer rounded-lg p-2 hover:bg-slate-200">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
             <div>
-              <h1 className="text-xl font-semibold">{details.product_title}</h1>
-              <p className="mt-1 text-slate-500">{details.category_name}</p>
+              <h1 className="text-xl font-semibold">{formatDisplayValue(details.product_title)}</h1>
+              <p className="mt-1 text-slate-500">{formatDisplayValue(details.category_name)}</p>
             </div>
-            {details.code && <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold">{details.code}</span>}
-            {details.condition && <span className="rounded-full bg-white px-3 py-1 text-sm font-medium shadow-sm">{details.condition}</span>}
+            {details.code && <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold">{formatDisplayValue(details.code)}</span>}
+            {details.condition && <span className="rounded-full bg-white px-3 py-1 text-sm font-medium shadow-sm">{formatDisplayValue(details.condition)}</span>}
           </div>
+          <button
+            type="button"
+            onClick={() => setShowWarrantyModal(true)}
+            className="ml-auto cursor-pointer rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            Add Warranty
+          </button>
         </header>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -362,7 +395,7 @@ export default function ProductDetail({ id }) {
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             <InfoCard label="Vendor Name" value={primaryVendor.name} />
             <InfoCard label="Rating">
-              <span className="inline-flex items-center gap-2"><Star className="h-5 w-5" /> {primaryVendor.ratings ?? primaryVendor.rating ?? "—"}</span>
+              <span className="inline-flex items-center gap-2"><Star className="h-5 w-5" /> {formatDisplayValue(primaryVendor.ratings ?? primaryVendor.rating)}</span>
             </InfoCard>
             <InfoCard label="Total Sales" value={primaryVendor.total_sales} />
           </div>
@@ -396,9 +429,9 @@ export default function ProductDetail({ id }) {
                         {variant.item.images?.[0] ? <Image src={variant.item.images[0]} alt={variant.item.sku || "Variant"} fill sizes="48px" className="object-contain p-1" /> : null}
                       </div>
                     </td>
-                    <td className="max-w-72 px-4 py-4 font-mono text-xs">{variant.item.sku || "—"}</td>
-                    {attributeKeys.map((attribute) => <td key={attribute} className="px-4 py-4">{variant.item[attribute] ?? "—"}</td>)}
-                    <td className="px-4 py-4"><span className="rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">{variant.item.stocks ?? 0} units</span></td>
+                    <td className="max-w-72 px-4 py-4 font-mono text-xs">{formatDisplayValue(variant.item.sku)}</td>
+                    {attributeKeys.map((attribute) => <td key={attribute} className="px-4 py-4">{formatDisplayValue(variant.item[attribute])}</td>)}
+                    <td className="px-4 py-4"><span className="rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">{formatDisplayValue(variant.item.stocks, 0)} units</span></td>
                     <td className="px-4 py-4 font-medium">{formatPrice(variant.item.price)}</td>
                     <td className="px-4 py-4 font-medium">{formatPrice(variant.item.sell_price)}</td>
                     <td className="px-4 py-4 font-medium">{formatPrice(variant.item.mrp)}</td>
@@ -479,6 +512,13 @@ export default function ProductDetail({ id }) {
           specId={details.spec_id}
           onClose={() => setEditingVariant(null)}
           onSave={saveVariant}
+        />
+      )}
+      {showWarrantyModal && (
+        <AddWarrantyModal
+          specId={details.spec_id}
+          onClose={() => setShowWarrantyModal(false)}
+          
         />
       )}
     </main>

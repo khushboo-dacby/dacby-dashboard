@@ -10,6 +10,8 @@ export default function ItemDetailsFields({
   updateItem,
 }) {
   const imageUrls = Array.isArray(item.images) ? item.images.slice(0, 4) : [];
+  const inputValue = (value) =>
+    typeof value === "string" || typeof value === "number" ? value : "";
 
   function updateImageUrl(imageIndex, value) {
     const nextImageUrls = Array.from({ length: 4 }, (_, index) =>
@@ -26,7 +28,7 @@ export default function ItemDetailsFields({
           <label className="block text-sm font-medium mb-1">SKU</label>
           <input
             className="w-full min-w-0 border rounded px-3 py-2"
-            value={item.sku}
+            value={inputValue(item.sku)}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "sku", e.target.value)
             }
@@ -37,7 +39,7 @@ export default function ItemDetailsFields({
           <label className="block text-sm font-medium mb-1">Weight</label>
           <input
             className="w-full min-w-0 border rounded px-3 py-2"
-            value={item.weight}
+            value={inputValue(item.weight)}
             type="number"
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "weight", Number(e.target.value || 0))
@@ -48,7 +50,7 @@ export default function ItemDetailsFields({
           <label className="block text-sm font-medium mb-1">Stocks</label>
           <input
             className="w-full min-w-0 border rounded px-3 py-2"
-            value={item.stocks}
+            value={inputValue(item.stocks)}
             type="number"
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "stocks", Number(e.target.value || 0))
@@ -61,7 +63,7 @@ export default function ItemDetailsFields({
           <input
             type="number"
             className="w-full min-w-0 border rounded px-3 py-2"
-            value={item.mrp}
+            value={inputValue(item.mrp)}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "mrp", Number(e.target.value || 0))
             }
@@ -72,7 +74,7 @@ export default function ItemDetailsFields({
           <input
             type="number"
             className="w-full min-w-0 border rounded px-3 py-2"
-            value={item.price}
+            value={inputValue(item.price)}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "price", Number(e.target.value || 0))
             }
@@ -83,7 +85,7 @@ export default function ItemDetailsFields({
           <input
             type="number"
             className="w-full min-w-0 border rounded px-3 py-2"
-            value={item.sell_price}
+            value={inputValue(item.sell_price)}
             onChange={(e) =>
               updateItem(vendorIndex, itemIndex, "sell_price", Number(e.target.value || 0))
             }
@@ -111,7 +113,7 @@ export default function ItemDetailsFields({
         <textarea
           rows={3}
           className="w-full border rounded p-2"
-          value={item.yt_iframe}
+          value={inputValue(item.yt_iframe)}
           onChange={(e) =>
             updateItem(vendorIndex, itemIndex, "yt_iframe", e.target.value)
           }
