@@ -11,6 +11,94 @@ const ADD_COMBINATION_ITEM = `${BASE_URL}/api/inventory/add-combination-item`;
 const ADD_SPECIAL_EDITION = `${BASE_URL}/api/inventory/add-special-edition`;
 const FETCH_INVENTORY = `${BASE_URL}/fetchInventory`;
 const ADD_WARRANTY= `${BASE_URL}/api/warranties`;
+
+const PRODUCT_FULL_JSON = (productId) =>
+  `${BASE_URL}/api/products/${encodeURIComponent(productId)}/full-json`;
+const UPDATE_INVENTORY_DOC = (productId) =>
+  `${BASE_URL}/updateinventorydoc/${encodeURIComponent(productId)}`;
+const UPDATE_SPEC_DOC = (specId) =>
+  `${BASE_URL}/updatespecdoc/${encodeURIComponent(specId)}`;
+
+// Loads the complete product record used by the Update Inventory screen.
+// Returns { success, productId, spec_id, inventory_json, spec_json }.
+export async function getProductFullJson(productId) {
+  try {
+    const { data } = await axios.get(PRODUCT_FULL_JSON(productId));
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to load product");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to load product");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to load product";
+    throw new Error(message);
+  }
+}
+
+// Full-document replace of the Inventory doc. `inventoryJson` must be the
+// complete inventory_json object (the backend replaces the whole document and
+// preserves created_at). Never send a partial payload.
+export async function updateInventoryDoc(productId, inventoryJson) {
+  try {
+    const { data } = await axios.put(UPDATE_INVENTORY_DOC(productId), inventoryJson, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to update inventory");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to update inventory");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to update inventory";
+    throw new Error(message);
+  }
+}
+
+// Full-document replace of the Specifications doc. `specJson` must be the
+// complete spec_json object. Never send a partial payload.
+export async function updateSpecDoc(specId, specJson) {
+  try {
+    const { data } = await axios.put(UPDATE_SPEC_DOC(specId), specJson, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to update specification");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to update specification");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to update specification";
+    throw new Error(message);
+  }
+}
 export async function addWarranty(payload){
 try {
     const { data } = await axios.post(ADD_WARRANTY, payload, {
