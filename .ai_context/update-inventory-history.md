@@ -148,3 +148,10 @@ The Update Inventory feature is currently in an inventory-draft + payload-prepar
   3. `Cancel` → discards the image change and cancels save.
 - Preserved all other variant fields (`price`, `mrp`, `sell_price`, `stocks`, `weight`, `sku`, `sell`, `yt_iframe`, ratings, etc.) across same-color variants.
 
+### Specification API Integration & Clean Payload
+
+- Integrated `updateSpecDoc(specId, specJson)` API call in `saveSpec()` inside `UpdateInventory.jsx`.
+- Automatically strips `created_at` and `updated_at` properties from specification drafts during initialization and payload preparation.
+- Ensures all entries in `color_codes` default to `#000000` if no color hex is filled in.
+- Logs `Update Specification Payload` to console, updates baseline, toasts success, and refreshes `ProductContext`.
+

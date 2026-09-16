@@ -319,122 +319,115 @@ export default function SpecificationTab({ spec, onChange, specId }) {
     });
   }
 
-  function updateDescriptionSummary(value) {
+  function modifyDescriptionForm(updater) {
     setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }), summary: value };
-      syncDescriptionForm(next);
+      const next = updater(current ?? { summary: "" });
+      queueMicrotask(() => {
+        syncDescriptionForm(next);
+      });
       return next;
     });
   }
 
+  function updateDescriptionSummary(value) {
+    modifyDescriptionForm((current) => ({
+      ...current,
+      summary: value,
+    }));
+  }
+
   function addDescriptionSection(name) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-      const sectionName = String(name || "").trim();
-      if (!sectionName) return next;
-      if (!next[sectionName]) next[sectionName] = [];
-      syncDescriptionForm(next);
-      return next;
+    const sectionName = String(name || "").trim();
+    if (!sectionName) return;
+    modifyDescriptionForm((current) => {
+      if (current[sectionName]) return current;
+      return { ...current, [sectionName]: [] };
     });
   }
 
   function removeDescriptionSection(sectionName) {
-    setDescriptionForm((current) => {
-      if (!sectionName || sectionName === "summary") return current;
-      const next = { ...(current ?? { summary: "" }) };
+    if (!sectionName || sectionName === "summary") return;
+    modifyDescriptionForm((current) => {
+      if (!current[sectionName]) return current;
+      const next = { ...current };
       delete next[sectionName];
-      syncDescriptionForm(next);
       return next;
     });
   }
 
   function renameDescriptionSection(oldName, newName) {
-    setDescriptionForm((current) => {
-      if (!oldName || !newName || oldName === "summary") return current;
-      const next = { ...(current ?? { summary: "" }) };
-      const trimmed = String(newName).trim();
-      if (!trimmed || trimmed === oldName) return next;
-      if (!next[oldName]) return next;
+    if (!oldName || !newName || oldName === "summary") return;
+    const trimmed = String(newName).trim();
+    if (!trimmed || trimmed === oldName) return;
+    modifyDescriptionForm((current) => {
+      if (!current[oldName]) return current;
+      const next = { ...current };
       next[trimmed] = next[oldName];
       delete next[oldName];
-      syncDescriptionForm(next);
       return next;
     });
   }
 
   function finalizeDescriptionSection(sectionName) {
-    setDescriptionForm((current) => {
-      if (!sectionName || !current?.[sectionName]) return current;
-      const next = { ...(current ?? { summary: "" }) };
-      const trimmed = String(sectionName).trim();
-      if (!trimmed || trimmed === sectionName) return next;
+    if (!sectionName) return;
+    const trimmed = String(sectionName).trim();
+    if (!trimmed || trimmed === sectionName) return;
+    modifyDescriptionForm((current) => {
+      if (!current[sectionName]) return current;
+      const next = { ...current };
       next[trimmed] = next[sectionName];
       delete next[sectionName];
-      syncDescriptionForm(next);
       return next;
     });
   }
 
   function addDescriptionField(sectionName) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-      next[sectionName] = [...(next[sectionName] || []), { key: "", value: "", valueType: "single" }];
-      syncDescriptionForm(next);
-      return next;
-    });
+    modifyDescriptionForm((current) => ({
+      ...current,
+      [sectionName]: [...(current[sectionName] || []), { key: "", value: "", valueType: "single" }],
+    }));
   }
 
   function updateDescriptionFieldKey(sectionName, index, newKey) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-      const fields = [...(next[sectionName] || [])];
+    modifyDescriptionForm((current) => {
+      const fields = [...(current[sectionName] || [])];
       fields[index] = { ...(fields[index] ?? {}), key: newKey };
-      next[sectionName] = fields;
-      syncDescriptionForm(next);
-      return next;
+      return { ...current, [sectionName]: fields };
     });
   }
 
   function finalizeDescriptionFieldKey(sectionName, index, newKey) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-      const fields = [...(next[sectionName] || [])];
-      fields[index] = { ...(fields[index] ?? {}), key: String(newKey || "").trim() };
-      next[sectionName] = fields;
-      syncDescriptionForm(next);
-      return next;
+    const trimmedKey = String(newKey || "").trim();
+    modifyDescriptionForm((current) => {
+      const fields = [...(current[sectionName] || [])];
+      fields[index] = { ...(fields[index] ?? {}), key: trimmedKey };
+      return { ...current, [sectionName]: fields };
     });
   }
 
   function updateDescriptionFieldValue(sectionName, index, newValue) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-      const fields = [...(next[sectionName] || [])];
+    modifyDescriptionForm((current) => {
+      const fields = [...(current[sectionName] || [])];
       fields[index] = { ...(fields[index] ?? {}), value: newValue };
-      next[sectionName] = fields;
-      syncDescriptionForm(next);
-      return next;
+      return { ...current, [sectionName]: fields };
     });
   }
 
   function updateDescriptionFieldValueType(sectionName, index, newType) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-      const fields = [...(next[sectionName] || [])];
+    modifyDescriptionForm((current) => {
+      const fields = [...(current[sectionName] || [])];
       fields[index] = { ...(fields[index] ?? {}), valueType: newType };
-      next[sectionName] = fields;
-      syncDescriptionForm(next);
-      return next;
+      return { ...current, [sectionName]: fields };
     });
   }
 
   function removeDescriptionField(sectionName, index) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-      const fields = [...(next[sectionName] || [])];
-      next[sectionName] = fields.filter((_, itemIndex) => itemIndex !== index);
-      syncDescriptionForm(next);
-      return next;
+    modifyDescriptionForm((current) => {
+      const fields = [...(current[sectionName] || [])];
+      return {
+        ...current,
+        [sectionName]: fields.filter((_, itemIndex) => itemIndex !== index),
+      };
     });
   }
 
@@ -443,35 +436,29 @@ export default function SpecificationTab({ spec, onChange, specId }) {
       ? nextDescription
       : { summary: "" };
     setDescriptionForm(safeDescription);
-    syncDescriptionForm(safeDescription);
+    queueMicrotask(() => {
+      syncDescriptionForm(safeDescription);
+    });
   }
 
   function updateDescriptionTopLevelField(oldKey, newKey, newValue) {
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
-
+    modifyDescriptionForm((current) => {
+      const next = { ...current };
       if (oldKey && oldKey !== newKey && Object.prototype.hasOwnProperty.call(next, oldKey)) {
         delete next[oldKey];
       }
-
-      if (!newKey) {
-        syncDescriptionForm(next);
-        return next;
+      if (newKey) {
+        next[newKey] = newValue;
       }
-
-      next[newKey] = newValue;
-      syncDescriptionForm(next);
       return next;
     });
   }
 
   function removeDescriptionTopLevelField(key) {
     if (!key) return;
-
-    setDescriptionForm((current) => {
-      const next = { ...(current ?? { summary: "" }) };
+    modifyDescriptionForm((current) => {
+      const next = { ...current };
       delete next[key];
-      syncDescriptionForm(next);
       return next;
     });
   }
@@ -492,7 +479,7 @@ export default function SpecificationTab({ spec, onChange, specId }) {
     return Object.entries(colorCodes).map(([name, hex], index) => ({
       id: `color-${index}-${name || "empty"}`,
       name: String(name ?? ""),
-      hex: String(hex ?? ""),
+      hex: String(hex ?? "").trim() || "#000000",
     }));
   }
 
@@ -579,8 +566,8 @@ export default function SpecificationTab({ spec, onChange, specId }) {
     const nextMap = {};
 
     entries.forEach((entry) => {
-      const name = String(entry?.name ?? "");
-      const hex = String(entry?.hex ?? "");
+      const name = String(entry?.name ?? "").trim();
+      const hex = String(entry?.hex ?? "").trim() || "#000000";
 
       if (name) {
         nextMap[name] = hex;
@@ -602,7 +589,7 @@ export default function SpecificationTab({ spec, onChange, specId }) {
     entries.push({
       id: `color-${Date.now()}-${entries.length}`,
       name: "",
-      hex: "",
+      hex: "#000000",
     });
     setColorEntries(entries);
     syncColorEntries(entries);

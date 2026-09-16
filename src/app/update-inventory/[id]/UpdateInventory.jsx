@@ -228,18 +228,27 @@ export default function UpdateInventory({ id }) {
       const inventory = clone(product?.inventory_json ?? {});
       delete inventory.created_at;
       delete inventory.updated_at;
-      const spec = product?.spec_json ?? {};
-        setMeta({
-          productId: product?.productId || id,
-          specId:
-            product?.spec_id || inventory?.spec_id || spec?.spec_id || "",
+      const spec = clone(product?.spec_json ?? {});
+      delete spec.created_at;
+      delete spec.updated_at;
+      if (spec.color_codes && typeof spec.color_codes === "object") {
+        Object.keys(spec.color_codes).forEach((key) => {
+          if (!spec.color_codes[key] || typeof spec.color_codes[key] !== "string" || !spec.color_codes[key].trim()) {
+            spec.color_codes[key] = "#000000";
+          }
         });
-        const syncedInventory = recalculateInventoryDerivedFlags(inventory);
-        setInventoryDraft(syncedInventory);
-        setSpecDraft(clone(spec));
-        setInventoryBaseline(JSON.stringify(syncedInventory));
-        setSpecBaseline(JSON.stringify(spec));
-        setError("");
+      }
+      setMeta({
+        productId: product?.productId || id,
+        specId:
+          product?.spec_id || inventory?.spec_id || spec?.spec_id || "",
+      });
+      const syncedInventory = recalculateInventoryDerivedFlags(inventory);
+      setInventoryDraft(syncedInventory);
+      setSpecDraft(spec);
+      setInventoryBaseline(JSON.stringify(syncedInventory));
+      setSpecBaseline(JSON.stringify(spec));
+      setError("");
     }
 
     const cachedProduct = getProduct(id);
@@ -371,14 +380,33 @@ export default function UpdateInventory({ id }) {
       return;
     }
 
+    const targetSpecId = meta.specId || specDraft.spec_id || id;
+    if (!targetSpecId) {
+      toast.error("No specification ID available.");
+      return;
+    }
+
     setIsSavingSpec(true);
     try {
       const finalSpecPayload = clone(specDraft);
+      delete finalSpecPayload.created_at;
+      delete finalSpecPayload.updated_at;
+      if (finalSpecPayload.color_codes && typeof finalSpecPayload.color_codes === "object") {
+        Object.keys(finalSpecPayload.color_codes).forEach((key) => {
+          if (!finalSpecPayload.color_codes[key] || typeof finalSpecPayload.color_codes[key] !== "string" || !finalSpecPayload.color_codes[key].trim()) {
+            finalSpecPayload.color_codes[key] = "#000000";
+          }
+        });
+      }
       console.log("Update Specification Payload:", finalSpecPayload);
+      const response = await updateSpecDoc(targetSpecId, finalSpecPayload);
       setSpecBaseline(JSON.stringify(finalSpecPayload));
-      toast.success("Payload prepared — check console");
+      const successMessage = response?.message || "Specification saved successfully.";
+      toast.success(successMessage);
+      const refreshed = await getProductDetail(meta.productId || id);
+      setProduct(id, refreshed);
     } catch (requestError) {
-      toast.error(requestError.message || "Failed to prepare specification payload");
+      toast.error(requestError.message || "Failed to save specification");
     } finally {
       setIsSavingSpec(false);
     }
