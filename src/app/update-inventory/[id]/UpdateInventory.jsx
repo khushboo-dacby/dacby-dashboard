@@ -5,23 +5,49 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, LoaderCircle, Pencil, RotateCcw, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { getProductFullJson, updateInventoryDoc, updateSpecDoc } from "../../apis/api";
+import {
+  getProductDetail,
+  getProductFullJson,
+  updateInventoryDoc,
+  updateSpecDoc,
+} from "../../apis/api";
 import { categories } from "../../../constants/inventory";
+import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
 import EditItemDrawer from "./EditItemDrawer";
 import SpecificationTab from "./SpecificationTab";
 import WarningPopup from "../../../components/confirmation-modal/WarningPopup";
-
+import { BASE_CONDITIONS } from "../../../constants/inventory";
+import { SelectWithOther } from "@/components/fields/SelectWithOther";
+import { brandMap,typeMap } from "../../../constants/inventory";
+import {
+  normalizeProductResponse,
+  useProductContext,
+} from "../../../context/ProductContext";
 const TABS = ["Overview", "Inventory", "Specification"];
 
 // Item-level keys that are NOT variant-defining attributes. Everything else on
 // an item (color, storage, ram, ...) is treated as a dynamic attribute column.
 const NON_ATTRIBUTE_ITEM_KEYS = new Set([
-  "sku", "images", "mrp", "price", "sell_price", "weight", "stocks", "sell",
-  "rating", "rating_count", "yt_iframe", "accessories", "id", "combination_name",
-  "minimum_price", "oneDayDelivery", "one_day_delivery", "onedaydelivery",
+  "sku",
+  "images",
+  "mrp",
+  "price",
+  "sell_price",
+  "weight",
+  "stocks",
+  "sell",
+  "rating",
+  "rating_count",
+  "yt_iframe",
+  "accessories",
+  "id",
+  "combination_name",
+  "minimum_price",
+  "oneDayDelivery",
+  "one_day_delivery",
+  "onedaydelivery",
+  "price_analysis"
 ]);
-
-const BASE_CONDITIONS = ["Brand New", "Pre Owned", "Pre Ordered", "Refurbished", "Open Box"];
 
 function clone(value) {
   return typeof structuredClone === "function"
@@ -50,22 +76,32 @@ function formatDisplay(value, fallback = "—") {
 }
 
 function getVariants(inventory) {
-  return Object.entries(inventory?.vendors ?? {}).flatMap(([vendorId, vendor]) =>
-    Object.entries(vendor?.combination_offered ?? {}).flatMap(([combinationId, combination]) =>
-      Object.entries(combination ?? {}).map(([itemId, item]) => ({
-        vendorId,
-        vendor,
-        combinationId,
-        itemId,
-        item,
-      })),
-    ),
+  return Object.entries(inventory?.vendors ?? {}).flatMap(
+    ([vendorId, vendor]) =>
+      Object.entries(vendor?.combination_offered ?? {}).flatMap(
+        ([combinationId, combination]) =>
+          Object.entries(combination ?? {}).map(([itemId, item]) => ({
+            vendorId,
+            vendor,
+            combinationId,
+            itemId,
+            item,
+          })),
+      ),
   );
 }
 
+function recalculateInventoryDerivedFlags(inventory) {
+  const nextInventory = clone(inventory ?? {});
+  const items = getVariants(nextInventory).map(({ item }) => item).filter(Boolean);
+  nextInventory.in_stock = items.some((item) => Number(item?.stocks) > 0);
+  nextInventory.sell = items.some((item) => Boolean(item?.sell));
+  return nextInventory;
+}
+
 function getAttributeKeys(spec, variants) {
-  const combinationKeys = Object.values(spec?.combination ?? {}).flatMap((combination) =>
-    Object.keys(combination ?? {}),
+  const combinationKeys = Object.values(spec?.combination ?? {}).flatMap(
+    (combination) => Object.keys(combination ?? {}),
   );
   const itemKeys = variants.flatMap(({ item }) =>
     Object.keys(item ?? {}).filter((key) => !NON_ATTRIBUTE_ITEM_KEYS.has(key)),
@@ -94,7 +130,9 @@ function NumberField({ label, value, onChange }) {
       <span className="text-sm font-medium text-slate-700">{label}</span>
       <input
         type="number"
-        value={value === "" || value === null || value === undefined ? "" : value}
+        value={
+          value === "" || value === null || value === undefined ? "" : value
+        }
         onChange={(event) =>
           onChange(event.target.value === "" ? "" : Number(event.target.value))
         }
@@ -105,7 +143,8 @@ function NumberField({ label, value, onChange }) {
 }
 
 function SelectField({ label, value, options, onChange }) {
-  const merged = options.includes(value) || !value ? options : [value, ...options];
+  const merged =
+    options.includes(value) || !value ? options : [value, ...options];
   return (
     <label className="block">
       <span className="text-sm font-medium text-slate-700">{label}</span>
@@ -141,6 +180,7 @@ function ToggleField({ label, checked, onChange }) {
 
 export default function UpdateInventory({ id }) {
   const router = useRouter();
+  const { getProduct, setProduct } = useProductContext();
 
   const [meta, setMeta] = useState({ productId: id, specId: "" });
   const [inventoryDraft, setInventoryDraft] = useState(null);
@@ -157,25 +197,65 @@ export default function UpdateInventory({ id }) {
   const [isSavingInventory, setIsSavingInventory] = useState(false);
   const [isSavingSpec, setIsSavingSpec] = useState(false);
   const [pendingBack, setPendingBack] = useState(false);
+  const [addingCustomBrand, setAddingCustomBrand] = useState(false);
+  const [addingCustomType, setAddingCustomType] = useState(false);
+
+  // Apply images to every variant that shares the same color attribute.
+  const applyImagesToColor = useCallback((images, matchingColor) => {
+    setInventoryDraft((current) => {
+      const next = clone(current);
+      Object.values(next.vendors ?? {}).forEach((vendor) => {
+        Object.values(vendor.combination_offered ?? {}).forEach((combination) => {
+          Object.values(combination ?? {}).forEach((item) => {
+            const itemColor = String(item.color || "").trim().toLowerCase();
+            if (itemColor === matchingColor) {
+              item.images = [...images];
+            }
+          });
+        });
+      });
+      return recalculateInventoryDerivedFlags(next);
+    });
+  }, []);
 
   useEffect(() => {
     let ignore = false;
     setIsLoading(true);
 
+    function initializeProduct(product) {
+      if (ignore) return;
+
+      const inventory = clone(product?.inventory_json ?? {});
+      delete inventory.created_at;
+      delete inventory.updated_at;
+      const spec = product?.spec_json ?? {};
+        setMeta({
+          productId: product?.productId || id,
+          specId:
+            product?.spec_id || inventory?.spec_id || spec?.spec_id || "",
+        });
+        const syncedInventory = recalculateInventoryDerivedFlags(inventory);
+        setInventoryDraft(syncedInventory);
+        setSpecDraft(clone(spec));
+        setInventoryBaseline(JSON.stringify(syncedInventory));
+        setSpecBaseline(JSON.stringify(spec));
+        setError("");
+    }
+
+    const cachedProduct = getProduct(id);
+    if (cachedProduct) {
+      initializeProduct(cachedProduct);
+      setIsLoading(false);
+      return () => {
+        ignore = true;
+      };
+    }
+
     getProductFullJson(id)
       .then((response) => {
         if (ignore) return;
-        const inventory = response?.inventory_json ?? {};
-        const spec = response?.spec_json ?? {};
-        setMeta({
-          productId: response?.productId || id,
-          specId: response?.spec_id || inventory?.spec_id || spec?.spec_id || "",
-        });
-        setInventoryDraft(clone(inventory));
-        setSpecDraft(clone(spec));
-        setInventoryBaseline(JSON.stringify(inventory));
-        setSpecBaseline(JSON.stringify(spec));
-        setError("");
+        setProduct(id, response);
+        initializeProduct(normalizeProductResponse(id, response));
       })
       .catch((requestError) => {
         if (!ignore) setError(requestError.message || "Failed to load product");
@@ -187,16 +267,17 @@ export default function UpdateInventory({ id }) {
     return () => {
       ignore = true;
     };
-  }, [id, retryCount]);
+  }, [getProduct, id, retryCount, setProduct]);
 
   const variants = useMemo(() => getVariants(inventoryDraft), [inventoryDraft]);
   const attributeKeys = useMemo(
     () => getAttributeKeys(specDraft, variants),
     [specDraft, variants],
   );
-
   const inventoryDirty = useMemo(
-    () => inventoryDraft !== null && JSON.stringify(inventoryDraft) !== inventoryBaseline,
+    () =>
+      inventoryDraft !== null &&
+      JSON.stringify(inventoryDraft) !== inventoryBaseline,
     [inventoryDraft, inventoryBaseline],
   );
   const specDirty = useMemo(
@@ -222,8 +303,13 @@ export default function UpdateInventory({ id }) {
   const applyItem = useCallback((vendorId, combinationId, itemId, nextItem) => {
     setInventoryDraft((current) => {
       const next = clone(current);
-      next.vendors[vendorId].combination_offered[combinationId][itemId] = nextItem;
-      return next;
+      const existingItem = next.vendors?.[vendorId]?.combination_offered?.[combinationId]?.[itemId] ?? {};
+      const mergedItem = {
+        ...existingItem,
+        ...nextItem,
+      };
+      next.vendors[vendorId].combination_offered[combinationId][itemId] = mergedItem;
+      return recalculateInventoryDerivedFlags(next);
     });
   }, []);
 
@@ -233,13 +319,17 @@ export default function UpdateInventory({ id }) {
   }
 
   function discardAll() {
-    setInventoryDraft(inventoryBaseline ? JSON.parse(inventoryBaseline) : inventoryDraft);
+    setInventoryDraft(
+      inventoryBaseline ? JSON.parse(inventoryBaseline) : inventoryDraft,
+    );
     setSpecDraft(specBaseline ? JSON.parse(specBaseline) : specDraft);
     toast.message("Reverted unsaved changes");
   }
 
   function collectSkus(inventory) {
-    return getVariants(inventory).map(({ item }) => String(item?.sku || "").trim());
+    return getVariants(inventory).map(({ item }) =>
+      String(item?.sku || "").trim(),
+    );
   }
 
   async function saveInventory() {
@@ -250,36 +340,45 @@ export default function UpdateInventory({ id }) {
     }
     const duplicates = skus.filter((sku, index) => skus.indexOf(sku) !== index);
     if (duplicates.length) {
-      toast.error(`Duplicate SKU in this product: ${[...new Set(duplicates)].join(", ")}`);
+      toast.error(
+        `Duplicate SKU in this product: ${[...new Set(duplicates)].join(", ")}`,
+      );
       return;
     }
 
-    setIsSavingInventory(true);
-    try {
-      const payload = clone(inventoryDraft);
-      const response = await updateInventoryDoc(meta.productId, payload);
-      setInventoryBaseline(JSON.stringify(inventoryDraft));
-      toast.success(response?.message || "Inventory updated successfully");
-    } catch (requestError) {
-      toast.error(requestError.message || "Failed to update inventory");
-    } finally {
-      setIsSavingInventory(false);
-    }
+      setIsSavingInventory(true);
+      try {
+        const finalInventoryPayload = recalculateInventoryDerivedFlags(clone(inventoryDraft));
+        console.log("Update Inventory Payload:", finalInventoryPayload);
+        const response = await updateInventoryDoc(meta.productId, finalInventoryPayload);
+        // Update baseline and notify user
+        setInventoryBaseline(JSON.stringify(finalInventoryPayload));
+        const successMessage = response?.message || "Inventory saved successfully.";
+        toast.success(successMessage);
+        // Refresh product data in context to reflect changes in ProductDetail view
+        const refreshed = await getProductDetail(meta.productId);
+        setProduct(id, refreshed);
+      } catch (requestError) {
+        toast.error(requestError.message || "Failed to prepare inventory payload");
+      } finally {
+        setIsSavingInventory(false);
+      }
   }
 
   async function saveSpec() {
-    if (!meta.specId) {
-      toast.error("Missing spec_id — cannot save specification.");
+    if (!specDraft) {
+      toast.error("No specification draft available.");
       return;
     }
+
     setIsSavingSpec(true);
     try {
-      const payload = clone(specDraft);
-      const response = await updateSpecDoc(meta.specId, payload);
-      setSpecBaseline(JSON.stringify(specDraft));
-      toast.success(response?.message || "Specification updated successfully");
+      const finalSpecPayload = clone(specDraft);
+      console.log("Update Specification Payload:", finalSpecPayload);
+      setSpecBaseline(JSON.stringify(finalSpecPayload));
+      toast.success("Payload prepared — check console");
     } catch (requestError) {
-      toast.error(requestError.message || "Failed to update specification");
+      toast.error(requestError.message || "Failed to prepare specification payload");
     } finally {
       setIsSavingSpec(false);
     }
@@ -296,7 +395,8 @@ export default function UpdateInventory({ id }) {
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 text-blue-600">
-        <LoaderCircle className="mr-3 h-7 w-7 animate-spin" /> Loading inventory…
+        <LoaderCircle className="mr-3 h-7 w-7 animate-spin" /> Loading
+        inventory…
       </main>
     );
   }
@@ -316,8 +416,11 @@ export default function UpdateInventory({ id }) {
     );
   }
 
-  const categoryOptions = categories.map((category) => category.name || category);
-
+  const categoryOptions = categories.map(
+    (category) => category.name || category,
+  );
+const brandOptions = brandMap[inventoryDraft.category_name] || [];
+const typeOptions = typeMap[inventoryDraft.category_name] || [];
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 pb-28 text-slate-950 sm:px-10 lg:px-20">
       <div className="mx-auto w-full space-y-6">
@@ -332,8 +435,12 @@ export default function UpdateInventory({ id }) {
           </button>
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
             <div>
-              <h1 className="text-xl font-semibold">{formatDisplay(inventoryDraft.product_title)}</h1>
-              <p className="mt-1 text-slate-500">{formatDisplay(inventoryDraft.category_name)}</p>
+              <h1 className="text-xl font-semibold">
+                {formatDisplay(inventoryDraft.product_title)}
+              </h1>
+              <p className="mt-1 text-slate-500">
+                {formatDisplay(inventoryDraft.category_name)}
+              </p>
             </div>
             {inventoryDraft.code && (
               <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold">
@@ -350,10 +457,13 @@ export default function UpdateInventory({ id }) {
           role="note"
           className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
         >
-          Specifications are shared by <span className="font-semibold">spec_id</span>. Editing the
+          Specifications are shared by{" "}
+          <span className="font-semibold">spec_id</span>. Editing the
           Specification tab may affect other listings that share{" "}
-          <span className="font-mono font-semibold">{formatDisplay(meta.specId)}</span>. Inventory
-          and Specification are saved to separate backend documents.
+          <span className="font-mono font-semibold">
+            {formatDisplay(meta.specId)}
+          </span>
+          . Inventory and Specification are saved to separate backend documents.
         </div>
 
         <nav className="flex gap-2 rounded-2xl bg-slate-100 p-1.5">
@@ -387,29 +497,41 @@ export default function UpdateInventory({ id }) {
                 <TextField
                   label="Product Title"
                   value={inventoryDraft.product_title}
-                  onChange={(value) => setInventoryField("product_title", value)}
+                  onChange={(value) =>
+                    setInventoryField("product_title", value)
+                  }
                 />
                 <SelectField
-                  label="Category"
+                  label="Category (read-only)"
                   value={inventoryDraft.category_name}
                   options={categoryOptions}
-                  onChange={(value) => setInventoryField("category_name", value)}
+                  // onChange={(value) => setInventoryField("category_name", value)}
+                  onChange={() => {}}
                 />
                 <SelectField
-                  label="Condition"
+                  label="Condition (read-only)"
                   value={inventoryDraft.condition}
                   options={BASE_CONDITIONS}
-                  onChange={(value) => setInventoryField("condition", value)}
+                  // onChange={(value) => setInventoryField("condition", value)}
+                  onChange={() => {}}
                 />
-                <TextField
+                <SelectWithOther
                   label="Brand"
                   value={inventoryDraft.brand}
+                  options={brandOptions}
+                  addingCustom={addingCustomBrand}
+                  onCustomToggle={setAddingCustomBrand}
                   onChange={(value) => setInventoryField("brand", value)}
+                  customPlaceholder="Enter another brand"
                 />
-                <TextField
+                <SelectWithOther
                   label="Type"
                   value={inventoryDraft.type}
+                  options={typeOptions}
+                  addingCustom={addingCustomType}
+                  onCustomToggle={setAddingCustomType}
                   onChange={(value) => setInventoryField("type", value)}
+                  customPlaceholder="Enter another type"
                 />
                 <TextField
                   label="Code (read-only)"
@@ -417,7 +539,7 @@ export default function UpdateInventory({ id }) {
                   onChange={() => {}}
                 />
               </div>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {/* <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <ToggleField
                   label="Listed for sale (sell)"
                   checked={inventoryDraft.sell}
@@ -428,7 +550,7 @@ export default function UpdateInventory({ id }) {
                   checked={inventoryDraft.in_stock}
                   onChange={(value) => setInventoryField("in_stock", value)}
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -447,24 +569,73 @@ export default function UpdateInventory({ id }) {
                 <NumberField
                   label="Max Sell Price"
                   value={inventoryDraft.sell_max_price}
-                  onChange={(value) => setInventoryField("sell_max_price", value)}
+                  onChange={(value) =>
+                    setInventoryField("sell_max_price", value)
+                  }
                 />
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            {/* <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Product Video</h2>
               <label className="mt-4 block">
-                <span className="text-sm font-medium text-slate-700">YouTube embed (yt_iframe)</span>
+                <span className="text-sm font-medium text-slate-700">
+                  YouTube embed (yt_iframe)
+                </span>
                 <textarea
                   value={inventoryDraft.yt_iframe ?? ""}
-                  onChange={(event) => setInventoryField("yt_iframe", event.target.value)}
+                  onChange={(event) =>
+                    setInventoryField("yt_iframe", event.target.value)
+                  }
                   rows={4}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   placeholder="<iframe …></iframe>"
                 />
               </label>
-            </div>
+            </div> */}
+          
+<div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 className="text-lg font-semibold">Product Video</h2>
+
+  <label className="mt-4 block">
+    <span className="text-sm font-medium text-slate-700">
+      YouTube embed (yt_iframe)
+    </span>
+
+    <textarea
+      value={inventoryDraft.yt_iframe ?? ""}
+      onChange={(event) =>
+        setInventoryField("yt_iframe", event.target.value)
+      }
+      rows={4}
+      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      placeholder='<iframe src="https://www.youtube.com/embed/VIDEO_ID" ...></iframe>'
+    />
+  </label>
+
+  {inventoryDraft.yt_iframe && (
+    <div className="mt-5">
+      <p className="mb-2 text-sm font-medium text-slate-700">
+        Preview
+      </p>
+
+      <div className="aspect-video w-1/2 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+        <iframe
+          src={
+            inventoryDraft.yt_iframe.match(
+              /src=["']([^"']+)["']/
+            )?.[1] || null
+          }
+          title="Product Video"
+          className="h-full w-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  )}
+</div>
+
           </section>
         )}
 
@@ -472,15 +643,14 @@ export default function UpdateInventory({ id }) {
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold">Items</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Vendor → combination → item, rendered from the live document. Edit any item, then save
-              inventory.
+              Edit any item, then save inventory.
             </p>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-max text-left text-sm">
                 <thead className="border-b border-slate-200 text-slate-500">
                   <tr>
                     <th className="px-4 py-3 font-medium">Image</th>
-                    <th className="px-4 py-3 font-medium">Vendor</th>
+                    {/* <th className="px-4 py-3 font-medium">Vendor</th> */}
                     <th className="px-4 py-3 font-medium">Combination</th>
                     <th className="px-4 py-3 font-medium">SKU</th>
                     {attributeKeys.map((attribute) => (
@@ -489,7 +659,9 @@ export default function UpdateInventory({ id }) {
                       </th>
                     ))}
                     <th className="px-4 py-3 font-medium">Stock</th>
-                    <th className="px-4 py-3 font-medium">Price</th>
+                     <th className="px-4 py-3 font-medium">MRP</th>
+                    <th className="px-4 py-3 font-medium">Buy Price</th>
+                    <th className="px-4 py-3 font-medium">Sell Price</th>
                     <th className="px-4 py-3 font-medium">Sell</th>
                     <th className="px-4 py-3 font-medium">Action</th>
                   </tr>
@@ -513,8 +685,12 @@ export default function UpdateInventory({ id }) {
                           ) : null}
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-xs text-slate-500">{variant.vendorId}</td>
-                      <td className="px-4 py-4 text-xs text-slate-500">{variant.combinationId}</td>
+                      {/* <td className="px-4 py-4 text-xs text-slate-500">
+                        {variant.vendorId}
+                      </td> */}
+                      <td className="px-4 py-4 text-xs text-slate-500">
+                        {variant.combinationId}
+                      </td>
                       <td className="max-w-72 px-4 py-4 font-mono text-xs">
                         {formatDisplay(variant.item.sku)}
                       </td>
@@ -528,8 +704,18 @@ export default function UpdateInventory({ id }) {
                           {formatDisplay(variant.item.stocks, 0)} units
                         </span>
                       </td>
-                      <td className="px-4 py-4 font-medium">{formatPrice(variant.item.price)}</td>
-                      <td className="px-4 py-4">{variant.item.sell ? "Yes" : "No"}</td>
+                      <td className="px-4 py-4 font-medium">
+                        {formatPrice(variant.item.mrp)}
+                      </td>
+                      <td className="px-4 py-4 font-medium">
+                        {formatPrice(variant.item.price)}
+                      </td>
+                      <td className="px-4 py-4 font-medium">
+                        {formatPrice(variant.item.sell_price)}
+                      </td>
+                      <td className="px-4 py-4">
+                        {variant.item.sell ? "Yes" : "No"}
+                      </td>
                       <td className="px-4 py-4">
                         <button
                           type="button"
@@ -544,14 +730,20 @@ export default function UpdateInventory({ id }) {
                 </tbody>
               </table>
               {variants.length === 0 && (
-                <p className="py-10 text-center text-sm text-slate-500">No items found.</p>
+                <p className="py-10 text-center text-sm text-slate-500">
+                  No items found.
+                </p>
               )}
             </div>
           </section>
         )}
 
         {activeTab === "Specification" && (
-          <SpecificationTab spec={specDraft} onChange={setSpecDraft} specId={meta.specId} />
+          <SpecificationTab
+            spec={specDraft}
+            onChange={setSpecDraft}
+            specId={meta.specId}
+          />
         )}
       </div>
 
@@ -560,8 +752,12 @@ export default function UpdateInventory({ id }) {
           <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-medium text-slate-600">
               Unsaved changes
-              {inventoryDirty && <span className="ml-2 text-amber-600">• inventory</span>}
-              {specDirty && <span className="ml-2 text-amber-600">• specification</span>}
+              {inventoryDirty && (
+                <span className="ml-2 text-amber-600">• inventory</span>
+              )}
+              {specDirty && (
+                <span className="ml-2 text-amber-600">• specification</span>
+              )}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -607,15 +803,21 @@ export default function UpdateInventory({ id }) {
           key={`${editingVariant.vendorId}-${editingVariant.combinationId}-${editingVariant.itemId}`}
           variant={editingVariant}
           attributeKeys={attributeKeys}
+          allVariants={variants}
           allSkus={collectSkus(inventoryDraft)}
           onClose={() => setEditingVariant(null)}
-          onApply={(nextItem) => {
+          onApply={(nextItem, options) => {
             applyItem(
               editingVariant.vendorId,
               editingVariant.combinationId,
               editingVariant.itemId,
               nextItem,
             );
+
+            if (options?.applyToAllSameColor && options?.color && options?.images) {
+              applyImagesToColor(options.images, options.color.toLowerCase());
+            }
+
             setEditingVariant(null);
           }}
         />

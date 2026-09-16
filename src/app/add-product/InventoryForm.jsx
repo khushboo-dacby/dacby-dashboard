@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import DescriptionSection from "@/components/inventory/DescriptionSection";
+import DescriptionEditor from "@/components/inventory/DescriptionEditor";
 import FormActions from "@/components/inventory/FormActions";
 import ProductFields from "@/components/inventory/ProductFields";
 import QuestionsSection from "@/components/inventory/QuestionsSection";
@@ -91,6 +91,16 @@ function removeEmptyDescriptionSections(description) {
   }, {});
 }
 
+function hasValidCombinationAttributes(combination) {
+  return (combination?.attributes || []).some((attribute) => {
+    const key = normalizeAttributeKey(attribute?.key);
+    const values = Array.isArray(attribute?.values)
+      ? attribute.values.filter((value) => String(value ?? "").trim())
+      : [];
+    return Boolean(key && values.length);
+  });
+}
+
 export default function InventoryForm() {
   
   const [resp, setResp] = useState(null);
@@ -171,6 +181,7 @@ export default function InventoryForm() {
 
   const {
     description,
+    setDescription,
     resetDescription,
     updateSummary,
     addDescriptionSection,
@@ -183,6 +194,8 @@ export default function InventoryForm() {
     updateDescriptionFieldValue,
     updateDescriptionFieldValueType,
     removeDescriptionField,
+    updateDescriptionTopLevelField,
+    removeDescriptionTopLevelField,
   } = useDescriptionState();
 
   useEffect(() => {
@@ -831,7 +844,7 @@ export default function InventoryForm() {
   function updateCombinations(updater) {
     setSpecification((prev) => {
       const previousCombinations = prev.combinations || [];
-      const combinations = updater(previousCombinations) || [];
+        const combinations = updater(previousCombinations) || [];
       const previousNames = new Set(
         previousCombinations
           .map((combination) => combination?.name)
@@ -1266,22 +1279,24 @@ const isEmptyArray = (arr) =>
           }
           return acc;
         }, {}),
-        combination: (specification.combinations || []).reduce((acc, c) => {
-          const key =
-            c.name || `combination_${Math.random().toString(36).slice(2, 8)}`;
-          const obj = {};
-          (c.attributes || []).forEach((a) => {
-            if (!a.key) return;
-            obj[normalizeAttributeKey(a.key)] = a.values || [];
-          });
-          if (c.include_colors)
-            obj.color = (specification.color_codes || []).map((cc) => ({
-              name: formatAttributeValue(cc.name),
-              hex: cc.hex,
-            }));
-          acc[key] = obj;
-          return acc;
-        }, {}),
+        combination: (specification.combinations || [])
+          .filter(hasValidCombinationAttributes)
+          .reduce((acc, c) => {
+            const key =
+              c.name || `combination_${Math.random().toString(36).slice(2, 8)}`;
+            const obj = {};
+            (c.attributes || []).forEach((a) => {
+              if (!a.key) return;
+              obj[normalizeAttributeKey(a.key)] = a.values || [];
+            });
+            if (c.include_colors)
+              obj.color = (specification.color_codes || []).map((cc) => ({
+                name: formatAttributeValue(cc.name),
+                hex: cc.hex,
+              }));
+            acc[key] = obj;
+            return acc;
+          }, {}),
         description: descriptionNormalized,
         minimum_price: fields.minimum_price ? Number(fields.minimum_price) : 0,
         questions: (function () {
@@ -1499,8 +1514,10 @@ const isEmptyArray = (arr) =>
             removeOption={removeOption}
           />
 
-          <DescriptionSection
+          <DescriptionEditor
             description={description}
+            value={description}
+            onChange={setDescription}
             updateSummary={updateSummary}
             addDescriptionSection={addDescriptionSection}
             removeDescriptionSection={removeDescriptionSection}

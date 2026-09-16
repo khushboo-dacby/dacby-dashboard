@@ -6,6 +6,11 @@ import { ArrowLeft, CheckCircle2, Copy, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import { addProductToInventory } from "@/app/apis/api";
 import ImagePreview from "@/components/inventory/ImagePreview";
+import DescriptionEditor, {
+  convertDescriptionObjectToFormState,
+  serializeDescriptionState,
+} from "@/components/inventory/DescriptionEditor";
+import useDescriptionState from "@/hooks/useDescriptionState";
 
 const PS5_DESCRIPTION_TEMPLATE = {
   Packaging: "Pre-Owned Game Case",
@@ -282,6 +287,22 @@ export default function AddPreorderCd({ categoryName, code }) {
     descriptionTemplate = PREORDER_DESCRIPTION_JSON;
   }
   const [formData, setFormData] = useState(makeEmptyForm(!isPreOrder));
+  const initialDescription = convertDescriptionObjectToFormState({});
+  const {
+    description,
+    resetDescription,
+    updateSummary,
+    addDescriptionSection,
+    removeDescriptionSection,
+    renameDescriptionSection,
+    finalizeDescriptionSection,
+    addDescriptionField,
+    updateDescriptionFieldKey,
+    finalizeDescriptionFieldKey,
+    updateDescriptionFieldValue,
+    updateDescriptionFieldValueType,
+    removeDescriptionField,
+  } = useDescriptionState(initialDescription);
   const [descriptionError, setDescriptionError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewPayload, setPreviewPayload] = useState(null);
@@ -309,6 +330,7 @@ export default function AddPreorderCd({ categoryName, code }) {
 
   function handleReset() {
     setFormData(makeEmptyForm(!isPreOrder));
+    resetDescription(initialDescription);
     setDescriptionError("");
     setIsSubmitting(false);
     setPreviewPayload(null);
@@ -342,7 +364,7 @@ export default function AddPreorderCd({ categoryName, code }) {
 
     if (requiresDescription) {
       try {
-        description = JSON.parse(formData.descriptionJson);
+        description = serializeDescriptionState(description);
 
         if (!description || Array.isArray(description)) {
           throw new Error("Description must be an object");
@@ -577,10 +599,9 @@ export default function AddPreorderCd({ categoryName, code }) {
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="font-semibold">Description JSON *</p>
+                <p className="font-semibold">Description *</p>
                 <p className="mt-1 text-sm text-slate-500">
-                  Enter product title, copy generation prompt, then paste its
-                  JSON result here.
+                  Use Form Mode or JSON Mode. Preview description before submitting.
                 </p>
               </div>
               <button
@@ -588,23 +609,23 @@ export default function AddPreorderCd({ categoryName, code }) {
                 onClick={handleCopyDescription}
                 className="flex cursor-pointer items-center gap-2 rounded-lg border border-indigo-300 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
               >
-                <Copy className="h-4 w-4" /> Copy JSON
+                <Copy className="h-4 w-4" /> Copy Prompt for Description
               </button>
             </div>
-            <textarea
-              value={formData.descriptionJson}
-              placeholder={descriptionTemplate}
-              onChange={(event) => {
-                handleFormChange("descriptionJson", event.target.value);
-                setDescriptionError("");
-              }}
-              rows={20}
-              spellCheck={false}
-              className={`w-full rounded-xl border bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none ${
-                descriptionError
-                  ? "border-red-500"
-                  : "border-slate-700 focus:border-indigo-500"
-              }`}
+            <DescriptionEditor
+              description={description}
+              updateSummary={updateSummary}
+              addDescriptionSection={addDescriptionSection}
+              removeDescriptionSection={removeDescriptionSection}
+              renameDescriptionSection={renameDescriptionSection}
+              finalizeDescriptionSection={finalizeDescriptionSection}
+              addDescriptionField={addDescriptionField}
+              updateDescriptionFieldKey={updateDescriptionFieldKey}
+              finalizeDescriptionFieldKey={finalizeDescriptionFieldKey}
+              updateDescriptionFieldValue={updateDescriptionFieldValue}
+              updateDescriptionFieldValueType={updateDescriptionFieldValueType}
+              removeDescriptionField={removeDescriptionField}
+              resetDescription={resetDescription}
             />
             {descriptionError && (
               <p className="mt-2 text-sm font-medium text-red-600">

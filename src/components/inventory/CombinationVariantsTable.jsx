@@ -32,7 +32,15 @@ function expandAttributes(attributes, index = 0, current = {}) {
 }
 
 function getCombinationRows(combinations) {
-  return combinations.flatMap((combination) =>
+  return combinations.filter((combination) =>
+    (combination?.attributes || []).some((attribute) => {
+      const key = normalizeAttributeKey(attribute?.key);
+      const values = Array.isArray(attribute?.values)
+        ? attribute.values.filter((value) => String(value ?? "").trim())
+        : [];
+      return Boolean(key && values.length);
+    })
+  ).flatMap((combination) =>
     expandAttributes(combination.attributes || []).map((attributes) => ({
       key: `${combination.name}:${Object.entries(attributes).map(([key, value]) => `${key}=${value}`).join("|")}`,
       combinationName: combination.name,
@@ -195,11 +203,10 @@ export default function CombinationVariantsTable({
                     <button
                       type="button"
                       onClick={() => setActiveRow(row)}
-                      className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 font-semibold ${
-                        savedItem
+                      className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 font-semibold ${savedItem
                           ? "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
                           : "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                      }`}
+                        }`}
                     >
                       {savedItem ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                       {savedItem ? "Edit Variant" : "Add Variant"}

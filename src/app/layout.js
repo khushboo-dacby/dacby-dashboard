@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "react-photo-view/dist/react-photo-view.css";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { ProductProvider } from "../context/ProductContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,8 +25,9 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}
-         <Toaster richColors position="top-right" />
+      <body className="min-h-full flex flex-col">
+        <ProductProvider>{children}</ProductProvider>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

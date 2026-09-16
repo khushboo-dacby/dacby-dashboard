@@ -32,14 +32,27 @@ function DetailValue({ value }) {
     return (
       <ul className="list-disc space-y-1.5 pl-5">
         {value.map((item, index) => (
-          <li key={`${String(item)}-${index}`}>{String(item)}</li>
+          <li key={`${String(item)}-${index}`}>
+            <DetailValue value={item} />
+          </li>
         ))}
       </ul>
     );
   }
 
   if (value && typeof value === "object") {
-    return <span>{JSON.stringify(value)}</span>;
+    return (
+      <dl className="space-y-3 rounded-lg bg-slate-50 px-4 py-3">
+        {Object.entries(value).map(([key, childValue]) => (
+          <div key={key} className="grid gap-1 sm:grid-cols-[140px_1fr] sm:gap-4">
+            <dt className="font-medium text-slate-500">{titleCase(key)}</dt>
+            <dd className="text-slate-800">
+              <DetailValue value={childValue} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    );
   }
 
   return <span>{String(value ?? "—")}</span>;

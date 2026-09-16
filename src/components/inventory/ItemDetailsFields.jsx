@@ -91,23 +91,12 @@ export default function ItemDetailsFields({
             }
           />
         </div>
-        <div className="flex items-center gap-2 md:col-span-3">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={!!item.sell}
-              onChange={(e) =>
-                updateItem(vendorIndex, itemIndex, "sell", e.target.checked)
-              }
-            />{" "}
-            <span className="text-sm">is item for sell?</span>
-          </label>
-        </div>
+       
         {/* variant minimum_price removed; product-level min shown next to Max Sell Price */}
       </div>
 
       <div className="mt-2">
-        <label className="block text-sm mb-1">
+        <label className="block text-sm mb-1 font-semibold">
           Item YouTube Iframe (optional)
         </label>
         <textarea
@@ -120,7 +109,7 @@ export default function ItemDetailsFields({
         />
       </div>
       <div className="mt-2">
-        <p className="mb-1 block text-sm">Item Images</p>
+        <p className="mb-1 block text-sm font-semibold">Item Images</p>
         <ImagePreview imageUrls={imageUrls} />
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {Array.from({ length: 4 }, (_, imageIndex) => (
@@ -143,6 +132,33 @@ export default function ItemDetailsFields({
           ))}
         </div>
       </div>
+      <div className="md:col-span-3 mt-2">
+          <p className="mb-2 text-sm font-semibold">Available for Sell</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => updateItem(vendorIndex, itemIndex, "sell", true)}
+              className={`w-20 cursor-pointer rounded-xl border-2 px-3 py-2 text-sm font-semibold ${
+                item.sell
+                  ? "border-green-600 bg-green-50 text-green-700"
+                  : "border-slate-200 bg-white text-slate-500"
+              }`}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              onClick={() => updateItem(vendorIndex, itemIndex, "sell", false)}
+              className={`w-20 cursor-pointer rounded-xl border-2 px-3 py-2 text-sm font-semibold ${
+                !item.sell
+                  ? "border-red-600 bg-red-50 text-red-700"
+                  : "border-slate-200 bg-white text-slate-500"
+              }`}
+            >
+              No
+            </button>
+          </div>
+        </div>
     </>
   );
 }

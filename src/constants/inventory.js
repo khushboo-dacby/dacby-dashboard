@@ -16,7 +16,7 @@ export function emptyItem() {
     sell: false,
   };
 }
-
+export const BASE_CONDITIONS = ["Pre Owned", "Pre Order", "Open Box", "New"];
 export const categories = [
   { name: "PS5 CDs", code: "D001Y" },
   { name: "PS4 CDs", code: "D002Y" },
@@ -42,7 +42,7 @@ export const brandMap = {
     "Sony",
     "Fujifilm",
     "Insta360",
-  ],
+  ],  
   Consoles: ["Microsoft", "Sony", "Nintendo", "Asus", "Valve"],
 };
 

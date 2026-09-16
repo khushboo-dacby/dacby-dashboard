@@ -21,7 +21,7 @@ function getOptimizedImageUrl(src) {
   return `/_next/image?url=${encodeURIComponent(src)}&w=2048&q=75`;
 }
 
-export default function ImagePreview({ imageUrls }) {
+export default function ImagePreview({ imageUrls, hw="h-20 w-20" }) {
   const previewableImages = imageUrls
     .map((imageUrl) => String(imageUrl || "").trim())
     .filter(isPreviewableImageUrl);
@@ -66,7 +66,7 @@ export default function ImagePreview({ imageUrls }) {
           <PhotoView key={`${imageUrl}-${imageIndex}`} src={getOptimizedImageUrl(imageUrl)}>
             <button
               type="button"
-              className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className={`relative flex ${hw} shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500`}
               aria-label={`Preview item image ${imageIndex + 1}`}
             >
               <Image

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Eye, LoaderCircle, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useSWR from "swr";
 import { deleteProduct as deleteProductApi, fetchInventory, searchProducts } from "../apis/api";
 import { toast } from "sonner";
 import { categories } from "../../constants/inventory";
@@ -42,6 +43,10 @@ function getProductsFromResponse(response) {
   }
 
   return products;
+}
+
+function fetchInitialInventory() {
+  return fetchInventory();
 }
 
 function ProductRow({ product, onDelete }) {
@@ -126,8 +131,27 @@ function ProductRow({ product, onDelete }) {
 }
 
 export default function ProductInventory() {
+  const {
+    data: inventoryResponse,
+    error: inventoryFetchError,
+    mutate: mutateInventory,
+  } = useSWR("product-inventory:first-page", fetchInitialInventory, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+    shouldRetryOnError: false,
+  });
+  const initialPage = inventoryResponse
+    ? {
+        products: getProductsFromResponse(inventoryResponse),
+        hasNext:
+          inventoryResponse?.hasNext ??
+          inventoryResponse?.hasMore ??
+          getProductsFromResponse(inventoryResponse).length > 0,
+      }
+    : null;
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [pages, setPages] = useState([]);
+  const [pages, setPages] = useState(() => (initialPage ? [initialPage] : []));
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingLabel, setLoadingLabel] = useState("Loading inventory...");
@@ -160,6 +184,10 @@ export default function ProductInventory() {
       const hasNext = response?.hasNext ?? response?.hasMore ?? products.length > 0;
       const nextPage = { products, hasNext };
 
+      if (pageIndex === 0 || reset) {
+        await mutateInventory(response, { revalidate: false });
+      }
+
       setPages((existingPages) => {
         if (reset) return [nextPage];
         const updatedPages = existingPages.slice(0, pageIndex);
@@ -172,29 +200,17 @@ export default function ProductInventory() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [mutateInventory]);
 
   useEffect(() => {
-    let ignore = false;
+    if (!inventoryResponse) return;
 
-    fetchInventory()
-      .then((response) => {
-        if (ignore) return;
-        const products = getProductsFromResponse(response);
-        const hasNext = response?.hasNext ?? response?.hasMore ?? products.length > 0;
-        setPages([{ products, hasNext }]);
-      })
-      .catch((requestError) => {
-        if (!ignore) setError(requestError.message || "Failed to fetch inventory");
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [loadPage]);
+    const products = getProductsFromResponse(inventoryResponse);
+    const hasNext = inventoryResponse?.hasNext ?? inventoryResponse?.hasMore ?? products.length > 0;
+    setPages((existingPages) => existingPages.length > 0 ? existingPages : [{ products, hasNext }]);
+    setIsLoading(false);
+    setError("");
+  }, [inventoryResponse]);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -222,6 +238,8 @@ export default function ProductInventory() {
   }, [searchQuery]);
 
   const currentPageData = pages[currentPage] ?? { products: [], hasNext: false };
+  const listError = error || inventoryFetchError?.message || "";
+  const listLoading = isLoading && !inventoryResponse;
 
   const filteredProducts = useMemo(
     () => selectedCategory
@@ -248,6 +266,28 @@ export default function ProductInventory() {
   async function deleteProduct(product) {
     try {
       const response = await deleteProductApi(encodeURIComponent(product.id));
+      await mutateInventory(
+        (currentResponse) => {
+          const products = getProductsFromResponse(currentResponse).filter(
+            (item) => item.id !== product.id,
+          );
+          if (Array.isArray(currentResponse)) return products;
+          if (Array.isArray(currentResponse?.inventory)) {
+            return { ...currentResponse, inventory: products };
+          }
+          if (Array.isArray(currentResponse?.data?.inventory)) {
+            return {
+              ...currentResponse,
+              data: { ...currentResponse.data, inventory: products },
+            };
+          }
+          if (Array.isArray(currentResponse?.data)) {
+            return { ...currentResponse, data: products };
+          }
+          return currentResponse;
+        },
+        { revalidate: false },
+      );
       setPages((existingPages) => existingPages.map((page, pageIndex) =>
         pageIndex === currentPage
           ? { ...page, products: page.products.filter((item) => item.id !== product.id) }
@@ -284,7 +324,7 @@ export default function ProductInventory() {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">Product Inventory</h1>
-            <p className="mt-2 text-slate-600">Manage and view all your products in one place.</p>
+            {/* <p className="mt-2 text-slate-600">Manage and view all your products in one place.</p> */}
           </div>
           <AddNewProduct />
         </div>
@@ -382,7 +422,7 @@ export default function ProductInventory() {
           />
         )}
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        {/* <div className="mt-4 flex flex-wrap items-center gap-3">
           <label className="sr-only" htmlFor="category-filter">Filter by category</label>
           <select
             id="category-filter"
@@ -407,7 +447,7 @@ export default function ProductInventory() {
             <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </button>
-        </div>
+        </div> */}
 
         <div className="mt-7 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="relative min-h-0 flex-1 overflow-auto">
@@ -426,19 +466,19 @@ export default function ProductInventory() {
                 {filteredProducts.map((product) => <ProductRow key={product.id} product={product} onDelete={deleteProduct} />)}
               </tbody>
             </table>
-            {isLoading && (
+            {listLoading && (
               <div className="absolute inset-0 z-20 flex items-center justify-center gap-3 bg-white/80 text-sm font-medium text-blue-600 backdrop-blur-[1px]">
                 <LoaderCircle className="h-6 w-6 animate-spin" />
                 <span>{loadingLabel}</span>
               </div>
             )}
-            {!isLoading && error && (
+            {!listLoading && listError && (
               <div className="px-6 py-16 text-center">
-                <p className="text-sm text-rose-600">{error}</p>
+                <p className="text-sm text-rose-600">{listError}</p>
                 <button type="button" onClick={() => loadPage({ pageIndex: 0, reset: true })} className="mt-4 cursor-pointer rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Try again</button>
               </div>
             )}
-            {!isLoading && !error && filteredProducts.length === 0 && (
+            {!listLoading && !listError && filteredProducts.length === 0 && (
               <div className="px-6 py-16 text-center text-sm text-slate-500">No products found in this category.</div>
             )}
           </div>

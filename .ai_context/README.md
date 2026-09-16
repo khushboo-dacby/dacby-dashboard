@@ -1,33 +1,96 @@
 # AI Context
 
-This folder contains project-specific context for AI agents working on the DACBY dashboard. It maps the implementation inspected on 2026-09-09, including incomplete save flows and unused code.
+This folder contains project-specific context for AI agents working on the DACBY Dashboard.
 
-### Before making changes
+The files document the project's architecture, technology stack, UI/UX patterns, coding conventions, feature requirements, and implementation history.
+
+## Before Making Changes
+
+Before modifying any code:
 
 1. Read `.ai_context/README.md`.
-2. Read [architecture.md](architecture.md) for architecture, entities, API payloads, and data flow.
-3. Read [techStack.md](techStack.md) for technology, dependency versions, configuration, and scripts.
-4. Read [design.md](design.md) for existing UI/UX patterns and responsive behavior.
-5. Read [conventions.md](conventions.md) for coding-style decisions and implementation inconsistencies.
-6. Inspect the actual source and its callers before making assumptions. Per root `AGENTS.md`, read relevant guides in `node_modules/next/dist/docs/` before writing application code.
+2. Read `.ai_context/architecture.md` for architecture, entities, API payloads, and data flow.
+3. Read `.ai_context/techStack.md` for technologies, dependencies, versions, configuration, and scripts.
+4. Read `.ai_context/design.md` for existing UI/UX patterns and responsive behavior.
+5. Read `.ai_context/conventions.md` for coding conventions and known implementation decisions.
+6. For Update Inventory work, read:
+   - `.ai_context/update-inventory-requirements.md`
+   - `.ai_context/update-inventory-history.md`
+7. Inspect the actual source code and relevant callers before making assumptions.
 
-### Source of Truth
+## Important AI Agent Rules
 
-The current code is the ultimate source of truth. If these documents conflict with implementation, trust the implementation and update this context when appropriate. Root README and sample JSON files do not establish runtime behavior; the JSON fixtures are not imported by active screens.
+- Treat the actual source code as the ultimate source of truth.
+- If the context files conflict with the current implementation, inspect the implementation first and mention the conflict before changing behavior.
+- Do not rewrite or refactor unrelated code.
+- Prefer small, targeted changes.
+- Inspect existing components, helpers, hooks, and API functions before creating new ones.
+- Reuse existing components and utilities whenever their contracts fit.
+- Do not create duplicate components or duplicate API functions unnecessarily.
+- Do not invent API endpoints, payload fields, backend behavior, or data structures.
+- Preserve existing API/data contracts unless the task explicitly requires changing them.
+- Follow the existing UI/UX patterns unless a redesign is explicitly requested.
+- Do not add new dependencies unless they are actually required and the existing project cannot solve the problem.
+- Check all callers before changing a shared component or utility.
+- Do not modify unrelated files just to make the requested feature work.
 
-Backend implementation and live response contracts were not available during this source review. Unknowns are explicitly marked **“Not clearly determined from the current codebase.”** Example shapes describe builders, consumers, and fixtures, not an invented server schema.
+## Update Inventory
 
-### Development Rules
+For Update Inventory tasks:
 
-- Trace a feature from `src/app/**/page.js` to its active component. `AddProduct.jsx` and `OrdersDashboard.jsx` are not the screens those routes render.
-- Reuse existing inventory components, ImagePreview, confirmation dialogs, and the four draft-state hooks where their contracts fit. Inspect parent style overrides and callback behavior first.
-- Reuse product helpers in `src/app/apis/api.js`; `/api/inventory` only echoes/logs input. Analytics currently uses a separate native-fetch request.
-- Keep listing IDs, shared spec IDs, vendor keys, combination keys, item keys, and SKUs distinct. Follow the exact payload fields used by the caller; do not infer new API fields.
-- Check persistence before changing forms: general Final Submit is disabled in code, AddVariant item submission only logs, detail save updates images only, and detail description edits are local.
-- Preserve separate product/item pricing and availability fields, flattened persisted attributes, URL-based images, and description serialization behavior unless the task explicitly changes them.
-- Inspect existing implementations before adding abstractions or dependencies. SKU/media helpers currently differ by screen; replacing one does not update all flows.
-- Preserve existing page-specific UI patterns unless a redesign is requested. The detail section strip is not functional tab navigation.
-- Read dependencies before changing architecture. Shared specifications can be reused by special editions; no local backend source establishes the impact of a specification change on other listings.
-- Keep verification appropriate to the change. Available scripts are dev, build, start, and lint; there is no existing test script. Do not issue live mutations merely to validate documentation.
+1. Read `update-inventory-requirements.md`.
+2. Read `update-inventory-history.md`.
+3. Inspect the current implementation before changing it.
+4. Follow the requirements and previously established decisions.
+5. Preserve existing inventory/specification data that is not explicitly editable.
+6. Do not create or delete vendors, combinations, items, or SKUs unless explicitly requested.
+7. Reuse existing inventory image, API, and state-management helpers where possible.
+8. Keep unfinished save/API behavior as documented in the history file.
+9. After completing a significant change, update `update-inventory-history.md`.
 
-`architecture.md` is the canonical architecture document. The pre-existing empty `archtecture.md` spelling variant was left untouched because it was outside the requested edit allowlist.
+## Working Process
+
+Use this workflow for feature requests:
+
+1. Understand the request.
+2. Read the relevant context files.
+3. Inspect the actual implementation.
+4. Identify the exact files/components that need changes.
+5. Explain the planned change briefly if the task is complex.
+6. Make the smallest appropriate change.
+7. Run the relevant lint/build checks.
+8. Fix any errors caused by the change.
+9. Verify that existing functionality was not unnecessarily changed.
+10. Update the relevant context/history file when appropriate.
+
+## Do Not Start Coding Immediately
+
+For a new feature or unfamiliar area, first inspect the relevant context and source code.
+
+Do not assume that a missing feature means a new component, API, hook, or dependency is required.
+
+Always check whether an existing implementation can be reused.
+
+## Context Files
+
+- `README.md` — Instructions for AI agents and context navigation.
+- `architecture.md` — Project architecture and data flow.
+- `techStack.md` — Technologies, dependencies, configuration, and scripts.
+- `design.md` — UI/UX patterns and design decisions.
+- `conventions.md` — Coding conventions and implementation rules.
+- `update-inventory-requirements.md` — Update Inventory requirements.
+- `update-inventory-history.md` — Update Inventory implementation history and current status.
+
+## File Naming
+
+`architecture.md` is the canonical architecture document.
+
+`archtecture.md` is a pre-existing misspelled file. Do not use it as the architecture source unless explicitly requested.
+
+## Current Codebase Takes Priority
+
+The context files are there to help AI agents understand the project, but they are not a replacement for inspecting the actual code.
+
+When uncertain:
+
+**Inspect → Understand → Make a targeted change → Verify.**

@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, LoaderCircle, Pencil, Star, X } from "lucide-react";
+import { ArrowLeft, Eye, LoaderCircle, Star, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getProductDetail, updateSkuImages } from "../../apis/api";
 import ItemDetailsFields from "../../../components/inventory/ItemDetailsFields";
 import WarningPopup from "../../../components/confirmation-modal/WarningPopup";
 import AddWarrantyModal from "../AddWarrantyModal";
+import DescriptionPreviewModal from "../../../components/description-preview/DescriptionPreviewModal";
+import ImagePreview from "../../../components/inventory/ImagePreview";
+import { useProductContext } from "../../../context/ProductContext";
 import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
 import { toast } from "sonner";
 
@@ -92,8 +95,11 @@ function getAttributeKeys(productData, variants) {
       Object.keys(combination ?? {}).filter((key) => !ITEM_FIELDS.has(key))
     );
   const itemKeys = variants.flatMap(({ item }) =>
-    Object.keys(item ?? {}).filter((key) => !ITEM_FIELDS.has(key))
+    Object.keys(item ?? {})
+      .filter((key) => !ITEM_FIELDS.has(key) && key.toLowerCase() !== 'accessories')
   );
+  console.log(combinationKeys);
+  console.log(itemKeys);
   return [...new Set([...combinationKeys, ...itemKeys])];
 }
 
@@ -198,42 +204,198 @@ function EditVariantModal({ variant, attributeKeys, specId, onClose, onSave }) {
   );
 }
 
+function ViewVariantModal({ variant, attributeKeys, onClose }) {
+  const item = variant.item ?? {};
+  const details = [
+    ["SKU", item.sku],
+    ["Weight", item.weight],
+    ["Stock", item.stocks],
+    ["MRP", formatPrice(item.mrp)],
+    ["Price", formatPrice(item.price)],
+    ["Sell Price", formatPrice(item.sell_price)],
+    ["Sell Status", item.sell ? "Yes" : "No"],
+    ["Rating", item.rating],
+    ["Rating Count", item.rating_count],
+    ["Minimum Price", formatPrice(item.minimum_price)],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+
+  const extraDetails = Object.entries(item).filter(
+    ([key]) =>
+      ![
+        "sku",
+        "weight",
+        "stocks",
+        "mrp",
+        "price",
+        "sell_price",
+        "sell",
+        "rating",
+        "rating_count",
+        "minimum_price",
+        "oneDayDelivery",
+        "one_day_delivery",
+        "onedaydelivery",
+        "images",
+        "yt_iframe",
+        ...attributeKeys,
+      ].includes(key),
+  );
+
+  const videoUrl = getYoutubeUrl(item.yt_iframe);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+      <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+          <div>
+            <h2 className="text-xl font-semibold">View Variant</h2>
+            {/* <p className="mt-1 text-sm text-slate-500">
+              Read-only details for {item.sku || variant.itemId || "this variant"}.
+            </p> */}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close variant details"
+            className="cursor-pointer rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto p-6">
+          {attributeKeys.length > 0 && (
+            <section>
+              <h3 className="mb-3 text-sm font-semibold text-slate-900">Combination Attributes</h3>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {attributeKeys.map((attribute) => (
+                  <InfoCard key={attribute} label={titleCase(attribute)} value={item[attribute]} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="mt-6">
+            <h3 className="mb-3 text-sm font-semibold text-slate-900">Variant Details</h3>
+            <dl className="grid gap-3 sm:grid-cols-2">
+              {details.map(([label, value]) => (
+                <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</dt>
+                  <dd className="mt-1 break-words text-sm font-semibold text-slate-900">{formatDisplayValue(value)}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          {/* {extraDetails.length > 0 && (
+            <section className="mt-6">
+              <h3 className="mb-3 text-sm font-semibold text-slate-900">Other Variant Data</h3>
+              <dl className="grid gap-3 sm:grid-cols-2">
+                {extraDetails.map(([key, value]) => (
+                  <div key={key} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                    <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{titleCase(key)}</dt>
+                    <dd className="mt-1 break-words text-sm font-semibold text-slate-900">{formatDisplayValue(value)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )} */}
+
+          <section className="mt-6">
+            <h3 className="mb-3 text-sm font-semibold text-slate-900">Images</h3>
+            {Array.isArray(item.images) && item.images.length > 0 ? (
+              <ImagePreview imageUrls={item.images} hw="h-24 w-24" />
+            ) : (
+              <p className="text-sm text-slate-500">No images available.</p>
+            )}
+          </section>
+
+          {videoUrl && (
+            <section className="mt-6">
+              <h3 className="mb-3 text-sm font-semibold text-slate-900">YouTube Video</h3>
+              <div className="aspect-video max-w-2xl overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                <iframe
+                  src={videoUrl}
+                  title={`${item.sku || "Variant"} video`}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            </section>
+          )}
+        </div>
+
+        <div className="flex justify-end border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold hover:bg-slate-100"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductDetail({ id }) {
   const router = useRouter();
+  const { getProduct, setProduct } = useProductContext();
   const [productData, setProductData] = useState(null);
-  const [editingVariant, setEditingVariant] = useState(null);
+  const [viewingVariant, setViewingVariant] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryCount, setRetryCount] = useState(0);
-  const [descriptionJson, setDescriptionJson] = useState("{}");
-  const [descriptionError, setDescriptionError] = useState("");
+  const [showDescriptionPreview, setShowDescriptionPreview] = useState(false);
   const [showWarrantyModal, setShowWarrantyModal] = useState(false);
 
-  useEffect(() => {
-    let ignore = false;
+// Updated imports to include getProductFullJson
 
-    getProductDetail(id)
-      .then((response) => {
-        if (!ignore) {
-          const nextProductData = Array.isArray(response) ? response[0] : response;
-          setProductData(nextProductData);
-          setDescriptionJson(
-            JSON.stringify(nextProductData?.specifications?.description ?? {}, null, 2)
-          );
-          setDescriptionError("");
-        }
-      })
-      .catch((requestError) => {
-        if (!ignore) setError(requestError.message || "Failed to load product details");
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
 
-    return () => {
-      ignore = true;
-    };
-  }, [id, retryCount]);
+// Load product data: use cache if available, otherwise fetch from API
+useEffect(() => {
+  let cancelled = false;
+
+  async function loadProduct() {
+    const cached = getProduct(id);
+
+    console.log("Cached product:", cached);
+
+    if (cached?.response) {
+      console.log("Using cached product");
+      setProductData(cached.response);
+      setIsLoading(false);
+      return;
+    }
+
+    console.log("Calling product API");
+
+    try {
+      const data = await getProductDetail(id);
+
+      if (!cancelled) {
+        setProductData(data);
+        setProduct(id, data);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      if (!cancelled) {
+        setError(err.message || "Failed to load product");
+        setIsLoading(false);
+      }
+    }
+  }
+
+  if (id) {
+    loadProduct();
+  }
+
+  return () => {
+    cancelled = true;
+  };
+}, [id, getProduct, setProduct]);
 
   const details = productData?.details ?? EMPTY_DETAILS;
   const variants = useMemo(() => getVariants(details), [details]);
@@ -313,32 +475,6 @@ export default function ProductDetail({ id }) {
     }
   }
 
-  function applyDescription(event) {
-    event.preventDefault();
-
-    let description;
-    try {
-      description = JSON.parse(descriptionJson);
-      if (!description || Array.isArray(description)) {
-        throw new Error("Description must be a JSON object");
-      }
-      setDescriptionError("");
-    } catch {
-      setDescriptionError("Description must contain a valid JSON object.");
-      return;
-    }
-
-    setProductData((current) => ({
-      ...current,
-      specifications: {
-        ...current?.specifications,
-        description,
-      },
-    }));
-    setDescriptionJson(JSON.stringify(description, null, 2));
-    toast.success("Description JSON is valid");
-  }
-
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 text-blue-600">
@@ -391,10 +527,11 @@ export default function ProductDetail({ id }) {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Pricing Information</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             <InfoCard label="Current Price" value={formatPrice(details.price)} />
             <InfoCard label="MRP" value={formatPrice(details.mrp)} />
             <InfoCard label="Max Sell Price" value={formatPrice(details.sell_max_price)} />
+            <InfoCard label="Minimum Price" value={formatPrice(productData?.specifications?.minimum_price)} />
             <InfoCard label="Extra Coins" value={details.extra_coins ?? 0} />
           </div>
         </section>
@@ -410,9 +547,9 @@ export default function ProductDetail({ id }) {
           </div>
         </section>
 
-        <nav className="grid grid-cols-4 rounded-2xl bg-slate-100 py-3 text-center text-sm font-semibold">
+        {/* <nav className="grid grid-cols-4 rounded-2xl bg-slate-100 py-3 text-center text-sm font-semibold">
           <span>Variants</span><span>Specifications</span><span>Assessment</span><span>Warranty</span>
-        </nav>
+        </nav> */}
 
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Product Variants</h2>
@@ -445,8 +582,8 @@ export default function ProductDetail({ id }) {
                     <td className="px-4 py-4 font-medium">{formatPrice(variant.item.sell_price)}</td>
                     <td className="px-4 py-4 font-medium">{formatPrice(variant.item.mrp)}</td>
                     <td className="px-4 py-4">
-                      <button type="button" onClick={() => setEditingVariant(variant)} className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50">
-                        <Pencil className="h-4 w-4" /> Edit
+                      <button type="button" onClick={() => setViewingVariant(variant)} className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50">
+                        <Eye className="h-4 w-4" /> View Variant
                       </button>
                     </td>
                   </tr>
@@ -458,41 +595,21 @@ export default function ProductDetail({ id }) {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <form onSubmit={applyDescription}>
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold">Description JSON</h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Paste or edit specifications.description JSON. Missing descriptions start as an empty object.
-                </p>
-              </div>
-              <button
-                type="submit"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-              >
-                Apply Description
-              </button>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Description</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                View the customer-facing product description.
+              </p>
             </div>
-            <textarea
-              value={descriptionJson}
-              onChange={(event) => {
-                setDescriptionJson(event.target.value);
-                setDescriptionError("");
-              }}
-              rows={20}
-              spellCheck={false}
-              aria-label="Product description JSON"
-              aria-invalid={Boolean(descriptionError)}
-              className={`mt-5 w-full rounded-xl border bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none ${
-                descriptionError
-                  ? "border-red-500"
-                  : "border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              }`}
-            />
-            {descriptionError && (
-              <p className="mt-2 text-sm font-medium text-red-600">{descriptionError}</p>
-            )}
-          </form>
+            <button
+              type="button"
+              onClick={() => setShowDescriptionPreview(true)}
+              className="cursor-pointer rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              Preview Description
+            </button>
+          </div>
         </section>
 
         {videoUrl && (
@@ -505,6 +622,30 @@ export default function ProductDetail({ id }) {
         )}
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold">Color Codes</h2>
+          {Object.entries(productData?.specifications?.color_codes ?? {}).length > 0 ? (
+            <div className="mt-6 flex flex-wrap gap-5">
+              {Object.entries(productData.specifications.color_codes).map(([name, hex]) => (
+                <div key={name} className="flex items-center gap-3">
+                  <span
+                    className="h-10 w-10 rounded-full border border-slate-300 shadow-sm"
+                    style={{ backgroundColor: hex }}
+                    title={`${name}: ${hex}`}
+                    aria-label={`${name}: ${hex}`}
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{name}</p>
+                    <p className="text-xs uppercase text-slate-500">{hex}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-slate-500">No color codes available.</p>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Product Metadata</h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             <InfoCard label="Product ID" value={details.id ?? id} />
@@ -514,20 +655,24 @@ export default function ProductDetail({ id }) {
         </section>
       </div>
 
-      {editingVariant && (
-        <EditVariantModal
-          variant={editingVariant}
+      {viewingVariant && (
+        <ViewVariantModal
+          variant={viewingVariant}
           attributeKeys={attributeKeys}
-          specId={details.spec_id}
-          onClose={() => setEditingVariant(null)}
-          onSave={saveVariant}
+          onClose={() => setViewingVariant(null)}
         />
       )}
       {showWarrantyModal && (
         <AddWarrantyModal
           specId={details.spec_id}
           onClose={() => setShowWarrantyModal(false)}
-          
+
+        />
+      )}
+      {showDescriptionPreview && (
+        <DescriptionPreviewModal
+          description={productData?.specifications?.description ?? {}}
+          onClose={() => setShowDescriptionPreview(false)}
         />
       )}
     </main>

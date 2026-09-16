@@ -111,8 +111,36 @@ export default function useDescriptionState(initialDescription = defaultDescript
     }));
   }
 
+  function updateDescriptionTopLevelField(oldKey, newKey, newValue) {
+    setDescription((prev) => {
+      const next = { ...prev };
+
+      if (oldKey && oldKey !== newKey && Object.prototype.hasOwnProperty.call(next, oldKey)) {
+        delete next[oldKey];
+      }
+
+      if (!newKey) {
+        return next;
+      }
+
+      next[newKey] = newValue;
+      return next;
+    });
+  }
+
+  function removeDescriptionTopLevelField(key) {
+    if (!key) return;
+
+    setDescription((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }
+
   return {
     description,
+    setDescription,
     resetDescription,
     updateSummary,
     addDescriptionSection,
@@ -125,5 +153,7 @@ export default function useDescriptionState(initialDescription = defaultDescript
     updateDescriptionFieldValue,
     updateDescriptionFieldValueType,
     removeDescriptionField,
+    updateDescriptionTopLevelField,
+    removeDescriptionTopLevelField,
   };
 }
