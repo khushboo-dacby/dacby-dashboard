@@ -13,6 +13,7 @@ import {
 
 import { addSpecialEdition, getProductDetail, searchProducts } from "@/app/apis/api";
 import { brandMap, typeMap } from "@/constants/inventory";
+import { getYouTubeEmbedUrl } from "@/components/inventory/ProductFields";
 
 function generateSpecialEditionSku(specId, productTitle) {
   const specWords = specId.toLowerCase().split("-");
@@ -56,6 +57,7 @@ function makeEmptyForm() {
     vendorName: "Dacby Technologies Pvt. Ltd.",
     vendorNote: "",
     youtubeIframe: "",
+    itemYoutubeIframe: "",
     image1: "",
     image2: "",
     image3: "",
@@ -174,6 +176,15 @@ export default function SpecialEdition() {
 
     if (!selectedProduct) return;
 
+    const invalidVideoField = [
+      ["Global YouTube", formData.youtubeIframe],
+      ["Item YouTube", formData.itemYoutubeIframe],
+    ].find(([, value]) => value.trim() && !getYouTubeEmbedUrl(value));
+    if (invalidVideoField) {
+      toast.error(`${invalidVideoField[0]} must contain a YouTube embed iframe.`);
+      return;
+    }
+
     const selectedCategory = specialEditionCategories.find((category) => {
       return category.code === formData.categoryCode;
     });
@@ -203,8 +214,8 @@ export default function SpecialEdition() {
       ...(formData.type.trim() ? { type: formData.type.trim() } : {}),
       mrp,
       price,
-      rating: 0,
-      rating_count: 0,
+      rating: 4.5,
+      rating_count: 115,
       sell: formData.sell,
       sell_max_price: sellMaxPrice,
       in_stock: stocks > 0,
@@ -223,9 +234,9 @@ export default function SpecialEdition() {
                 weight,
                 mrp,
                 price,
-                rating: 0,
-                rating_count: 0,
-                yt_iframe: "",
+                rating: 4.5,
+                rating_count: 115,
+                yt_iframe: formData.itemYoutubeIframe,
                 images,
                 stocks,
               },
@@ -239,8 +250,8 @@ export default function SpecialEdition() {
     setSubmitting(true);
     try {
       console.log("Special edition payload:", payload);
-      const response = await addSpecialEdition(payload);
-      toast.success(response?.message || "Special edition added successfully");
+      // const response = await addSpecialEdition(payload);
+      // toast.success(response?.message || "Special edition added successfully");
     } catch (error) {
       toast.error(error.message || "Failed to add special edition");
     } finally {
@@ -448,6 +459,8 @@ function ProductDetailsStep({
     categoryName === "Consoles" || categoryName === "Cameras";
   const brandOptions = brandMap[categoryName] || [];
   const typeOptions = typeMap[categoryName] || [];
+  const globalYoutubePreviewUrl = getYouTubeEmbedUrl(formData.youtubeIframe);
+  const itemYoutubePreviewUrl = getYouTubeEmbedUrl(formData.itemYoutubeIframe);
   const [addingCustomBrand, setAddingCustomBrand] = useState(
     Boolean(formData.brand) && !brandOptions.includes(formData.brand),
   );
@@ -564,7 +577,7 @@ function ProductDetailsStep({
       </div>
 
       <div>
-        <label className="mb-2 block font-semibold">YouTube Iframe</label>
+        <label className="mb-2 block font-semibold">Global YouTube</label>
         <textarea
           value={formData.youtubeIframe}
           onChange={(event) => onFormChange("youtubeIframe", event.target.value)}
@@ -572,6 +585,41 @@ function ProductDetailsStep({
           rows={4}
           className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-indigo-700"
         />
+        {globalYoutubePreviewUrl && (
+          <div className="mt-4 w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+            <iframe
+              src={globalYoutubePreviewUrl}
+              title="Global video preview"
+              className="aspect-video w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        )}
+      </div>
+
+      <div>
+        <label className="mb-2 block font-semibold">Item YouTube</label>
+        <textarea
+          value={formData.itemYoutubeIframe}
+          onChange={(event) => onFormChange("itemYoutubeIframe", event.target.value)}
+          placeholder={'<iframe src="https://www.youtube.com/embed/..."></iframe>'}
+          rows={4}
+          className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-indigo-700"
+        />
+        {itemYoutubePreviewUrl && (
+          <div className="mt-4 w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+            <iframe
+              src={itemYoutubePreviewUrl}
+              title="Item video preview"
+              className="aspect-video w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        )}
       </div>
 
       <div>

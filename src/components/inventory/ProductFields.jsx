@@ -28,20 +28,39 @@ function SelectChevron() {
   );
 }
 
-function getYouTubeEmbedUrl(iframeCode) {
-  const sourceMatch = String(iframeCode || "").match(/src=["']([^"']+)["']/i);
-  if (!sourceMatch) return "";
+export function getYouTubeEmbedUrl(value) {
+  const sourceMatch = String(value || "").match(/src=["']([^"']+)["']/i);
+  const input = (sourceMatch?.[1] || String(value || "").trim()).replaceAll(
+    "&amp;",
+    "&"
+  );
+  if (!input) return "";
 
   try {
-    const url = new URL(sourceMatch[1]);
+    const url = new URL(input);
     const allowedHosts = [
       "youtube.com",
       "www.youtube.com",
       "youtube-nocookie.com",
       "www.youtube-nocookie.com",
     ];
-    return url.protocol === "https:" && allowedHosts.includes(url.hostname)
-      ? url.toString()
+    if (url.protocol !== "https:") return "";
+
+    if (sourceMatch) {
+      return allowedHosts.includes(url.hostname) ? url.toString() : "";
+    }
+
+    if (allowedHosts.includes(url.hostname) && url.pathname.startsWith("/embed/")) {
+      return url.toString();
+    }
+
+    const videoId =
+      url.hostname === "youtu.be"
+        ? url.pathname.split("/").filter(Boolean)[0]
+        : url.searchParams.get("v");
+
+    return videoId
+      ? `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`
       : "";
   } catch {
     return "";

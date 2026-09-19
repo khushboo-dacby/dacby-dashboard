@@ -155,3 +155,18 @@ The Update Inventory feature is currently in an inventory-draft + payload-prepar
 - Ensures all entries in `color_codes` default to `#000000` if no color hex is filled in.
 - Logs `Update Specification Payload` to console, updates baseline, toasts success, and refreshes `ProductContext`.
 
+### CD, preorder, and inventory description ownership
+
+- For inventory codes `D001Y` (PS5 CDs), `D002Y` (PS4 CDs), and `D003Y` (Pre Orders), the existing Description Editor now loads and updates `inventory_json.description`.
+- These categories retain the same Form/JSON modes, Summary, Description Sections, Additional Fields, and Global Attributes behavior as other listings.
+- Other categories continue to load and update `spec_json.description`.
+- Inventory saves carry the edited CD/preorder description in the full inventory-document payload; the specification editor does not use it as its description source.
+- For these three codes, the Description Editor is shown only in the Overview tab and is omitted from the Specification tab. Other categories retain its Specification-tab placement.
+- Overview now allows category and condition edits. Changing category sets its matching code from `constants/inventory.js`; code is no longer manually displayed or editable.
+
+### Variant and special-edition YouTube fields
+
+- Add Variant now blocks all item-selection and item-form actions while `combinationsHaveChanges` is true. The existing Update Combinations flow clears that state after a successful update and re-enables item actions.
+- Add Variant stores separate global and item YouTube iframe values in its outer payload and nested item payload respectively. Both use the shared safe preview helper and accept only HTTPS YouTube embed iframe sources.
+- Special Edition now provides separate Global YouTube and Item YouTube iframe fields. The global value is stored on `product.yt_iframe`; the item value is stored on `product.vendors.VENDOR_001.combination_offered.combination_1.item_1.yt_iframe`.
+- New Add Variant and Special Edition payloads use `rating: 4.5` and `rating_count: 115` for global products and nested items.

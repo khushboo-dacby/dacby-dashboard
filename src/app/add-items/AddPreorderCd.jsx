@@ -220,7 +220,7 @@ function getCategorySettings(code) {
   };
 }
 
-function makeEmptyForm(availableForSell = true) {
+function makeEmptyForm(availableForSell = true, defaultWeight = "") {
   return {
     productTitle: "",
     mrp: "",
@@ -228,7 +228,7 @@ function makeEmptyForm(availableForSell = true) {
     sellPrice: "",
     maxSellPrice: "",
     stocks: "",
-    weight: "",
+    weight: defaultWeight,
     availableForSell,
     releaseDate: "",
     sku: "",
@@ -286,10 +286,12 @@ export default function AddPreorderCd({ categoryName, code }) {
   if (isPreOrder) {
     descriptionTemplate = PREORDER_DESCRIPTION_JSON;
   }
-  const [formData, setFormData] = useState(makeEmptyForm(!isPreOrder));
+  const [formData, setFormData] = useState(
+    makeEmptyForm(!isPreOrder, isGameCd ? 0.1 : ""),
+  );
   const initialDescription = convertDescriptionObjectToFormState({});
   const {
-    description,
+    description: descriptionState,
     resetDescription,
     updateSummary,
     addDescriptionSection,
@@ -329,7 +331,7 @@ export default function AddPreorderCd({ categoryName, code }) {
   }
 
   function handleReset() {
-    setFormData(makeEmptyForm(!isPreOrder));
+    setFormData(makeEmptyForm(!isPreOrder, isGameCd ? 0.1 : ""));
     resetDescription(initialDescription);
     setDescriptionError("");
     setIsSubmitting(false);
@@ -360,13 +362,13 @@ export default function AddPreorderCd({ categoryName, code }) {
   function handleSubmit(event) {
     event.preventDefault();
 
-    let description;
+    let inventoryDescription;
 
     if (requiresDescription) {
       try {
-        description = serializeDescriptionState(description);
+        inventoryDescription = serializeDescriptionState(descriptionState);
 
-        if (!description || Array.isArray(description)) {
+        if (!inventoryDescription || Array.isArray(inventoryDescription)) {
           throw new Error("Description must be an object");
         }
 
@@ -406,7 +408,7 @@ export default function AddPreorderCd({ categoryName, code }) {
         sell: formData.availableForSell,
         sell_max_price: maxSellPrice,
         yt_iframe: formData.youtubeIframe,
-        ...(requiresDescription ? { description } : {}),
+        ...(requiresDescription ? { description: inventoryDescription } : {}),
         ...(isPreOrder
           ? { release_date: formatReleaseDate(formData.releaseDate) }
           : {}),
@@ -426,8 +428,8 @@ export default function AddPreorderCd({ categoryName, code }) {
                   sell: formData.availableForSell,
                   sell_price: sellPrice,
                   weight,
-                  rating: 0,
-                  rating_count: 0,
+                  rating: 4.5,
+                  rating_count: 120,
                   stocks,
                   images,
                 },
@@ -452,7 +454,7 @@ export default function AddPreorderCd({ categoryName, code }) {
       const response = await addProductToInventory(previewPayload);
       toast.success(response?.message || "Product added successfully!");
       console.log("Inventory API response:", response);
-      setFormData(makeEmptyForm(!isPreOrder));
+      setFormData(makeEmptyForm(!isPreOrder, isGameCd ? 0.1 : ""));
       setDescriptionError("");
       setPreviewPayload(null);
     } catch (error) {
@@ -613,7 +615,7 @@ export default function AddPreorderCd({ categoryName, code }) {
               </button>
             </div>
             <DescriptionEditor
-              description={description}
+              description={descriptionState}
               updateSummary={updateSummary}
               addDescriptionSection={addDescriptionSection}
               removeDescriptionSection={removeDescriptionSection}

@@ -12,8 +12,7 @@ import {
   updateSpecDoc,
 } from "../../apis/api";
 import { categories } from "../../../constants/inventory";
-import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
-import EditItemDrawer from "./EditItemDrawer";
+import MediaModal from "./MediaModal";
 import SpecificationTab from "./SpecificationTab";
 import WarningPopup from "../../../components/confirmation-modal/WarningPopup";
 import { BASE_CONDITIONS } from "../../../constants/inventory";
@@ -23,7 +22,10 @@ import {
   normalizeProductResponse,
   useProductContext,
 } from "../../../context/ProductContext";
+import { convertFirebaseImageToCdn } from "@/app/add-variant/AddVariant";
+import AddWarrantyModal from "@/app/product-detail/AddWarrantyModal";
 const TABS = ["Overview", "Inventory", "Specification"];
+const INVENTORY_DESCRIPTION_CODES = new Set(["D001Y", "D002Y", "D003Y"]);
 
 // Item-level keys that are NOT variant-defining attributes. Everything else on
 // an item (color, storage, ram, ...) is treated as a dynamic attribute column.
@@ -34,6 +36,8 @@ const NON_ATTRIBUTE_ITEM_KEYS = new Set([
   "price",
   "sell_price",
   "weight",
+  "condition",
+  "type",
   "stocks",
   "sell",
   "rating",
@@ -75,6 +79,10 @@ function formatDisplay(value, fallback = "—") {
   return String(value);
 }
 
+function usesInventoryDescription(inventory) {
+  return INVENTORY_DESCRIPTION_CODES.has(String(inventory?.code ?? "").trim());
+}
+
 function getVariants(inventory) {
   return Object.entries(inventory?.vendors ?? {}).flatMap(
     ([vendorId, vendor]) =>
@@ -102,10 +110,11 @@ function recalculateInventoryDerivedFlags(inventory) {
 function getAttributeKeys(spec, variants) {
   const combinationKeys = Object.values(spec?.combination ?? {}).flatMap(
     (combination) => Object.keys(combination ?? {}),
-  );
+  ).filter((key) => !["condition", "type"].includes(key.toLowerCase()));
   const itemKeys = variants.flatMap(({ item }) =>
     Object.keys(item ?? {}).filter((key) => !NON_ATTRIBUTE_ITEM_KEYS.has(key)),
   );
+  return [...new Set([...combinationKeys, ...itemKeys])];
   return [...new Set([...combinationKeys, ...itemKeys])];
 }
 
@@ -194,6 +203,16 @@ export default function UpdateInventory({ id }) {
 
   const [activeTab, setActiveTab] = useState("Overview");
   const [editingVariant, setEditingVariant] = useState(null);
+  
+  // Edit mode states
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [isEditingVideo, setIsEditingVideo] = useState(false);
+  const [isEditingInventory, setIsEditingInventory] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingSpec, setIsEditingSpec] = useState(false);
+  const [discardCount, setDiscardCount] = useState(0);
+  const [showWarrantyModal, setShowWarrantyModal] = useState(false);
+
   const [isSavingInventory, setIsSavingInventory] = useState(false);
   const [isSavingSpec, setIsSavingSpec] = useState(false);
   const [pendingBack, setPendingBack] = useState(false);
@@ -279,6 +298,7 @@ export default function UpdateInventory({ id }) {
   }, [getProduct, id, retryCount, setProduct]);
 
   const variants = useMemo(() => getVariants(inventoryDraft), [inventoryDraft]);
+  const isInventoryDescription = usesInventoryDescription(inventoryDraft);
   const attributeKeys = useMemo(
     () => getAttributeKeys(specDraft, variants),
     [specDraft, variants],
@@ -332,6 +352,12 @@ export default function UpdateInventory({ id }) {
       inventoryBaseline ? JSON.parse(inventoryBaseline) : inventoryDraft,
     );
     setSpecDraft(specBaseline ? JSON.parse(specBaseline) : specDraft);
+    setIsEditingDetails(false);
+    setIsEditingVideo(false);
+    setIsEditingInventory(false);
+    setIsEditingDescription(false);
+    setIsEditingSpec(false);
+    setDiscardCount(c => c + 1);
     toast.message("Reverted unsaved changes");
   }
 
@@ -364,9 +390,14 @@ export default function UpdateInventory({ id }) {
         setInventoryBaseline(JSON.stringify(finalInventoryPayload));
         const successMessage = response?.message || "Inventory saved successfully.";
         toast.success(successMessage);
-        // Refresh product data in context to reflect changes in ProductDetail view
-        const refreshed = await getProductDetail(meta.productId);
-        setProduct(id, refreshed);
+        
+        // Disable all edit modes on successful save
+        setIsEditingDetails(false);
+    setIsEditingVideo(false);
+    setIsEditingInventory(false);
+    setIsEditingDescription(false);
+        
+        // Note: Intentionally avoiding getProductDetail / setProduct per user request
       } catch (requestError) {
         toast.error(requestError.message || "Failed to prepare inventory payload");
       } finally {
@@ -447,41 +478,65 @@ export default function UpdateInventory({ id }) {
   const categoryOptions = categories.map(
     (category) => category.name || category,
   );
+  function updateCategory(categoryName) {
+    const category = categories.find(({ name }) => name === categoryName);
+    setInventoryDraft((current) => ({
+      ...current,
+      category_name: categoryName,
+      code: category?.code ?? "",
+    }));
+  }
 const brandOptions = brandMap[inventoryDraft.category_name] || [];
 const typeOptions = typeMap[inventoryDraft.category_name] || [];
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 pb-28 text-slate-950 sm:px-10 lg:px-20">
-      <div className="mx-auto w-full space-y-6">
-        <header className="flex flex-wrap items-center gap-5">
-          <button
-            type="button"
-            onClick={handleBack}
-            aria-label="Go back"
-            className="cursor-pointer rounded-lg p-2 hover:bg-slate-200"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
-            <div>
-              <h1 className="text-xl font-semibold">
-                {formatDisplay(inventoryDraft.product_title)}
-              </h1>
-              <p className="mt-1 text-slate-500">
-                {formatDisplay(inventoryDraft.category_name)}
-              </p>
+    <main className="min-h-screen bg-slate-50 pb-28 text-slate-950">
+      <div className="mx-auto w-full">
+        {/* Header Section */}
+        <header className="flex flex-wrap items-center justify-between gap-5 border-b border-slate-200 bg-white px-4 py-4 sm:px-10 lg:px-20">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handleBack}
+              aria-label="Go back"
+              className="cursor-pointer rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            
+            <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex items-center gap-2 text-[13px] font-semibold tracking-wide text-slate-400">
+                <span className="uppercase">{formatDisplay(inventoryDraft.category_name)}</span>
+                <span className="text-slate-300">/</span>
+                <span className="font-medium">{inventoryDraft.brand || "Brand"} Inventory</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-bold text-slate-900">
+                  {formatDisplay(inventoryDraft.product_title)}
+                </h1>
+                {inventoryDraft.code && (
+                  <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                    {formatDisplay(inventoryDraft.code)}
+                  </span>
+                )}
+                <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold tracking-tight text-slate-500">
+                  spec: {formatDisplay(meta.specId)}
+                </span>
+              </div>
             </div>
-            {inventoryDraft.code && (
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold">
-                {formatDisplay(inventoryDraft.code)}
-              </span>
-            )}
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-medium shadow-sm">
-              spec: {formatDisplay(meta.specId)}
-            </span>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button onClick={() => setShowWarrantyModal(true)} className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-x font-semibold text-amber-700 hover:bg-amber-100">
+              Add Warranty
+            </button>
+           
           </div>
         </header>
 
-        <div
+        {/* Main Content Area */}
+        <div className="px-4 py-8 sm:px-10 lg:px-20 space-y-6">
+
+        {/* <div
           role="note"
           className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
         >
@@ -492,269 +547,445 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
             {formatDisplay(meta.specId)}
           </span>
           . Inventory and Specification are saved to separate backend documents.
-        </div>
+        </div> */}
 
-        <nav className="flex gap-2 rounded-2xl bg-slate-100 p-1.5">
-          {TABS.map((tab) => (
+        <div className="flex justify-center pt-2">
+          <nav className="inline-flex gap-1 rounded-full border border-slate-200 bg-slate-100/50 p-1">
             <button
-              key={tab}
               type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 cursor-pointer rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                activeTab === tab
+              onClick={() => setActiveTab("Inventory")}
+              className={`flex min-w-[200px] items-center justify-center rounded-full px-6 py-2 text-sm font-semibold transition ${
+                activeTab === "Inventory" || activeTab === "Overview"
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              {tab}
-              {tab !== "Specification" && inventoryDirty && (
-                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-amber-500 align-middle" />
-              )}
-              {tab === "Specification" && specDirty && (
-                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-amber-500 align-middle" />
+              Inventory
+              {inventoryDirty && (
+                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-amber-500" />
               )}
             </button>
-          ))}
-        </nav>
+            <button
+              type="button"
+              onClick={() => setActiveTab("Specification")}
+              className={`flex min-w-[200px] items-center justify-center rounded-full px-6 py-2 text-sm font-semibold transition ${
+                activeTab === "Specification"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Specification
+              {specDirty && (
+                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-amber-500" />
+              )}
+            </button>
+          </nav>
+        </div>
 
-        {activeTab === "Overview" && (
+        {/* Replace activeTab === 'Overview' with just rendering the content, 
+            since there's no tab switching for now (Specification disabled) */}
+        {(activeTab === "Overview" || activeTab === "Inventory") && (
           <section className="space-y-6">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold">Listing Details</h2>
-              <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                <TextField
-                  label="Product Title"
-                  value={inventoryDraft.product_title}
-                  onChange={(value) =>
-                    setInventoryField("product_title", value)
-                  }
-                />
-                <SelectField
-                  label="Category (read-only)"
-                  value={inventoryDraft.category_name}
-                  options={categoryOptions}
-                  // onChange={(value) => setInventoryField("category_name", value)}
-                  onChange={() => {}}
-                />
-                <SelectField
-                  label="Condition (read-only)"
-                  value={inventoryDraft.condition}
-                  options={BASE_CONDITIONS}
-                  // onChange={(value) => setInventoryField("condition", value)}
-                  onChange={() => {}}
-                />
-                <SelectWithOther
-                  label="Brand"
-                  value={inventoryDraft.brand}
-                  options={brandOptions}
-                  addingCustom={addingCustomBrand}
-                  onCustomToggle={setAddingCustomBrand}
-                  onChange={(value) => setInventoryField("brand", value)}
-                  customPlaceholder="Enter another brand"
-                />
-                <SelectWithOther
-                  label="Type"
-                  value={inventoryDraft.type}
-                  options={typeOptions}
-                  addingCustom={addingCustomType}
-                  onCustomToggle={setAddingCustomType}
-                  onChange={(value) => setInventoryField("type", value)}
-                  customPlaceholder="Enter another type"
-                />
-                <TextField
-                  label="Code (read-only)"
-                  value={inventoryDraft.code}
-                  onChange={() => {}}
-                />
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">Listing Details & Base Information</h2>
+                  <p className="text-sm text-slate-500">Manage general product title, categorization, default pricing, and catalog presentation.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {inventoryDirty && !isEditingDetails && (
+                     <span className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                       Unsaved changes
+                     </span>
+                  )}
+                  {!inventoryDirty && !isEditingDetails && (
+                     <span className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                       All changes saved
+                     </span>
+                  )}
+                  
+                  {!isEditingDetails ? (
+                    <>
+                      <button
+                        onClick={() => setIsEditingDetails(true)}
+                        className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-100"
+                      >
+                        <Pencil className="h-4 w-4" /> Edit Details
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        discardAll();
+                        setIsEditingDetails(false);
+    setIsEditingVideo(false);
+    setIsEditingInventory(false);
+    setIsEditingDescription(false);
+                      }}
+                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
-              {/* <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <ToggleField
-                  label="Listed for sale (sell)"
-                  checked={inventoryDraft.sell}
-                  onChange={(value) => setInventoryField("sell", value)}
-                />
-                <ToggleField
-                  label="In stock"
-                  checked={inventoryDraft.in_stock}
-                  onChange={(value) => setInventoryField("in_stock", value)}
-                />
-              </div> */}
+              
+              <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {isEditingDetails ? (
+                  <>
+                    <TextField label="Product Title" value={inventoryDraft.product_title} onChange={(val) => setInventoryField("product_title", val)} />
+                    <SelectField label="Category" value={inventoryDraft.category_name} options={categoryOptions} onChange={updateCategory} />
+                    <SelectField label="Condition" value={inventoryDraft.condition} options={BASE_CONDITIONS} onChange={(val) => setInventoryField("condition", val)} />
+                    <SelectWithOther label="Brand" value={inventoryDraft.brand} options={brandOptions} addingCustom={addingCustomBrand} onCustomToggle={setAddingCustomBrand} onChange={(val) => setInventoryField("brand", val)} customPlaceholder="Enter another brand" />
+                    <SelectWithOther label="Type" value={inventoryDraft.type} options={typeOptions} addingCustom={addingCustomType} onCustomToggle={setAddingCustomType} onChange={(val) => setInventoryField("type", val)} customPlaceholder="Enter another type" />
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Product Title</span>
+                      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900">{formatDisplay(inventoryDraft.product_title)}</div>
+                    </div>
+                    <div>
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Category</span>
+                      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900">{formatDisplay(inventoryDraft.category_name)}</div>
+                    </div>
+                    <div>
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Condition</span>
+                      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900">{formatDisplay(inventoryDraft.condition)}</div>
+                    </div>
+                    <div>
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Brand</span>
+                      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900">{formatDisplay(inventoryDraft.brand)}</div>
+                    </div>
+                    <div>
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Type</span>
+                      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900">{formatDisplay(inventoryDraft.type)}</div>
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              <div className="mt-8">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Default Pricing Parameters</h3>
+                <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {isEditingDetails ? (
+                    <>
+                      <NumberField label="Maximum Retail Price (MRP)" value={inventoryDraft.mrp} onChange={(val) => setInventoryField("mrp", val)} />
+                      <NumberField label="Buy Price" value={inventoryDraft.price} onChange={(val) => setInventoryField("price", val)} />
+                      <NumberField label="Max Sell Price" value={inventoryDraft.sell_max_price} onChange={(val) => setInventoryField("sell_max_price", val)} />
+                    </>
+                  ) : (
+                    <>
+                    <div>
+                        <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Maximum Retail Price (MRP)</span>
+                        <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm font-medium text-slate-900">{formatPrice(inventoryDraft.mrp)}</div>
+                      </div>
+                      <div>
+                        <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Buy Price</span>
+                        <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm font-medium text-slate-900">{formatPrice(inventoryDraft.price)}</div>
+                      </div>
+                      
+                      <div>
+                        <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Max Sell Price</span>
+                        <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm font-medium text-slate-900">{formatPrice(inventoryDraft.sell_max_price)}</div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold">Pricing</h2>
-              <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                <NumberField
-                  label="Current Price"
-                  value={inventoryDraft.price}
-                  onChange={(value) => setInventoryField("price", value)}
-                />
-                <NumberField
-                  label="MRP"
-                  value={inventoryDraft.mrp}
-                  onChange={(value) => setInventoryField("mrp", value)}
-                />
-                <NumberField
-                  label="Max Sell Price"
-                  value={inventoryDraft.sell_max_price}
-                  onChange={(value) =>
-                    setInventoryField("sell_max_price", value)
-                  }
-                />
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">Product Video</h2>
+                  <p className="text-sm text-slate-500">Manage YouTube unboxing or product showcase video embeds for this catalog item.</p>
+                </div>
+                <div>
+                  {!isEditingVideo ? (
+                    <button
+                      onClick={() => setIsEditingVideo(true)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-100"
+                    >
+                      <Pencil className="h-4 w-4" /> Edit Video
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        discardAll();
+                        setIsEditingDetails(false);
+    setIsEditingVideo(false);
+    setIsEditingInventory(false);
+    setIsEditingDescription(false);
+                      }}
+                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
+
+              <div className="mt-6">
+                <span className="block text-sm font-medium text-slate-700">YouTube embed (yt_iframe)</span>
+                {isEditingVideo ? (
+                  <textarea
+                    value={inventoryDraft.yt_iframe ?? ""}
+                    onChange={(event) => setInventoryField("yt_iframe", event.target.value)}
+                    rows={4}
+                    className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    placeholder='<iframe src="https://www.youtube.com/embed/VIDEO_ID" ...></iframe>'
+                  />
+                ) : (
+                  <div className="mt-2 w-full break-all rounded-lg border border-slate-200 bg-slate-50/50 px-4 py-3 font-mono text-xs text-slate-600">
+                    {inventoryDraft.yt_iframe || "—"}
+                  </div>
+                )}
+              </div>
+
+              {inventoryDraft.yt_iframe && (
+                <div className="mt-6">
+                  <span className="block text-sm font-medium text-slate-700">Preview</span>
+                  <div className="mt-3 aspect-video w-full max-w-2xl overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
+                    <iframe
+                      src={inventoryDraft.yt_iframe.match(/src=["']([^"']+)["']/)?.[1] || null}
+                      title="Product Video"
+                      className="h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold">Product Video</h2>
-              <label className="mt-4 block">
-                <span className="text-sm font-medium text-slate-700">
-                  YouTube embed (yt_iframe)
-                </span>
-                <textarea
-                  value={inventoryDraft.yt_iframe ?? ""}
-                  onChange={(event) =>
-                    setInventoryField("yt_iframe", event.target.value)
+            {isInventoryDescription && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between gap-3 mb-6">
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-950">Description</h3>
+                    <p className="mt-1 text-sm text-slate-500">Manage the product specification and summary details.</p>
+                  </div>
+                  <div>
+                    {!isEditingDescription ? (
+                      <button
+                        onClick={() => setIsEditingDescription(true)}
+                        className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-100"
+                      >
+                        <Pencil className="h-4 w-4" /> Edit Description
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          discardAll();
+                          setIsEditingDetails(false);
+                          setIsEditingVideo(false);
+                          setIsEditingInventory(false);
+                          setIsEditingDescription(false);
+                        }}
+                        className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <SpecificationTab
+                  key={discardCount}
+                  spec={specDraft}
+                  onChange={setSpecDraft}
+                  specId={meta.specId}
+                  description={inventoryDraft.description}
+                  onDescriptionChange={(nextDescription) =>
+                    setInventoryField("description", nextDescription)
                   }
-                  rows={4}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  placeholder="<iframe …></iframe>"
+                  descriptionOnly
+                  readOnly={!isEditingDescription}
                 />
-              </label>
-            </div> */}
-          
-<div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-  <h2 className="text-lg font-semibold">Product Video</h2>
-
-  <label className="mt-4 block">
-    <span className="text-sm font-medium text-slate-700">
-      YouTube embed (yt_iframe)
-    </span>
-
-    <textarea
-      value={inventoryDraft.yt_iframe ?? ""}
-      onChange={(event) =>
-        setInventoryField("yt_iframe", event.target.value)
-      }
-      rows={4}
-      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-      placeholder='<iframe src="https://www.youtube.com/embed/VIDEO_ID" ...></iframe>'
-    />
-  </label>
-
-  {inventoryDraft.yt_iframe && (
-    <div className="mt-5">
-      <p className="mb-2 text-sm font-medium text-slate-700">
-        Preview
-      </p>
-
-      <div className="aspect-video w-1/2 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-        <iframe
-          src={
-            inventoryDraft.yt_iframe.match(
-              /src=["']([^"']+)["']/
-            )?.[1] || null
-          }
-          title="Product Video"
-          className="h-full w-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      </div>
-    </div>
-  )}
-</div>
+              </div>
+            )}
 
           </section>
         )}
 
-        {activeTab === "Inventory" && (
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold">Items</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Edit any item, then save inventory.
-            </p>
-            <div className="mt-6 overflow-x-auto">
+        {(activeTab === "Overview" || activeTab === "Inventory") && (
+          <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 p-6">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-slate-900">Variants & Stock Inventory</h2>
+                  <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-600">{variants.length} variant combinations configured</span>
+                </div>
+                <p className="mt-1 text-sm text-slate-500">Manage live warehouse quantities, selling prices, and active catalog visibility.</p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {inventoryDirty && !isEditingInventory && (
+                   <span className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                     Unsaved changes
+                   </span>
+                )}
+                {!inventoryDirty && !isEditingInventory && (
+                   <span className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                     All changes saved
+                   </span>
+                )}
+                
+                {!isEditingInventory ? (
+                  <button
+                    onClick={() => setIsEditingInventory(true)}
+                    className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-100"
+                  >
+                    <Pencil className="h-4 w-4" /> Edit Inventory
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      discardAll();
+                      setIsEditingDetails(false);
+    setIsEditingVideo(false);
+    setIsEditingInventory(false);
+    setIsEditingDescription(false);
+                    }}
+                    className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="max-h-[800px] overflow-auto pb-4">
               <table className="w-full min-w-max text-left text-sm">
-                <thead className="border-b border-slate-200 text-slate-500">
+                <thead className="sticky top-0 z-10 border-b border-slate-100 bg-white">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Image</th>
-                    {/* <th className="px-4 py-3 font-medium">Vendor</th> */}
-                    <th className="px-4 py-3 font-medium">Combination</th>
-                    <th className="px-4 py-3 font-medium">SKU</th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Image</th>
+                    <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">SKU</th>
                     {attributeKeys.map((attribute) => (
-                      <th key={attribute} className="px-4 py-3 font-medium">
+                      <th key={attribute} className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">
                         {titleCase(attribute)}
                       </th>
                     ))}
-                    <th className="px-4 py-3 font-medium">Stock</th>
-                     <th className="px-4 py-3 font-medium">MRP</th>
-                    <th className="px-4 py-3 font-medium">Buy Price</th>
-                    <th className="px-4 py-3 font-medium">Sell Price</th>
-                    <th className="px-4 py-3 font-medium">Sell</th>
-                    <th className="px-4 py-3 font-medium">Action</th>
+                    <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Weight</th>
+                    <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">MRP</th>
+                    <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Buy Price</th>
+                    <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Sell Price</th>
+                    <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Stock</th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Sell</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {variants.map((variant) => (
-                    <tr
-                      key={`${variant.vendorId}-${variant.combinationId}-${variant.itemId}`}
-                      className="border-b border-slate-100 last:border-0"
-                    >
-                      <td className="px-4 py-4">
-                        <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-slate-200">
-                          {variant.item.images?.[0] ? (
-                            <Image
-                              src={variant.item.images[0]}
-                              alt={variant.item.sku || "Item"}
-                              fill
-                              sizes="48px"
-                              className="object-contain p-1"
-                            />
-                          ) : null}
-                        </div>
-                      </td>
-                      {/* <td className="px-4 py-4 text-xs text-slate-500">
-                        {variant.vendorId}
-                      </td> */}
-                      <td className="px-4 py-4 text-xs text-slate-500">
-                        {variant.combinationId}
-                      </td>
-                      <td className="max-w-72 px-4 py-4 font-mono text-xs">
-                        {formatDisplay(variant.item.sku)}
-                      </td>
-                      {attributeKeys.map((attribute) => (
-                        <td key={attribute} className="px-4 py-4">
-                          {formatDisplay(variant.item[attribute])}
+                <tbody className="divide-y divide-slate-100">
+                  {variants.map((variant) => {
+                    const item = variant.item;
+                    const stockNum = Number(item.stocks) || 0;
+                    const hasStock = stockNum > 0;
+                    const isSelling = Boolean(item.sell);
+                    
+                    return (
+                      <tr key={`${variant.vendorId}-${variant.combinationId}-${variant.itemId}`} className="hover:bg-slate-50/50">
+                        <td className="px-6 py-4">
+                          <button
+                            type="button"
+                            onClick={() => setEditingVariant(variant)} // We will update this later to trigger the Media Modal
+                            className="group relative flex flex-col items-center gap-2"
+                          >
+                            <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white transition-shadow group-hover:shadow-sm">
+                              {item.images?.[0] ? (
+                                <Image src={convertFirebaseImageToCdn(item.images[0])} alt={item.sku || "Variant image"} fill sizes="56px" className="object-contain p-1.5" />
+                              ) : (
+                                <div className="h-full w-full bg-slate-50" />
+                              )}
+                              
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                <span className="text-[10px] font-bold text-white">
+                                  {isEditingInventory ? "Edit Media" : "View Media"}
+                                </span>
+                              </div>
+                            </div>
+                          </button>
                         </td>
-                      ))}
-                      <td className="px-4 py-4">
-                        <span className="rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                          {formatDisplay(variant.item.stocks, 0)} units
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 font-medium">
-                        {formatPrice(variant.item.mrp)}
-                      </td>
-                      <td className="px-4 py-4 font-medium">
-                        {formatPrice(variant.item.price)}
-                      </td>
-                      <td className="px-4 py-4 font-medium">
-                        {formatPrice(variant.item.sell_price)}
-                      </td>
-                      <td className="px-4 py-4">
-                        {variant.item.sell ? "Yes" : "No"}
-                      </td>
-                      <td className="px-4 py-4">
-                        <button
-                          type="button"
-                          onClick={() => setEditingVariant(variant)}
-                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50"
-                        >
-                          <Pencil className="h-4 w-4" /> Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        
+                        <td className="px-4 py-4 align-top">
+                          {isEditingInventory ? (
+                            <input type="text" value={item.sku ?? ""} onChange={(e) => applyItem(variant.vendorId, variant.combinationId, variant.itemId, { sku: e.target.value })} className="w-64 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                          ) : (
+                            <span className="font-mono text-sm font-medium text-slate-800">{formatDisplay(item.sku)}</span>
+                          )}
+                        </td>
+                        
+                        {attributeKeys.map((attribute) => (
+                          <td key={attribute} className="px-4 py-4 align-top">
+                            <span className="text-sm font-semibold text-slate-700">{formatDisplay(item[attribute])}</span>
+                          </td>
+                        ))}
+                        
+                        <td className="px-4 py-4 align-top">
+                          {isEditingInventory ? (
+                            <div className="flex w-24 items-center gap-1 rounded-lg border border-slate-300 px-2 py-1.5 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                              <input type="text" value={String(item.weight ?? "").replace("kg", "").trim()} onChange={(e) => applyItem(variant.vendorId, variant.combinationId, variant.itemId, { weight: e.target.value + " kg" })} className="w-full text-sm outline-none" />
+                              <span className="text-[10px] font-medium text-slate-400">kg</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm font-semibold text-slate-700">{formatDisplay(item.weight)}</span>
+                          )}
+                        </td>
+                        
+                        <td className="px-4 py-4 align-top">
+                          {isEditingInventory ? (
+                            <input type="number" value={item.mrp ?? ""} onChange={(e) => applyItem(variant.vendorId, variant.combinationId, variant.itemId, { mrp: e.target.value })} className="w-24 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                          ) : (
+                            <span className="text-sm font-medium text-slate-700">{formatPrice(item.mrp)}</span>
+                          )}
+                        </td>
+                        
+                        <td className="px-4 py-4 align-top">
+                          {isEditingInventory ? (
+                            <input type="number" value={item.price ?? ""} onChange={(e) => applyItem(variant.vendorId, variant.combinationId, variant.itemId, { price: e.target.value })} className="w-24 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                          ) : (
+                            <span className="text-sm font-medium text-slate-700">{formatPrice(item.price)}</span>
+                          )}
+                        </td>
+                        
+                        <td className="px-4 py-4 align-top">
+                          {isEditingInventory ? (
+                            <input type="number" value={item.sell_price ?? ""} onChange={(e) => applyItem(variant.vendorId, variant.combinationId, variant.itemId, { sell_price: e.target.value })} className="w-24 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                          ) : (
+                            <span className="text-sm font-bold text-slate-900">{formatPrice(item.sell_price)}</span>
+                          )}
+                        </td>
+                        
+                        <td className="px-4 py-4 align-top">
+                          {isEditingInventory ? (
+                            <input type="number" value={item.stocks ?? ""} onChange={(e) => applyItem(variant.vendorId, variant.combinationId, variant.itemId, { stocks: e.target.value })} className="w-20 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                          ) : (
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium border ${hasStock ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>
+                              {stockNum} unit{stockNum !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </td>
+                        
+                        <td className="px-6 py-4 align-top">
+                          {isEditingInventory ? (
+                            <label className="relative inline-flex cursor-pointer items-center">
+                              <input type="checkbox" checked={isSelling} onChange={(e) => applyItem(variant.vendorId, variant.combinationId, variant.itemId, { sell: e.target.checked })} className="peer sr-only" />
+                              <div className="peer h-5 w-9 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300"></div>
+                              <span className="ml-2 text-sm font-medium text-slate-700">{isSelling ? 'Selling' : 'Not Selling'}</span>
+                            </label>
+                          ) : (
+                            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-sm font-medium ${isSelling ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
+                              <span className={`h-1.5 w-1.5 rounded-full ${isSelling ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                              {isSelling ? 'Selling' : 'Not Selling'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               {variants.length === 0 && (
@@ -763,15 +994,65 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
                 </p>
               )}
             </div>
+            <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-6 py-3">
+              <span className="text-xs text-slate-500">Showing {variants.length} of {variants.length} variant configurations</span>
+              <span className="text-xs font-medium text-slate-700">Total in-stock: {variants.reduce((acc, v) => acc + (Number(v.item.stocks) || 0), 0)} units</span>
+            </div>
           </section>
         )}
 
         {activeTab === "Specification" && (
-          <SpecificationTab
-            spec={specDraft}
-            onChange={setSpecDraft}
-            specId={meta.specId}
-          />
+          <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 p-6">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-slate-900">Specification Details</h2>
+                </div>
+                <p className="mt-1 text-sm text-slate-500">
+                  Manage the full product specification, box contents, colors, and questionnaire.
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {!isEditingSpec ? (
+                  <button
+                    onClick={() => setIsEditingSpec(true)}
+                    className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-100"
+                  >
+                    <Pencil className="h-4 w-4" /> Edit Specification
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setSpecDraft(specBaseline ? JSON.parse(specBaseline) : specDraft);
+                      setIsEditingSpec(false);
+                    }}
+                    className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6">
+              <SpecificationTab
+                key={discardCount}
+                spec={specDraft}
+                onChange={setSpecDraft}
+                specId={meta.specId}
+                description={isInventoryDescription ? undefined : specDraft?.description}
+                onDescriptionChange={(nextDescription) => {
+                  setSpecDraft((current) => ({
+                    ...current,
+                    description: nextDescription,
+                  }));
+                }}
+                showDescription={!isInventoryDescription}
+                readOnly={!isEditingSpec}
+              />
+            </div>
+          </section>
         )}
       </div>
 
@@ -790,10 +1071,16 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={discardAll}
+                onClick={() => {
+                  discardAll();
+                  setIsEditingDetails(false);
+    setIsEditingVideo(false);
+    setIsEditingInventory(false);
+    setIsEditingDescription(false);
+                }}
                 className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-100"
               >
-                <RotateCcw className="h-4 w-4" /> Discard
+                <RotateCcw className="h-4 w-4" /> Cancel
               </button>
               <button
                 type="button"
@@ -806,7 +1093,7 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                Save inventory
+                Save Changes
               </button>
               <button
                 type="button"
@@ -827,12 +1114,10 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
       )}
 
       {editingVariant && (
-        <EditItemDrawer
+        <MediaModal
           key={`${editingVariant.vendorId}-${editingVariant.combinationId}-${editingVariant.itemId}`}
           variant={editingVariant}
-          attributeKeys={attributeKeys}
-          allVariants={variants}
-          allSkus={collectSkus(inventoryDraft)}
+          isEditing={isEditingInventory}
           onClose={() => setEditingVariant(null)}
           onApply={(nextItem, options) => {
             applyItem(
@@ -862,6 +1147,14 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
           }}
         />
       )}
+
+      {showWarrantyModal && (
+        <AddWarrantyModal
+          specId={meta.specId}
+          onClose={() => setShowWarrantyModal(false)}
+        />
+      )}
+      </div>
     </main>
   );
 }

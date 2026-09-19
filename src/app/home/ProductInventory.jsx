@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Eye, LoaderCircle, RefreshCw, Search, Trash2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LoaderCircle, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { deleteProduct as deleteProductApi, fetchInventory, searchProducts } from "../apis/api";
@@ -50,17 +51,24 @@ function fetchInitialInventory() {
 }
 
 function ProductRow({ product, onDelete }) {
+  const router = useRouter();
   const [showDeletePop, setShowDeletePop] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const variants = getVariantItems(product);
-  const thumbnail = variants.find((variant) => variant.images?.[0])?.images?.[0];
+  const isSearchResult = product.isSearchResult;
+  const variants = isSearchResult ? [] : getVariantItems(product);
+  const variantsLength = isSearchResult ? product.variants : variants.length;
+  const thumbnail = isSearchResult ? product.image : variants.find((variant) => variant.images?.[0])?.images?.[0];
   const discount = product.mrp > product.price
     ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
     : 0;
 
   return (
     <>
-    <tr className="border-t border-slate-200 bg-white transition-colors hover:bg-slate-50/70">
+    <tr
+     onClick={() => router.push(`/update-inventory/${encodeURIComponent(product.id)}`)}
+      // onClick={() => router.push(`/product-detail/${product.id}`)}
+      className="cursor-pointer border-t border-slate-200 bg-white transition-colors hover:bg-slate-50/70"
+    >
       <td className="px-5 py-5">
         <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
           {thumbnail ? (
@@ -77,40 +85,59 @@ function ProductRow({ product, onDelete }) {
         </div>
       </td>
       <td className="min-w-72 px-5 py-5">
-        <p className="font-semibold text-slate-900">{product.product_title}</p>
-        <p className="mt-1 text-sm text-slate-500">
-          {variants.length} {variants.length === 1 ? "variant" : "variants"}
+        <p className="text-base font-semibold text-slate-900">{product.product_title}</p>
+        <p className="mt-1 text-sm text-orange-700">
+          {variantsLength} {variantsLength === 1 ? "variant" : "variants"}
         </p>
-        <p className="mt-1 text-sm text-slate-700">{product.code}</p>
       </td>
-      <td className="min-w-40 px-5 py-5 font-medium text-slate-800">{product.category_name}</td>
+      <td className="min-w-40 px-5 py-5">
+        <p className="text-[15px] font-medium text-slate-800">{product.category_name || "—"}</p>
+        <p className="mt-2 inline-block rounded bg-orange-100 px-2 py-1 text-[13px] font-semibold tracking-wider text-orange-900">
+          {product.code || "—"}
+        </p>
+      </td>
       <td className="min-w-32 px-5 py-5">
-        <p className="font-semibold text-slate-900">{formatPrice(product.price)}</p>
+        <p className="text-base font-semibold text-slate-900">{formatPrice(product.price)}</p>
         {product.mrp > product.price && (
-          <>
-            <p className="mt-1 text-sm text-slate-500 line-through">{formatPrice(product.mrp)}</p>
-            <p className="mt-1 text-xs font-medium text-slate-700">{discount}% OFF</p>
-          </>
+          <div className="mt-1 flex items-center gap-2">
+            <p className="text-[13px] text-slate-400 line-through">{formatPrice(product.mrp)}</p>
+            <p className="rounded bg-emerald-50 px-1.5 py-0.5 text-[13px] font-bold text-emerald-600">{discount}% OFF</p>
+          </div>
         )}
       </td>
       <td className="min-w-28 px-5 py-5">
-        <span className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-medium ${
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
           product.in_stock && !product.outofstock
-            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-            : "border-rose-200 bg-rose-50 text-rose-700"
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-rose-50 text-rose-600"
         }`}>
-          {product.in_stock && !product.outofstock ? "In Stock" : "Out of Stock"}
+          <span className={`h-1.5 w-1.5 rounded-full ${product.in_stock && !product.outofstock ? "bg-emerald-500" : "bg-rose-500"}`}></span>
+          {product.in_stock && !product.outofstock ? "In" : "Out"}
         </span>
       </td>
-      <td className="min-w-48 px-5 py-5">
-        <div className="flex items-center gap-2">
-          <Link href={`/product-detail/${product.id}`} aria-label={`View ${product.product_title}`} title="View" className="cursor-pointer rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
-            <Eye className="h-4 w-4" />
-          </Link>
-          <button type="button" onClick={() => setShowDeletePop(true)} aria-label={`Delete ${product.product_title}`} title="Delete" className="cursor-pointer rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600">
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
+      <td className="min-w-28 px-5 py-5">
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
+          product.is_active !== false && product.status !== "Deactive"
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-slate-100 text-slate-600"
+        }`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${product.is_active !== false && product.status !== "Deactive" ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+          {product.is_active !== false && product.status !== "Deactive" ? "Active" : "Deactive"}
+        </span>
+      </td>
+      <td className="min-w-32 px-5 py-5">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowDeletePop(true);
+          }}
+          aria-label={`Delete ${product.product_title}`}
+          title="Delete"
+          className="cursor-pointer p-2 text-rose-500 transition hover:text-rose-700"
+        >
+          <Trash2 className="h-5 w-5" />
+        </button>
       </td>
     </tr>
     {showDeletePop && (
@@ -152,7 +179,6 @@ export default function ProductInventory() {
     : null;
   const [selectedCategory, setSelectedCategory] = useState("");
   const [pages, setPages] = useState(() => (initialPage ? [initialPage] : []));
-  const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingLabel, setLoadingLabel] = useState("Loading inventory...");
   const [error, setError] = useState("");
@@ -160,10 +186,9 @@ export default function ProductInventory() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const [searchDeleteTarget, setSearchDeleteTarget] = useState(null);
-  const [isDeletingSearchProduct, setIsDeletingSearchProduct] = useState(false);
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const searchRequestId = useRef(0);
+  const loaderRef = useRef(null);
 
   const loadPage = useCallback(async ({ startAfter, pageIndex, reset = false }) => {
     setIsLoading(true);
@@ -176,7 +201,7 @@ export default function ProductInventory() {
 
       if (pageIndex > 0 && products.length === 0) {
         setPages((existingPages) => existingPages.map((page, index) =>
-          index === pageIndex - 1 ? { ...page, hasNext: false } : page
+          index === existingPages.length - 1 ? { ...page, hasNext: false } : page
         ));
         return;
       }
@@ -190,11 +215,8 @@ export default function ProductInventory() {
 
       setPages((existingPages) => {
         if (reset) return [nextPage];
-        const updatedPages = existingPages.slice(0, pageIndex);
-        updatedPages[pageIndex] = nextPage;
-        return updatedPages;
+        return [...existingPages, nextPage];
       });
-      setCurrentPage(pageIndex);
     } catch (requestError) {
       setError(requestError.message || "Failed to fetch inventory");
     } finally {
@@ -212,55 +234,94 @@ export default function ProductInventory() {
     setError("");
   }, [inventoryResponse]);
 
+  const allProducts = useMemo(() => pages.flatMap(p => p.products), [pages]);
+  const hasNextPage = pages.length > 0 ? pages[pages.length - 1].hasNext : false;
+  
   useEffect(() => {
-    const query = searchQuery.trim();
-    if (!query) return;
-    const requestId = ++searchRequestId.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isLoading && !isSearchActive && !error) {
+          const lastProduct = allProducts.at(-1);
+          if (lastProduct?.id) {
+            loadPage({ startAfter: lastProduct.id, pageIndex: pages.length });
+          }
+        }
+      },
+      { root: null, rootMargin: "150px", threshold: 0.1 }
+    );
 
-    const timeoutId = window.setTimeout(async () => {
-      setIsSearching(true);
-      setSearchError("");
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isLoading, isSearchActive, error, allProducts, pages.length, loadPage]);
 
-      try {
-        const results = await searchProducts(query);
-        if (requestId !== searchRequestId.current) return;
-        setSearchResults(Array.isArray(results) ? results : []);
-      } catch (requestError) {
-        if (requestId !== searchRequestId.current) return;
-        setSearchResults([]);
-        setSearchError(requestError.message || "Failed to search products");
-      } finally {
-        if (requestId === searchRequestId.current) setIsSearching(false);
-      }
-    }, 350);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [searchQuery]);
-
-  const currentPageData = pages[currentPage] ?? { products: [], hasNext: false };
   const listError = error || inventoryFetchError?.message || "";
   const listLoading = isLoading && !inventoryResponse;
 
   const filteredProducts = useMemo(
     () => selectedCategory
-      ? currentPageData.products.filter((product) => product.category_name === selectedCategory)
-      : currentPageData.products,
-    [currentPageData.products, selectedCategory]
+      ? allProducts.filter((product) => product.category_name === selectedCategory)
+      : allProducts,
+    [allProducts, selectedCategory]
   );
+
+  const displayProducts = isSearchActive 
+    ? searchResults.map(result => ({
+        id: result.docId,
+        isSearchResult: true,
+        image: result.product?.image,
+        product_title: result.product?.product_title,
+        code: result.product?.code,
+        category_name: result.product?.category,
+        price: result.product?.price,
+        mrp: result.product?.mrp,
+        in_stock: !(result.product?.outOfStock || result.outOfStock),
+        outofstock: result.product?.outOfStock || result.outOfStock,
+        variants: result.product?.variants ?? 0,
+      }))
+    : filteredProducts;
+
+  async function executeSearch() {
+    const query = searchQuery.trim();
+    if (!query) {
+      clearSearch();
+      return;
+    }
+    
+    setIsSearchActive(true);
+    setIsSearching(true);
+    setSearchError("");
+    const requestId = ++searchRequestId.current;
+
+    try {
+      const results = await searchProducts(query);
+      if (requestId !== searchRequestId.current) return;
+      setSearchResults(Array.isArray(results) ? results : []);
+    } catch (requestError) {
+      if (requestId !== searchRequestId.current) return;
+      setSearchResults([]);
+      setSearchError(requestError.message || "Failed to search products");
+    } finally {
+      if (requestId === searchRequestId.current) setIsSearching(false);
+    }
+  }
+
+  function clearSearch() {
+    setSearchQuery("");
+    setIsSearchActive(false);
+    setSearchResults([]);
+    setSearchError("");
+    searchRequestId.current += 1;
+    setIsSearching(false);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      executeSearch();
+    }
+  }
 
   function changeCategory(event) {
     setSelectedCategory(event.target.value);
-  }
-
-  function changeSearchQuery(value) {
-    setSearchQuery(value);
-    setShowSearchResults(true);
-    if (!value.trim()) {
-      searchRequestId.current += 1;
-      setSearchResults([]);
-      setSearchError("");
-      setIsSearching(false);
-    }
   }
 
   async function deleteProduct(product) {
@@ -288,10 +349,8 @@ export default function ProductInventory() {
         },
         { revalidate: false },
       );
-      setPages((existingPages) => existingPages.map((page, pageIndex) =>
-        pageIndex === currentPage
-          ? { ...page, products: page.products.filter((item) => item.id !== product.id) }
-          : page
+      setPages((existingPages) => existingPages.map((page) =>
+        ({ ...page, products: page.products.filter((item) => item.id !== product.id) })
       ));
       setSearchResults((currentResults) =>
         currentResults.filter((result) => result.docId !== product.id)
@@ -302,20 +361,6 @@ export default function ProductInventory() {
       toast.error(requestError.message || "Failed to delete product");
       return false;
     }
-  }
-
-  async function goToNextPage() {
-    const nextPageIndex = currentPage + 1;
-
-    if (pages[nextPageIndex]) {
-      setCurrentPage(nextPageIndex);
-      return;
-    }
-
-    const lastProduct = currentPageData.products.at(-1);
-    if (!lastProduct?.id) return;
-
-    await loadPage({ startAfter: lastProduct.id, pageIndex: nextPageIndex });
   }
 
   return (
@@ -329,98 +374,36 @@ export default function ProductInventory() {
           <AddNewProduct />
         </div>
 
-        <div className="relative mt-7">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-          <input
-            type="search"
-            value={searchQuery}
-            onFocus={() => setShowSearchResults(true)}
-            onChange={(event) => changeSearchQuery(event.target.value)}
-            placeholder="Search products by name or code..."
-            className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-12 text-base shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-          />
-          {searchQuery && (
-            <button type="button" onClick={() => changeSearchQuery("")} aria-label="Clear product search" className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
-              <X className="h-4 w-4" />
+        <div className="mt-7 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Search products by name or code..."
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={executeSearch}
+              disabled={isSearching}
+              className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-6 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              Search
             </button>
-          )}
-
-          {showSearchResults && searchQuery.trim() && (
-            <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 max-h-[min(520px,60vh)] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
-              {isSearching && (
-                <div className="flex items-center justify-center gap-2 px-5 py-10 text-sm font-medium text-blue-600">
-                  <LoaderCircle className="h-5 w-5 animate-spin" /> Searching products...
-                </div>
-              )}
-              {!isSearching && searchError && (
-                <p className="px-5 py-10 text-center text-sm text-rose-600">{searchError}</p>
-              )}
-              {!isSearching && !searchError && searchResults.length === 0 && (
-                <p className="px-5 py-10 text-center text-sm text-slate-500">No products found.</p>
-              )}
-              {!isSearching && !searchError && searchResults.map((result) => {
-                const product = result.product ?? {};
-                const discount = getDiscount(product.mrp, product.price);
-                return (
-                  <div key={result.docId} className="flex items-center border-b border-slate-200 transition last:border-0 hover:bg-blue-50/60">
-                    <Link
-                      href={`/product-detail/${encodeURIComponent(result.docId)}`}
-                      onClick={() => setShowSearchResults(false)}
-                      className="grid min-w-0 flex-1 grid-cols-[72px_minmax(0,1fr)] gap-4 px-5 py-4 sm:grid-cols-[80px_minmax(0,1fr)_150px] sm:items-center"
-                    >
-                      <div className="relative h-18 w-18 overflow-hidden rounded-xl border border-slate-200 bg-white sm:h-20 sm:w-20">
-                        {product.image && (
-                          <Image src={product.image} alt={product.product_title || "Product"} fill sizes="80px" className="object-contain p-1" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-lg font-semibold text-slate-900">{product.product_title}</p>
-                        <p className="mt-1 text-sm text-slate-500">{product.category}</p>
-                        <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-700">
-                          <span>{product.condition || "—"}</span>
-                          <span className={product.outOfStock || result.outOfStock ? "text-rose-600" : "text-emerald-600"}>
-                            {product.outOfStock || result.outOfStock ? "Out of Stock" : "In Stock"}
-                          </span>
-                          <span>{product.variants ?? 0} {product.variants === 1 ? "variant" : "variants"}</span>
-                        </div>
-                      </div>
-                      <div className="col-start-2 sm:col-start-auto sm:text-right">
-                        <p className="text-lg font-semibold text-slate-950">{formatPrice(product.price)}</p>
-                        {discount > 0 && <p className="mt-1 text-sm font-medium text-emerald-700">{discount}% OFF</p>}
-                      </div>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setSearchDeleteTarget(result)}
-                      aria-label={`Delete ${product.product_title}`}
-                      title="Delete"
-                      className="mr-5 shrink-0 cursor-pointer rounded-xl border border-rose-200 bg-white p-3 text-rose-600 hover:bg-rose-50"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-slate-100 px-6 text-sm font-medium text-slate-700 transition hover:bg-slate-200"
+            >
+              Clear
+            </button>
+          </div>
         </div>
-
-        {searchDeleteTarget && (
-          <DeletePop
-            productName={searchDeleteTarget.product?.product_title}
-            isDeleting={isDeletingSearchProduct}
-            onCancel={() => setSearchDeleteTarget(null)}
-            onConfirm={async () => {
-              setIsDeletingSearchProduct(true);
-              const deleted = await deleteProduct({
-                id: searchDeleteTarget.docId,
-                product_title: searchDeleteTarget.product?.product_title,
-              });
-              setIsDeletingSearchProduct(false);
-              if (deleted) setSearchDeleteTarget(null);
-            }}
-          />
-        )}
 
         {/* <div className="mt-4 flex flex-wrap items-center gap-3">
           <label className="sr-only" htmlFor="category-filter">Filter by category</label>
@@ -452,59 +435,76 @@ export default function ProductInventory() {
         <div className="mt-7 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="relative min-h-0 flex-1 overflow-auto">
             <table className="w-full border-collapse text-left text-sm">
-              <thead className="sticky top-0 z-10 bg-slate-50 text-slate-700 shadow-[0_1px_0_0_#e2e8f0]">
+              <thead className="sticky top-0 z-10 bg-slate-50 text-sm font-medium uppercase tracking-wider text-slate-500 shadow-[0_1px_0_0_#e2e8f0]">
                 <tr>
-                  <th className="px-5 py-4 font-semibold">Image</th>
-                  <th className="px-5 py-4 font-semibold">Product Details</th>
-                  <th className="px-5 py-4 font-semibold">Category</th>
-                  <th className="px-5 py-4 font-semibold">Pricing</th>
-                  <th className="px-5 py-4 font-semibold">Status</th>
-                  <th className="px-5 py-4 font-semibold">Actions</th>
+                  <th className="px-5 py-4">IMAGE</th>
+                  <th className="px-5 py-4">PRODUCT DETAILS</th>
+                  <th className="px-5 py-4">CATEGORY & CODE</th>
+                  <th className="px-5 py-4">PRICING</th>
+                  <th className="px-5 py-4">STOCK</th>
+                  <th className="px-5 py-4">SELL</th>
+                  <th className="px-5 py-4">ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) => <ProductRow key={product.id} product={product} onDelete={deleteProduct} />)}
+                {displayProducts.map((product) => <ProductRow key={product.id} product={product} onDelete={deleteProduct} />)}
+                {!isSearchActive && hasNextPage && displayProducts.length > 0 && !listError && (
+                  <tr ref={loaderRef}>
+                    <td colSpan={7} className="py-8 text-center">
+                      <div className="flex items-center justify-center gap-2 text-sm font-medium text-slate-500">
+                        <LoaderCircle className="h-5 w-5 animate-spin text-blue-600" />
+                        Loading more products...
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                {!isSearchActive && !hasNextPage && displayProducts.length > 0 && !listError && (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-sm text-slate-500">
+                      All products loaded.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
-            {listLoading && (
+            {(listLoading || isSearching) && (
               <div className="absolute inset-0 z-20 flex items-center justify-center gap-3 bg-white/80 text-sm font-medium text-blue-600 backdrop-blur-[1px]">
                 <LoaderCircle className="h-6 w-6 animate-spin" />
-                <span>{loadingLabel}</span>
+                <span>{isSearching ? "Searching products..." : loadingLabel}</span>
               </div>
             )}
-            {!listLoading && listError && (
+            {!listLoading && !isSearching && (listError || searchError) && (
               <div className="px-6 py-16 text-center">
-                <p className="text-sm text-rose-600">{listError}</p>
-                <button type="button" onClick={() => loadPage({ pageIndex: 0, reset: true })} className="mt-4 cursor-pointer rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Try again</button>
+                <p className="text-sm text-rose-600">{listError || searchError}</p>
+                {!isSearchActive && (
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      if (displayProducts.length > 0) {
+                        const lastProduct = allProducts.at(-1);
+                        if (lastProduct?.id) loadPage({ startAfter: lastProduct.id, pageIndex: pages.length });
+                      } else {
+                        loadPage({ pageIndex: 0, reset: true });
+                      }
+                    }} 
+                    className="mt-4 cursor-pointer rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+                  >
+                    Try again
+                  </button>
+                )}
               </div>
             )}
-            {!listLoading && !listError && filteredProducts.length === 0 && (
-              <div className="px-6 py-16 text-center text-sm text-slate-500">No products found in this category.</div>
+            {!listLoading && !isSearching && !(listError || searchError) && displayProducts.length === 0 && (
+              <div className="px-6 py-16 text-center text-sm text-slate-500">
+                {isSearchActive ? "No products found for your search." : "No products found in this category."}
+              </div>
             )}
           </div>
 
-          <div className="flex flex-col gap-4 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="border-t border-slate-200 bg-slate-50 px-5 py-4 text-center sm:text-left">
             <p className="text-sm font-medium text-slate-600">
-              Page {currentPage + 1} · {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+              {isSearchActive ? "Search Results" : "Total Loaded"} · {displayProducts.length} {displayProducts.length === 1 ? "product" : "products"}
             </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={isLoading || currentPage === 0}
-                onClick={() => setCurrentPage((page) => Math.max(0, page - 1))}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                <ChevronLeft className="h-4 w-4" /> Previous
-              </button>
-              <button
-                type="button"
-                disabled={isLoading || !currentPageData.hasNext || currentPageData.products.length === 0}
-                onClick={goToNextPage}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                Next <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
           </div>
         </div>
       </section>

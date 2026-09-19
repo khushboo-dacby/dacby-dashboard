@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import ImagePreview from "@/components/inventory/ImagePreview";
+import { getYouTubeEmbedUrl } from "@/components/inventory/ProductFields";
 import { toast } from "sonner";
 import {
   addCombinationItem,
@@ -213,6 +214,7 @@ export function createCombinationItemPayload(
       weight: getNumberOrZero(formData.weight),
       stocks: getNumberOrZero(formData.stocks),
       sell: formData.availableForSell,
+      yt_iframe: formData.yt_iframe.trim(),
     },
   };
 }
@@ -314,6 +316,7 @@ export default function AddVariant() {
     image2: "",
     image3: "",
     image4: "",
+    yt_iframe: "",
   });
   useEffect(() => {
     const query = searchTerm.trim();
@@ -385,6 +388,7 @@ export default function AddVariant() {
         image2: "",
         image3: "",
         image4: "",
+        yt_iframe: "",
       });
 
       const combinationMap = details?.specifications?.combination ?? {};
@@ -495,6 +499,8 @@ export default function AddVariant() {
     );
   }
   function handleSelectCombination(comboId) {
+    if (combinationsHaveChanges) return;
+
     const combo = combinations.find((item) => item.id === comboId);
 
     setFormData({
@@ -509,11 +515,13 @@ export default function AddVariant() {
       image2: "",
       image3: "",
       image4: "",
+      yt_iframe: "",
     });
 
     if (combo) handleSelectorCombination(combo);
   }
   function handleFormChange(field, value) {
+    if (combinationsHaveChanges) return;
     setFormData({ ...formData, [field]: value });
   }
   async function handleUpdateCombinations() {
@@ -542,6 +550,8 @@ export default function AddVariant() {
     }
   }
   async function handleSubmit() {
+    if (combinationsHaveChanges) return;
+
     const payload = createCombinationItemPayload(
       selectedProduct.docId,
       selectorCombo,
@@ -551,9 +561,9 @@ export default function AddVariant() {
 
     setSubmittingProduct(true);
     try {
-      //  const response = await addCombinationItem(payload);
+       const response = await addCombinationItem(payload);
       
-      // toast.success(response?.message || "Product added successfully");
+      toast.success(response?.message || "Product added successfully");
       console.log("Add combination item payload:", payload);
     } catch (error) {
       toast.error(error.message || "Failed to add product");
@@ -593,6 +603,7 @@ export default function AddVariant() {
     );
 
   function handleSelectorCombination(combo) {
+    if (combinationsHaveChanges) return;
     if (isCombinationFullyExisting(combo, productDetails)) return;
     const firstAvailableSelection = getAvailableSelections(
       combo,
@@ -609,6 +620,8 @@ export default function AddVariant() {
   }
 
   function handleSelectorAttribute(attributeName, value) {
+    if (combinationsHaveChanges) return;
+
     const updatedAttributeValues = {
       ...selectedAttributeValues,
       [attributeName]: value,
@@ -643,7 +656,11 @@ export default function AddVariant() {
       <h3 className="mb-3 text-sm text-gray-500">
         Select Product ({searchResults.length} results)
       </h3>
-      <div className="max-h-[calc(100vh-20rem)] space-y-3 overflow-y-auto px-5 py-5">
+      <div
+        className={`space-y-3 overflow-y-auto px-5 py-5 ${
+          selectedProduct ? "max-h-[min(20rem,50vh)]" : ""
+        }`}
+      >
         {searchResults.map((item) => {
           const isSelected = selectedProduct?.docId === item.docId;
 
@@ -689,7 +706,7 @@ export default function AddVariant() {
             <p className="text-sm text-gray-400">No products found.</p>
           )}
       </div>
-      {selectedProduct && (
+      {productDetails && (
         <div className="mb-8 overflow-hidden rounded-xl border border-gray-200">
           <div className="bg-indigo-900 p-5 text-white">
             <p className="text-lg font-semibold">
@@ -777,11 +794,14 @@ export default function AddVariant() {
                           </button>
 
                           <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleSelectCombination(combo.id)}
-                              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ${
-                                selectorCombinationId === combo.id
+                          <button
+                            type="button"
+                            onClick={() => handleSelectCombination(combo.id)}
+                            disabled={combinationsHaveChanges}
+                            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ${
+                                combinationsHaveChanges
+                                  ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                                  : selectorCombinationId === combo.id
                                   ? "bg-indigo-900 text-white"
                                   : "bg-white text-gray-800 hover:bg-gray-100"
                               }`}
@@ -869,6 +889,11 @@ export default function AddVariant() {
             </div>
 
             <div className="space-y-6 p-6">
+              {combinationsHaveChanges && (
+                <p className="text-sm font-medium text-amber-800">
+                  Please update combinations first before adding or updating items.
+                </p>
+              )}
               <div>
                 <p className="mb-3 font-medium text-gray-800">Combination</p>
                 <div className="flex flex-wrap gap-4">
@@ -877,8 +902,11 @@ export default function AddVariant() {
                       type="button"
                       key={combo.id}
                       onClick={() => handleSelectorCombination(combo)}
+                      disabled={combinationsHaveChanges}
                       className={`w-56 rounded-lg border-2 px-5 py-4 text-left transition-colors ${
-                        selectorCombinationId === combo.id
+                        combinationsHaveChanges
+                          ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+                          : selectorCombinationId === combo.id
                           ? "border-indigo-900 bg-blue-50"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
@@ -917,20 +945,22 @@ export default function AddVariant() {
                       </p>
                       <div className="flex flex-wrap gap-3">
                         {values.map((value) => {
-                          const isDisabled = !selectorAvailableSelections.some(
-                            (selection) =>
-                              normalizeAttributeValue(
-                                selection[attributeName]
-                              ) === normalizeAttributeValue(value) &&
-                              Object.entries(selectedAttributeValues).every(
-                                ([selectedAttribute, selectedValue]) =>
-                                  selectedAttribute === attributeName ||
-                                  normalizeAttributeValue(
-                                    selection[selectedAttribute]
-                                  ) ===
-                                    normalizeAttributeValue(selectedValue)
-                              )
-                          );
+                          const isDisabled =
+                            combinationsHaveChanges ||
+                            !selectorAvailableSelections.some(
+                              (selection) =>
+                                normalizeAttributeValue(
+                                  selection[attributeName]
+                                ) === normalizeAttributeValue(value) &&
+                                Object.entries(selectedAttributeValues).every(
+                                  ([selectedAttribute, selectedValue]) =>
+                                    selectedAttribute === attributeName ||
+                                    normalizeAttributeValue(
+                                      selection[selectedAttribute]
+                                    ) ===
+                                      normalizeAttributeValue(selectedValue)
+                                )
+                            );
 
                           return (
                             <button
@@ -985,6 +1015,7 @@ export default function AddVariant() {
           onFormChange={handleFormChange}
           onSubmit={handleSubmit}
           submitting={submittingProduct}
+          disabled={combinationsHaveChanges}
         />
       )}
     </div>
@@ -1095,9 +1126,13 @@ function ProductVariantForm({
   onFormChange,
   onSubmit,
   submitting,
+  disabled,
 }) {
+  const youtubePreviewUrl = getYouTubeEmbedUrl(formData.yt_iframe);
+
   function handleSubmit(event) {
     event.preventDefault();
+    if (disabled) return;
     onSubmit();
   }
 
@@ -1112,7 +1147,7 @@ function ProductVariantForm({
         </h2>
       </div>
 
-      <div className="space-y-6 p-6">
+      <fieldset disabled={disabled} className="space-y-6 p-6">
         <div className="flex flex-wrap gap-3">
           {Object.entries(selectedAttributes).map(([attributeName, value]) => (
             <span
@@ -1236,17 +1271,42 @@ function ProductVariantForm({
           </div>
         </div>
 
+        <div>
+          <label className="mb-2 block text-sm font-semibold">
+            YouTube Iframe
+          </label>
+          <textarea
+            rows={3}
+            value={formData.yt_iframe}
+            onChange={(event) => onFormChange("yt_iframe", event.target.value)}
+            placeholder={'<iframe src="https://www.youtube.com/embed/VIDEO_ID" ...></iframe>'}
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 outline-none focus:border-blue-400"
+          />
+          {youtubePreviewUrl && (
+            <div className="mt-4 w-full max-w-md overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
+              <iframe
+                src={youtubePreviewUrl}
+                title="Item video preview"
+                className="aspect-video w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-end border-t border-gray-100 pt-6">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || disabled}
             className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-10 py-3 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
             <CheckCircle2 className="h-5 w-5" />
             {submitting ? "Submitting Product..." : "Submit Product"}
           </button>
         </div>
-      </div>
+      </fieldset>
     </form>
   );
 }

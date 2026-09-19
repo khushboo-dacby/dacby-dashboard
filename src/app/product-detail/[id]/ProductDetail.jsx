@@ -13,6 +13,8 @@ import ImagePreview from "../../../components/inventory/ImagePreview";
 import { useProductContext } from "../../../context/ProductContext";
 import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
 import { toast } from "sonner";
+import PriceAnalysisForm from "@/components/price-analysis/PriceAnalysisForm";
+import PriceAnalysisModal from "@/components/price-analysis/PriceAnalysisModal";
 
 const ITEM_FIELDS = new Set([
   "sku", "images", "mrp", "price", "sell_price", "weight", "stocks", "sell",
@@ -90,13 +92,21 @@ function getVariants(details) {
 }
 
 function getAttributeKeys(productData, variants) {
+  const excludedAttributeKeys = new Set(["condition", "type"]);
   const combinationKeys = Object.values(productData?.specifications?.combination ?? {})
     .flatMap((combination) =>
-      Object.keys(combination ?? {}).filter((key) => !ITEM_FIELDS.has(key))
+      Object.keys(combination ?? {}).filter(
+        (key) => !ITEM_FIELDS.has(key) && !excludedAttributeKeys.has(key.toLowerCase()),
+      )
     );
   const itemKeys = variants.flatMap(({ item }) =>
     Object.keys(item ?? {})
-      .filter((key) => !ITEM_FIELDS.has(key) && key.toLowerCase() !== 'accessories')
+      .filter(
+        (key) =>
+          !ITEM_FIELDS.has(key) &&
+          key.toLowerCase() !== "accessories" &&
+          !excludedAttributeKeys.has(key.toLowerCase()),
+      )
   );
   console.log(combinationKeys);
   console.log(itemKeys);
@@ -350,6 +360,7 @@ export default function ProductDetail({ id }) {
   const [retryCount, setRetryCount] = useState(0);
   const [showDescriptionPreview, setShowDescriptionPreview] = useState(false);
   const [showWarrantyModal, setShowWarrantyModal] = useState(false);
+  const [showWebsiteLink, setShowWebsiteLink] = useState(false);
 
 // Updated imports to include getProductFullJson
 
@@ -508,6 +519,13 @@ useEffect(() => {
             {details.condition && <span className="rounded-full bg-white px-3 py-1 text-sm font-medium shadow-sm">{formatDisplayValue(details.condition)}</span>}
           </div>
           <div className="ml-auto flex items-center gap-3">
+             <button
+              type="button"
+              onClick={() => setShowWebsiteLink(true)}
+              className="cursor-pointer rounded-lg border border-blue-200 px-5 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+            >
+              Add Website Links
+            </button>
             <button
               type="button"
               onClick={() => router.push(`/update-inventory/${encodeURIComponent(id)}`)}
@@ -515,6 +533,7 @@ useEffect(() => {
             >
               Edit Inventory
             </button>
+
             <button
               type="button"
               onClick={() => setShowWarrantyModal(true)}
@@ -675,6 +694,13 @@ useEffect(() => {
           onClose={() => setShowDescriptionPreview(false)}
         />
       )}
+     
+     { showWebsiteLink && <PriceAnalysisModal
+ isOpen={showWebsiteLink}
+  onClose={() => setShowWebsiteLink(false)}
+  initialData={productData}
+ 
+ />}
     </main>
   );
 }

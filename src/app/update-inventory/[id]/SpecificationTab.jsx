@@ -293,7 +293,16 @@ function ImagePreviewCell({ imageUrl }) {
     </PhotoView>
   );
 }
-export default function SpecificationTab({ spec, onChange, specId }) {
+export default function SpecificationTab({
+  spec,
+  onChange,
+  specId,
+  description,
+  onDescriptionChange,
+  showDescription = true,
+  descriptionOnly = false,
+  readOnly = false,
+}) {
   const safe = useMemo(() => safeSpec(spec), [spec]);
   const [expandedSections, setExpandedSections] = useState({
     description: true,
@@ -301,22 +310,18 @@ export default function SpecificationTab({ spec, onChange, specId }) {
   });
 
   const [descriptionForm, setDescriptionForm] = useState(() =>
-    convertDescriptionObjectToFormState(safe.description ?? {}),
+    convertDescriptionObjectToFormState(description ?? {}),
   );
   const hasHydratedDescriptionRef = useRef(false);
 
   useEffect(() => {
     if (!spec || hasHydratedDescriptionRef.current) return;
-    setDescriptionForm(convertDescriptionObjectToFormState(spec?.description ?? {}));
+    setDescriptionForm(convertDescriptionObjectToFormState(description ?? {}));
     hasHydratedDescriptionRef.current = true;
-  }, [spec]);
+  }, [description, spec]);
 
   function syncDescriptionForm(nextDescription) {
-    updateSpec((next) => {
-      const updated = clone(next ?? {});
-      updated.description = serializeDescriptionState(nextDescription);
-      return updated;
-    });
+    onDescriptionChange?.(serializeDescriptionState(nextDescription));
   }
 
   function modifyDescriptionForm(updater) {
@@ -840,6 +845,27 @@ export default function SpecificationTab({ spec, onChange, specId }) {
     return renderPrimitiveInput(value, (nextValue) => setNestedValue(path, nextValue));
   }
 
+  const descriptionEditor = (
+    <DescriptionEditor
+        description={descriptionForm}
+        updateSummary={updateDescriptionSummary}
+        addDescriptionSection={addDescriptionSection}
+        removeDescriptionSection={removeDescriptionSection}
+        renameDescriptionSection={renameDescriptionSection}
+        finalizeDescriptionSection={finalizeDescriptionSection}
+        addDescriptionField={addDescriptionField}
+        updateDescriptionFieldKey={updateDescriptionFieldKey}
+        finalizeDescriptionFieldKey={finalizeDescriptionFieldKey}
+        updateDescriptionFieldValue={updateDescriptionFieldValue}
+        updateDescriptionFieldValueType={updateDescriptionFieldValueType}
+        removeDescriptionField={removeDescriptionField}
+        resetDescription={resetDescription}
+        readOnly={readOnly}
+      />
+  );
+
+  if (descriptionOnly) return descriptionEditor;
+
   return (
     <section className="space-y-6">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -853,207 +879,331 @@ export default function SpecificationTab({ spec, onChange, specId }) {
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold text-slate-900">Minimum Price</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Pricing Rules</h3>
         </div>
-        <div className="max-w-md">
-         <input
-         className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-  type="number"
-  value={safe.minimum_price ?? ""}
-  onChange={(event) =>
-    setKeyValue(
-      "minimum_price",
-      event.target.value === "" ? "" : Number(event.target.value)
-    )
-  }
-/>
+        <div className="grid max-w-2xl gap-6 md:grid-cols-2">
+          <div>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Minimum Price</span>
+            {readOnly ? (
+              <div className="text-sm font-medium text-slate-700">
+                {safe.minimum_price !== undefined && safe.minimum_price !== null ? `₹${Number(safe.minimum_price).toLocaleString("en-IN")}` : "Not set"}
+              </div>
+            ) : (
+              <input
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                type="number"
+                value={safe.minimum_price ?? ""}
+                onChange={(event) =>
+                  setKeyValue(
+                    "minimum_price",
+                    event.target.value === "" ? "" : Number(event.target.value)
+                  )
+                }
+              />
+            )}
+          </div>
+          <div>
+            {safe.fast_pickup_deduction !== undefined && safe.fast_pickup_deduction !== null ? (
+              <>
+                <span className="mb-1 flex items-center justify-between text-sm font-medium text-slate-700">
+                  Fast Pickup Deduction
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => setKeyValue("fast_pickup_deduction", null)}
+                      className="text-xs text-rose-500 hover:text-rose-700 font-semibold"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </span>
+                {readOnly ? (
+                  <div className="text-sm font-medium text-slate-700">
+                    {`₹${Number(safe.fast_pickup_deduction).toLocaleString("en-IN")}`}
+                  </div>
+                ) : (
+                  <input
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    type="number"
+                    value={safe.fast_pickup_deduction ?? ""}
+                    onChange={(event) =>
+                      setKeyValue(
+                        "fast_pickup_deduction",
+                        event.target.value === "" ? "" : Number(event.target.value)
+                      )
+                    }
+                  />
+                )}
+              </>
+            ) : (
+              <div className="flex h-full items-end">
+                {readOnly ? (
+                  <div>
+                    <span className="mb-1 block text-sm font-medium text-slate-700">Fast Pickup Deduction</span>
+                    <div className="text-sm font-medium text-slate-500">Not set</div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setKeyValue("fast_pickup_deduction", "")}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+                  >
+                    <Plus className="h-4 w-4" /> Add Fast Pickup Deduction
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
        <PhotoProvider>
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
+
           <h3 className="text-lg font-semibold text-slate-900">What&apos;s in the box</h3>
-          <button
-            type="button"
-            onClick={addBoxItem}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-          >
-            <Plus className="h-4 w-4" /> Add item
-          </button>
+
         </div>
 
         <div className="space-y-3">
           {Array.isArray(safe.whats_in_the_box) && safe.whats_in_the_box.length > 0 ? (
             safe.whats_in_the_box.map((item, index) => (
-             <div
-  key={`box-item-${index}`}
-  className="grid items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 md:grid-cols-[minmax(220px,0.8fr)_minmax(400px,1.8fr)_48px_48px]"
->
-  <textarea
-    value={item?.label ?? ""}
-    onChange={(event) =>
-      updateBoxItem(index, "label", event.target.value)
-    }
-    placeholder="Label"
-    rows={2}
-    className="min-h-[44px] w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-  />
+              <div
+                key={`box-item-${index}`}
+                className={readOnly ? "flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-3" : "grid items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 md:grid-cols-[minmax(220px,0.8fr)_minmax(400px,1.8fr)_48px_48px]"}
+              >
+                {readOnly ? (
+                  <>
+                    {item?.image_url && (
+                      <div className="shrink-0">
+                        <ImagePreview
+                          imageUrls={[item.image_url]}
+                          hw="h-10 w-10"
+                        />
+                      </div>
+                    )}
+                    <span className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{item?.label || "Unnamed item"}</span>
+                  </>
+                ) : (
+                  <>
+                    <textarea
+                      value={item?.label ?? ""}
+                      onChange={(event) =>
+                        updateBoxItem(index, "label", event.target.value)
+                      }
+                      placeholder="Label"
+                      rows={2}
+                      className="min-h-[44px] w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
 
-  <input
-    value={item?.image_url ?? ""}
-    onChange={(event) =>
-      updateBoxItem(index, "image_url", event.target.value)
-    }
-    placeholder="Image URL"
-    className="min-w-0 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-  />
+                    <input
+                      value={item?.image_url ?? ""}
+                      onChange={(event) =>
+                        updateBoxItem(index, "image_url", event.target.value)
+                      }
+                      placeholder="Image URL"
+                      className="min-w-0 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
 
-<ImagePreview
-  imageUrls={item?.image_url ? [item.image_url] : []}
-  hw="h-10 w-10"
-/>
-  <button
-    type="button"
-    onClick={() => removeBoxItem(index)}
-    className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-rose-200 text-sm font-semibold text-rose-700 hover:bg-rose-50"
-  >
-    <Trash2 className="h-4 w-4" />
-  </button>
-</div>
+                    <ImagePreview
+                      imageUrls={item?.image_url ? [item.image_url] : []}
+                      hw="h-10 w-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeBoxItem(index)}
+                      className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-rose-200 text-sm font-semibold text-rose-700 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
+              </div>
             ))
           ) : (
             <p className="text-sm text-slate-500">No box contents configured.</p>
           )}
+          {!readOnly && (
+
+            <div className="mt-4 flex justify-end">
+
+              <button
+
+                type="button"
+
+                onClick={addBoxItem}
+
+                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+
+              >
+
+                <Plus className="h-4 w-4" /> Add item
+
+              </button>
+
+            </div>
+
+          )}
+
         </div>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
+
           <h3 className="text-lg font-semibold text-slate-900">Configuration Icons</h3>
-          <button
-            type="button"
-            onClick={addIconEntry}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-          >
-            <Plus className="h-4 w-4" /> Add icon
-          </button>
+
         </div>
 
         <div className="space-y-3">
           {iconEntries.length > 0 ? (
             iconEntries.map((entry, index) => (
-              <div key={entry.id} className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 md:grid-cols-[1fr_1.5fr_48px_auto]">
-                <input
-                  value={entry.label}
-                  onChange={(event) => updateIconEntry(index, "label", event.target.value)}
-                  placeholder="Key"
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-                <input
-                  value={entry.value}
-                  onChange={(event) => updateIconEntry(index, "value", event.target.value)}
-                  placeholder="https://example.com/icon.png"
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-                <ImagePreview
-                  imageUrls={entry.value ? [entry.value] : []}
-                  hw="h-10 w-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeIconEntry(index)}
-                  className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+              <div key={entry.id} className={readOnly ? "flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-3" : "grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 md:grid-cols-[1fr_1.5fr_48px_auto]"}>
+                {readOnly ? (
+                  <>
+                    <div className="shrink-0">
+                      <ImagePreview
+                        imageUrls={entry.value ? [entry.value] : []}
+                        hw="h-10 w-10"
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700">{entry.label || "Unnamed icon"}</span>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      value={entry.label}
+                      onChange={(event) => updateIconEntry(index, "label", event.target.value)}
+                      placeholder="Key"
+                      className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                    <input
+                      value={entry.value}
+                      onChange={(event) => updateIconEntry(index, "value", event.target.value)}
+                      placeholder="https://example.com/icon.png"
+                      className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                    <ImagePreview
+                      imageUrls={entry.value ? [entry.value] : []}
+                      hw="h-10 w-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeIconEntry(index)}
+                      className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
               </div>
             ))
           ) : (
             <p className="text-sm text-slate-500">No configuration icons set.</p>
           )}
+          {!readOnly && (
+
+            <div className="mt-4 flex justify-end">
+
+              <button
+
+                type="button"
+
+                onClick={addIconEntry}
+
+                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+
+              >
+
+                <Plus className="h-4 w-4" /> Add icon
+
+              </button>
+
+            </div>
+
+          )}
+
         </div>
       </div>
       </PhotoProvider>
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
+
           <h3 className="text-lg font-semibold text-slate-900">Color Codes</h3>
-          <button
-            type="button"
-            onClick={addColorEntry}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-          >
-            <Plus className="h-4 w-4" /> Add color
-          </button>
+
         </div>
 
         <div className="space-y-3">
           {colorEntries.length > 0 ? (
             colorEntries.map((entry, index) => (
-              <div key={entry.id} className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 md:grid-cols-[1fr_120px_auto]">
-                <input
-                  value={entry.name}
-                  onChange={(event) => updateColorEntry(index, "name", event.target.value)}
-                  placeholder="Color name"
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-                <input
-                  type="color"
-                  value={entry.hex || "#000000"}
-                  onChange={(event) => updateColorEntry(index, "hex", event.target.value)}
-                  className="h-11 w-full rounded-lg border border-slate-300 bg-white pr-1"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeColorEntry(index)}
-                  className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+              <div key={entry.id} className={readOnly ? "flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-3" : "grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 md:grid-cols-[1fr_120px_auto]"}>
+                {readOnly ? (
+                  <>
+                    <div 
+                      className="h-8 w-8 shrink-0 rounded-full border border-slate-200 shadow-sm"
+                      style={{ backgroundColor: entry.hex || "#000000" }}
+                    />
+                    <span className="text-sm font-medium text-slate-700">{entry.name || "Unnamed color"}</span>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      value={entry.name}
+                      onChange={(event) => updateColorEntry(index, "name", event.target.value)}
+                      placeholder="Color name"
+                      className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                    <input
+                      type="color"
+                      value={entry.hex || "#000000"}
+                      onChange={(event) => updateColorEntry(index, "hex", event.target.value)}
+                      className="h-11 w-full rounded-lg border border-slate-300 bg-white pr-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeColorEntry(index)}
+                      className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
               </div>
             ))
           ) : (
             <p className="text-sm text-slate-500">No color codes configured.</p>
           )}
+          {!readOnly && (
+
+            <div className="mt-4 flex justify-end">
+
+              <button
+
+                type="button"
+
+                onClick={addColorEntry}
+
+                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+
+              >
+
+                <Plus className="h-4 w-4" /> Add color
+
+              </button>
+
+            </div>
+
+          )}
+
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <DescriptionEditor
-          description={descriptionForm}
-          updateSummary={updateDescriptionSummary}
-          addDescriptionSection={addDescriptionSection}
-          removeDescriptionSection={removeDescriptionSection}
-          renameDescriptionSection={renameDescriptionSection}
-          finalizeDescriptionSection={finalizeDescriptionSection}
-          addDescriptionField={addDescriptionField}
-          updateDescriptionFieldKey={updateDescriptionFieldKey}
-          finalizeDescriptionFieldKey={finalizeDescriptionFieldKey}
-          updateDescriptionFieldValue={updateDescriptionFieldValue}
-          updateDescriptionFieldValueType={updateDescriptionFieldValueType}
-          removeDescriptionField={removeDescriptionField}
-          resetDescription={resetDescription}
-        />
-      </div>
+      {showDescription && descriptionEditor}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
+
           <h3 className="text-lg font-semibold text-slate-900">Questions</h3>
-          <div className="flex flex-wrap gap-2">
-            {[
-              ["radio", "Add Single-choice"],
-              ["checkbox", "Add Multi-choice"],
-              ["dropdown", "Add Dropdown"],
-            ].map(([type, label]) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => addQuestion(type)}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-              >
-                <Plus className="h-4 w-4" /> {label}
-              </button>
-            ))}
-          </div>
+
         </div>
 
         <div className="space-y-4">
@@ -1062,24 +1212,30 @@ export default function SpecificationTab({ spec, onChange, specId }) {
               <div key={key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <span className="text-sm font-semibold uppercase tracking-wide text-slate-600">{key}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeQuestion(key)}
-                    className="inline-flex h-9 min-w-28 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border border-rose-200 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" /> Remove
-                  </button>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => removeQuestion(key)}
+                      className="inline-flex h-9 min-w-28 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border border-rose-200 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Remove
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
-                  <label className="block text-sm font-medium text-slate-700">
+                  <div className="block text-sm font-medium text-slate-700">
                     Question
-                    <input
-                      value={question || ""}
-                      onChange={(event) => updateQuestionField(key, "question", event.target.value)}
-                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
+                    {readOnly ? (
+                      <div className="mt-1 text-sm text-slate-900">{question || "Untitled Question"}</div>
+                    ) : (
+                      <input
+                        value={question || ""}
+                        onChange={(event) => updateQuestionField(key, "question", event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    )}
+                  </div>
 
                   <div className="block text-sm font-medium text-slate-700">
                     <span>Type</span>
@@ -1096,42 +1252,44 @@ export default function SpecificationTab({ spec, onChange, specId }) {
                       checked={Boolean(isRequired)}
                       onChange={(event) => updateQuestionField(key, "isRequired", event.target.checked)}
                       className="h-4 w-4 accent-blue-600"
+                      disabled={readOnly}
                     />
                     Required
                   </label>
                   {(type === "radio" || type === "dropdown") && (
-                    <label className="block text-sm font-medium text-slate-700">
+                    <div className="block text-sm font-medium text-slate-700">
                       Deduction
-                      <input
-                        type="number"
-                        value={Number(deduction) || 0}
-                        onChange={(event) => updateQuestionField(key, "deduction", Number(event.target.value) || 0)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      />
-                    </label>
+                      {readOnly ? (
+                        <div className="mt-1 text-sm text-slate-900">{Number(deduction) || 0}</div>
+                      ) : (
+                        <input
+                          type="number"
+                          value={Number(deduction) || 0}
+                          onChange={(event) => updateQuestionField(key, "deduction", Number(event.target.value) || 0)}
+                          className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
 
-                <label className="mt-3 block text-sm font-medium text-slate-700">
+                <div className="mt-3 block text-sm font-medium text-slate-700">
                   Description
-                  <textarea
-                    value={description || ""}
-                    onChange={(event) => updateQuestionField(key, "description", event.target.value)}
-                    rows={3}
-                    className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
+                  {readOnly ? (
+                    <div className="mt-1 text-sm text-slate-900 whitespace-pre-wrap">{description || "No description provided."}</div>
+                  ) : (
+                    <textarea
+                      value={description || ""}
+                      onChange={(event) => updateQuestionField(key, "description", event.target.value)}
+                      rows={3}
+                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  )}
+                </div>
 
                 <div className="mt-4">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <span className="text-sm font-semibold text-slate-700">Options</span>
-                    <button
-                      type="button"
-                      onClick={() => addQuestionOption(key)}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-2.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
-                    >
-                      <Plus className="h-3.5 w-3.5" /> Add option
-                    </button>
                   </div>
                   <div className="space-y-2">
                     {(Array.isArray(options) ? options : []).length > 0 ? (
@@ -1140,42 +1298,56 @@ export default function SpecificationTab({ spec, onChange, specId }) {
                         return (
                           <div
                             key={`${key}-option-${optionIndex}`}
-                            className={`grid gap-2 rounded-lg border border-slate-200 bg-white p-2 ${
+                            className={readOnly ? "flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-3" : `grid gap-2 rounded-lg border border-slate-200 bg-white p-2 ${
                               type === "checkbox"
                                 ? "md:grid-cols-[1.3fr_120px_1fr_auto]"
                                 : "md:grid-cols-[minmax(0,1fr)_auto]"
                             }`}
                           >
-                            <input
-                              value={normalized.label || ""}
-                              onChange={(event) => updateQuestionOption(key, optionIndex, type === "radio" || type === "dropdown" ? null : "label", event.target.value)}
-                              placeholder="Option label"
-                              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            />
-                            {type === "checkbox" ? (
+                            {readOnly ? (
+                              <>
+                                <span className="text-sm font-medium text-slate-700">{normalized.label || "Unnamed Option"}</span>
+                                {type === "checkbox" && (
+                                  <>
+                                    <span className="text-xs font-semibold text-slate-500">Ded: {Number(normalized.deduction) || 0}</span>
+                                    {normalized.icon && <span className="text-xs font-medium text-slate-500 truncate max-w-[120px]">Icon: {normalized.icon}</span>}
+                                  </>
+                                )}
+                              </>
+                            ) : (
                               <>
                                 <input
-                                  type="number"
-                                  value={Number(normalized.deduction) || 0}
-                                  onChange={(event) => updateQuestionOption(key, optionIndex, "deduction", Number(event.target.value) || 0)}
-                                  placeholder="Deduction"
+                                  value={normalized.label || ""}
+                                  onChange={(event) => updateQuestionOption(key, optionIndex, type === "radio" || type === "dropdown" ? null : "label", event.target.value)}
+                                  placeholder="Option label"
                                   className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
-                                <input
-                                  value={normalized.icon || ""}
-                                  onChange={(event) => updateQuestionOption(key, optionIndex, "icon", event.target.value)}
-                                  placeholder="Icon"
-                                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                />
+                                {type === "checkbox" ? (
+                                  <>
+                                    <input
+                                      type="number"
+                                      value={Number(normalized.deduction) || 0}
+                                      onChange={(event) => updateQuestionOption(key, optionIndex, "deduction", Number(event.target.value) || 0)}
+                                      placeholder="Deduction"
+                                      className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    />
+                                    <input
+                                      value={normalized.icon || ""}
+                                      onChange={(event) => updateQuestionOption(key, optionIndex, "icon", event.target.value)}
+                                      placeholder="Icon"
+                                      className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    />
+                                  </>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  onClick={() => removeQuestionOption(key, optionIndex)}
+                                  className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-rose-200 text-sm font-semibold text-rose-700 hover:bg-rose-50"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </>
-                            ) : null}
-                            <button
-                              type="button"
-                              onClick={() => removeQuestionOption(key, optionIndex)}
-                              className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-rose-200 text-sm font-semibold text-rose-700 hover:bg-rose-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                            )}
                           </div>
                         );
                       })
@@ -1183,11 +1355,42 @@ export default function SpecificationTab({ spec, onChange, specId }) {
                       <p className="text-sm text-slate-500">No options configured yet.</p>
                     )}
                   </div>
+                  
+                  {!readOnly && (
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => addQuestionOption(key)}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+                      >
+                        <Plus className="h-4 w-4" /> Add option
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
           ) : (
             <p className="text-sm text-slate-500">No questions configured.</p>
+          )}
+
+          {!readOnly && (
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              {[
+                ["radio", "Add Single-choice"],
+                ["checkbox", "Add Multi-choice"],
+                ["dropdown", "Add Dropdown"],
+              ].map(([type, label]) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => addQuestion(type)}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+                >
+                  <Plus className="h-4 w-4" /> {label}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </div>

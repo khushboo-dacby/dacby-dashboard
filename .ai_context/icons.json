@@ -1,0 +1,39 @@
+[
+  
+   
+                     {
+                        "icon":"https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2Fquestions%2Fconsoles%2Fmissing-port.png?alt=media&token=28000873-850b-47da-bb2e-2988f026b431",
+                        "label": "USB port not working",
+                        "deduction": 2000
+                    },
+                    {
+                        "deduction": 2000,
+                        "icon": "Icons.tv",
+                        "label": "HDMI Output port not working"
+                    },
+                    {
+                        "deduction": 2500,
+                        "label": "Fan Noise",
+                        "icon": "Icons.tv"
+                    },
+                    {
+                        "label": "Heating Issue",
+                        "deduction": 2500,
+                        "icon": "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2Fquestions%2Fconsoles%2Foverheating.png?alt=media&token=6224f7ff-2f4f-46c4-9f65-a7a6b6d91b06"
+                    },
+                    {
+                        "icon":"https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2Fquestions%2Fconsoles%2Ftype-c.png?alt=media&token=c4f7663f-d44a-4a7d-8e31-39dfa1a15b3d",
+                        "label": "Original Power Cord Missing",
+                        "deduction": 50
+                    },
+                    {
+                        "label": "HDMI Cable Missing",
+                        "deduction": 50,
+                        "icon": "Icons.cable"
+                    },
+                    {
+                        "label": "Original XBOX Series Controller Missing",
+                        "deduction": 2050,
+                        "icon": "Icons.tv"
+                    }
+]

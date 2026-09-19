@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import DescriptionPreviewModal from "@/components/description-preview/DescriptionPreviewModal";
 
 const editorStyle =
@@ -247,457 +247,196 @@ function getTopLevelFieldRows(description) {
 
 export default function DescriptionEditor({
   description,
-  value,
-  onChange,
   updateSummary,
-  addDescriptionSection,
-  removeDescriptionSection,
-  renameDescriptionSection,
-  finalizeDescriptionSection,
   addDescriptionField,
   updateDescriptionFieldKey,
-  finalizeDescriptionFieldKey,
   updateDescriptionFieldValue,
-  updateDescriptionFieldValueType,
   removeDescriptionField,
-  resetDescription,
+  readOnly = false,
 }) {
-  const descriptionState = value ?? description ?? {};
-  const [topLevelFieldRows, setTopLevelFieldRows] = useState(() =>
-    getTopLevelFieldRows(descriptionState),
-  );
-  const [mode, setMode] = useState("form");
-  const [jsonText, setJsonText] = useState(() => createDescriptionJson(descriptionState));
-  const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState("");
+  const descriptionState = description ?? {};
   const [showPreview, setShowPreview] = useState(false);
-  const jsonChangeTimeoutRef = useRef(null);
 
-  useEffect(() => {
-    return () => window.clearTimeout(jsonChangeTimeoutRef.current);
-  }, []);
+  const flatFields = [];
+  Object.keys(descriptionState).forEach((section) => {
+    if (section === "summary") return;
+    const val = descriptionState[section];
 
-  useEffect(() => {
-    if (mode === "json") {
-      setJsonText(createDescriptionJson(descriptionState));
-    }
-  }, [descriptionState, mode]);
-
-  useEffect(() => {
-    const persistedRows = getTopLevelFieldRows(descriptionState);
-    setTopLevelFieldRows((currentRows) => {
-      const nextRows = persistedRows.map((row) => {
-        const existingRow = currentRows.find((currentRow) => currentRow.key === row.key);
-        return existingRow ? { ...existingRow, value: row.value } : row;
+    if (Array.isArray(val)) {
+      val.forEach((field, index) => {
+        flatFields.push({
+          id: `${section}-${index}`,
+          section,
+          index,
+          key: field.key,
+          value: field.value,
+          valueType: field.valueType,
+          isTopLevel: false,
+        });
       });
-      const incompleteRows = currentRows.filter(
-        (row) => !row.key.trim() || !row.value.trim(),
-      );
-      return [...nextRows, ...incompleteRows.filter((row) => !nextRows.some((nextRow) => nextRow.id === row.id))];
-    });
-  }, [descriptionState]);
-
-  function commitDescription(nextDescription) {
-    if (typeof onChange === "function") {
-      onChange(nextDescription);
-      return;
+    } else if (val !== null && typeof val !== "object") {
+      flatFields.push({
+        id: `top-${section}`,
+        section: "TOP",
+        key: section,
+        value: val,
+        valueType: "single",
+        isTopLevel: true,
+      });
     }
-    if (typeof resetDescription === "function") {
-      resetDescription(nextDescription);
+  });
+
+  const summaryText =
+    typeof descriptionState?.summary === "string" ? descriptionState.summary : "";
+
+  function handleAddField() {
+    addDescriptionField("Details");
+  }
+
+  function handleKeyChange(field, newKey) {
+    if (!field.isTopLevel) {
+      updateDescriptionFieldKey(field.section, field.index, newKey);
     }
   }
 
-  function handleModeChange(nextMode) {
-    if (nextMode === "json") {
-      setJsonText(createDescriptionJson(descriptionState));
-      setMessage(null);
-      setMessageType("");
+  function handleValueChange(field, newValue) {
+    if (!field.isTopLevel) {
+      updateDescriptionFieldValue(field.section, field.index, newValue);
     }
-    setMode(nextMode);
   }
 
-  function addTopLevelFieldRow() {
-    setTopLevelFieldRows((currentRows) => [
-      ...currentRows,
-      {
-        id: `top-level-field-${Date.now()}-${Math.random()}`,
-        key: "",
-        value: "",
-      },
-    ]);
+  function handleRemove(field) {
+    if (!field.isTopLevel) {
+      removeDescriptionField(field.section, field.index);
+    }
   }
 
-  function updateTopLevelField(rowId, field, nextValue) {
-    const nextRows = topLevelFieldRows.map((row) =>
-      row.id === rowId ? { ...row, [field]: nextValue } : row,
-    );
-    setTopLevelFieldRows(nextRows);
-
-    const nextDescription = Object.entries(descriptionState || {}).reduce(
-      (result, [key, currentValue]) => {
-        if (
-          key === "summary" ||
-          Array.isArray(currentValue) ||
-          (currentValue && typeof currentValue === "object")
-        ) {
-          result[key] = currentValue;
-        }
-        return result;
-      },
-      {},
-    );
-
-    nextRows.forEach((row) => {
-      const key = row.key.trim();
-      const fieldValue = row.value.trim();
-      if (key && fieldValue && key !== "summary") {
-        nextDescription[key] = row.value;
-      }
-    });
-
-    commitDescription(nextDescription);
+  function toReadableLabel(key) {
+    if (!key) return "";
+    const str = String(key);
+    if (!str.includes("_")) return str;
+    return str
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   }
 
-  function removeTopLevelField(rowKey) {
-    const nextRows = topLevelFieldRows.filter((row) => row.id !== rowKey);
-    setTopLevelFieldRows(nextRows);
-
-    const nextDescription = Object.entries(descriptionState || {}).reduce(
-      (result, [key, currentValue]) => {
-        if (
-          key === "summary" ||
-          Array.isArray(currentValue) ||
-          (currentValue && typeof currentValue === "object")
-        ) {
-          result[key] = currentValue;
-        }
-        return result;
-      },
-      {},
-    );
-
-    nextRows.forEach((row) => {
-      const key = row.key.trim();
-      const fieldValue = row.value.trim();
-      if (key && fieldValue && key !== "summary") {
-        nextDescription[key] = row.value;
-      }
-    });
-
-    commitDescription(nextDescription);
-  }
-
-  function handleJsonChange(nextJsonText) {
-    setJsonText(nextJsonText);
-    setMessage(null);
-    setMessageType("");
-    window.clearTimeout(jsonChangeTimeoutRef.current);
-
-    jsonChangeTimeoutRef.current = window.setTimeout(() => {
-      const parsedResult = parseJsonWithLocation(nextJsonText);
-      if (parsedResult.error) {
-        setMessage(parsedResult.error);
-        setMessageType("error");
-        return;
-      }
-      if (
-        !parsedResult.parsed ||
-        typeof parsedResult.parsed !== "object" ||
-        Array.isArray(parsedResult.parsed)
-      ) {
-        setMessage("Description JSON must be an object at the top level.");
-        setMessageType("error");
-        return;
-      }
-
-      const transformedDescription = convertDescriptionObjectToFormState(
-        parsedResult.parsed,
-      );
-      if (typeof onChange === "function") {
-        onChange(transformedDescription);
-      } else if (typeof resetDescription === "function") {
-        resetDescription(transformedDescription);
-      }
-      setJsonText(createDescriptionJson(transformedDescription));
-      setMessage("JSON imported and formatted automatically.");
-      setMessageType("success");
-    }, 600);
-  }
-
-  const summaryText = typeof descriptionState?.summary === "string" ? descriptionState.summary : "";
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-slate-950">Description</h3>
+    <div className="w-full">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h3 className="text-xl font-semibold text-slate-950">Description Editor</h3>
         <button
           type="button"
           onClick={() => setShowPreview(true)}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-100"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
         >
           <Eye className="h-4 w-4" /> Preview
         </button>
       </div>
-      <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-              mode === "form"
-                ? "border-cyan-500 bg-cyan-500 text-white"
-                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
-            }`}
-            onClick={() => handleModeChange("form")}
-          >
-            Form Mode
-          </button>
-          <button
-            type="button"
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-              mode === "json"
-                ? "border-cyan-500 bg-cyan-500 text-white"
-                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
-            }`}
-            onClick={() => handleModeChange("json")}
-          >
-            JSON Mode
-          </button>
-        </div>
 
-        {mode === "form" ? (
-          <>
-            <div className="mt-4">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Summary</label>
-              <textarea
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                rows={5}
-                value={summaryText}
-                onChange={(event) => updateSummary(event.target.value)}
-              />
+      <div className="space-y-8">
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h4 className="text-base font-semibold text-slate-900">1. Details</h4>
+              <p className="text-sm text-slate-500">
+                Manage all product specification fields here.
+              </p>
             </div>
+          </div>
 
-            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <h4 className="font-medium text-slate-900">Additional Fields</h4>
-                <button
-                  type="button"
-                  className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50"
-                  onClick={addTopLevelFieldRow}
-                >
-                  + Add Field
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                {topLevelFieldRows.length > 0 ? (
-                  topLevelFieldRows.map((row) => (
-                    <div
-                      key={row.id}
-                      className="grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(180px,1fr)_minmax(220px,1.5fr)_auto]"
-                    >
+          <div className="space-y-3">
+            {flatFields.length > 0 ? (
+              flatFields.map((field) => {
+                const isMultiLine =
+                  field.valueType === "multiple" ||
+                  (typeof field.value === "string" && field.value.includes("\n"));
+                return (
+                  <div
+                    key={field.id}
+                    className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-start"
+                  >
+                    <div className="w-full sm:w-[250px] shrink-0">
                       <input
-                        className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                        value={row.key}
-                        onChange={(event) =>
-                          updateTopLevelField(row.id, "key", event.target.value)
-                        }
-                      />
-                      <input
-                        className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                        value={row.value}
-                        onChange={(event) =>
-                          updateTopLevelField(row.id, "value", event.target.value)
-                        }
-                      />
-                      <button
-                        type="button"
-                        className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
-                        onClick={() => removeTopLevelField(row.id)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-500">
-                    No additional top-level fields.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <h4 className="font-medium text-slate-900">Description Sections</h4>
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  id="newSectionName"
-                  placeholder="New section name"
-                  className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                />
-                <button
-                  type="button"
-                  className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50"
-                  onClick={() => {
-                    const input = document.getElementById("newSectionName");
-                    if (input && input.value && String(input.value).trim()) {
-                      addDescriptionSection(String(input.value).trim());
-                      input.value = "";
-                    }
-                  }}
-                >
-                  + Add Section
-                </button>
-              </div>
-            </div>
-
-            {Object.keys(descriptionState || {})
-              .filter((key) => isFieldArray(descriptionState[key]))
-              .map((section) => (
-                <div
-                  key={section}
-                  className="mt-4 rounded-xl border border-slate-200 bg-white p-3"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2">
-                      <input
-                        className="border-b border-slate-200 bg-transparent pb-1 font-medium text-slate-900 outline-none focus:border-cyan-500"
-                        value={section}
-                        onChange={(event) =>
-                          renameDescriptionSection(section, event.target.value)
-                        }
-                        onBlur={() => finalizeDescriptionSection(section)}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        placeholder="Label"
+                        value={toReadableLabel(field.key)}
+                        onChange={(e) => handleKeyChange(field, e.target.value)}
+                        readOnly={readOnly}
                       />
                     </div>
-                    <div>
-                      <button
-                        type="button"
-                        className="mr-2 rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50"
-                        onClick={() => addDescriptionField(section)}
-                      >
-                        + Add Field
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
-                        onClick={() => removeDescriptionSection(section)}
-                      >
-                        Remove Section
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 space-y-2">
-                    {(Array.isArray(descriptionState[section]) ? descriptionState[section] : []).map((field, index) => (
-                      <div
-                        key={`${section}-${field?.id || index}`}
-                        className="grid grid-cols-1 items-start gap-2 md:grid-cols-[192px_160px_minmax(0,1fr)_auto]"
-                      >
-                        <input
-                          className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                          placeholder="key"
-                          value={field.key || ""}
-                          onChange={(event) =>
-                            updateDescriptionFieldKey(
-                              section,
-                              index,
-                              event.target.value,
-                            )
-                          }
-                          onBlur={(event) =>
-                            finalizeDescriptionFieldKey(
-                              section,
-                              index,
-                              event.target.value,
-                            )
-                          }
+                    <div className="w-full flex-1">
+                      {isMultiLine ? (
+                        <textarea
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                          rows={4}
+                          placeholder="Value"
+                          value={field.value}
+                          onChange={(e) => handleValueChange(field, e.target.value)}
+                          readOnly={readOnly}
                         />
-                        <select
-                          className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                          value={field.valueType || "single"}
-                          onChange={(event) =>
-                            updateDescriptionFieldValueType(
-                              section,
-                              index,
-                              event.target.value,
-                            )
-                          }
-                        >
-                          <option value="single">Single value</option>
-                          <option value="multiple">Multiple values</option>
-                        </select>
-                        {field.valueType === "multiple" ? (
-                          <textarea
-                            rows={2}
-                            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                            placeholder="One value per line"
-                            value={field.value || ""}
-                            onChange={(event) =>
-                              updateDescriptionFieldValue(
-                                section,
-                                index,
-                                event.target.value,
-                              )
-                            }
-                          />
-                        ) : (
-                          <input
-                            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                            placeholder="value (number or string)"
-                            value={field.value || ""}
-                            onChange={(event) =>
-                              updateDescriptionFieldValue(
-                                section,
-                                index,
-                                event.target.value,
-                              )
-                            }
-                          />
-                        )}
-                        <button
-                          type="button"
-                          className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
-                          onClick={() => removeDescriptionField(section, index)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                    {!((description && description[section]) || []).length && (
-                      <div className="rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-500">
-                        No fields yet.
-                      </div>
+                      ) : (
+                        <input
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                          placeholder="Value"
+                          value={field.value}
+                          onChange={(e) => handleValueChange(field, e.target.value)}
+                          readOnly={readOnly}
+                        />
+                      )}
+                    </div>
+                    {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(field)}
+                      className="inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-600 hover:bg-rose-50"
+                      title="Remove field"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                     )}
                   </div>
-                </div>
-              ))}
-          </>
-        ) : (
-          <>
-            <div className="mt-4">
-              <label className="mb-2 block text-sm font-medium text-slate-700">Description JSON</label>
-              <textarea
-                className={editorStyle}
-                value={jsonText}
-                onChange={(event) => handleJsonChange(event.target.value)}
-                spellCheck={false}
-              />
-            </div>
-            {message && (
-              <div
-                className={`mt-3 rounded-lg border px-4 py-3 text-sm ${
-                  messageType === "error"
-                    ? "border-rose-200 bg-rose-50 text-rose-700"
-                    : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                }`}
-              >
-                {message}
+                );
+              })
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                No details added yet.
               </div>
             )}
-          </>
-        )}
+          </div>
+          
+          {!readOnly && (
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={handleAddField}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+              >
+                + Add Field
+              </button>
+            </div>
+          )}
+        </section>
+
+        <section>
+          <div className="mb-4">
+            <h4 className="text-base font-semibold text-slate-900">2. Summary</h4>
+            <p className="text-sm text-slate-500">Main product description.</p>
+          </div>
+          <textarea
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+            rows={8}
+            placeholder="Main product description..."
+            value={summaryText}
+            onChange={(event) => updateSummary(event.target.value)}
+            readOnly={readOnly}
+          />
+        </section>
       </div>
+
       {showPreview && (
         <DescriptionPreviewModal
-          description={serializeDescriptionState(description)}
+          description={serializeDescriptionState(descriptionState)}
           onClose={() => setShowPreview(false)}
         />
       )}
