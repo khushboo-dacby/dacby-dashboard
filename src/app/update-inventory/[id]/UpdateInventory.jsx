@@ -107,6 +107,48 @@ function recalculateInventoryDerivedFlags(inventory) {
   return nextInventory;
 }
 
+function cleanInventoryPayload(inventory) {
+  const cleaned = clone(inventory ?? {});
+  delete cleaned.created_at;
+  delete cleaned.updated_at;
+
+  const rootNumberFields = ["mrp", "sell_max_price", "price", "rating", "rating_count"];
+  rootNumberFields.forEach((field) => {
+    if (cleaned[field] !== undefined && cleaned[field] !== null) {
+      if (cleaned[field] === "") {
+        cleaned[field] = null;
+      } else {
+        cleaned[field] = Number(cleaned[field]);
+      }
+    }
+  });
+
+  const variants = getVariants(cleaned);
+  const itemNumberFields = ["mrp", "sell_price", "price", "stocks", "rating", "rating_count"];
+  
+  variants.forEach(({ item }) => {
+    itemNumberFields.forEach((field) => {
+      if (item[field] !== undefined && item[field] !== null) {
+        if (item[field] === "") {
+          item[field] = null;
+        } else {
+          item[field] = Number(item[field]);
+        }
+      }
+    });
+
+    if (item.weight !== undefined && item.weight !== null) {
+      if (item.weight === "") {
+        item.weight = null;
+      } else {
+        item.weight = Number(String(item.weight).replace(/kg/i, "").trim());
+      }
+    }
+  });
+
+  return cleaned;
+}
+
 function getAttributeKeys(spec, variants) {
   const combinationKeys = Object.values(spec?.combination ?? {}).flatMap(
     (combination) => Object.keys(combination ?? {}),
@@ -230,6 +272,20 @@ export default function UpdateInventory({ id }) {
             if (itemColor === matchingColor) {
               item.images = [...images];
             }
+          });
+        });
+      });
+      return recalculateInventoryDerivedFlags(next);
+    });
+  }, []);
+
+  const applyVideoToAllVariants = useCallback((ytIframe) => {
+    setInventoryDraft((current) => {
+      const next = clone(current);
+      Object.values(next.vendors ?? {}).forEach((vendor) => {
+        Object.values(vendor.combination_offered ?? {}).forEach((combination) => {
+          Object.values(combination ?? {}).forEach((item) => {
+            item.yt_iframe = ytIframe;
           });
         });
       });
@@ -383,7 +439,9 @@ export default function UpdateInventory({ id }) {
 
       setIsSavingInventory(true);
       try {
-        const finalInventoryPayload = recalculateInventoryDerivedFlags(clone(inventoryDraft));
+        let finalInventoryPayload = recalculateInventoryDerivedFlags(clone(inventoryDraft));
+        finalInventoryPayload = cleanInventoryPayload(finalInventoryPayload);
+        
         console.log("Update Inventory Payload:", finalInventoryPayload);
         const response = await updateInventoryDoc(meta.productId, finalInventoryPayload);
         // Update baseline and notify user
@@ -895,10 +953,23 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
                             className="group relative flex flex-col items-center gap-2"
                           >
                             <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white transition-shadow group-hover:shadow-sm">
-                              {item.images?.[0] ? (
-                                <Image src={convertFirebaseImageToCdn(item.images[0])} alt={item.sku || "Variant image"} fill sizes="56px" className="object-contain p-1.5" />
+                              {item.images?.[0]?.trim() || item.yt_iframe ? (
+                                <>
+                                  {item.images?.[0]?.trim() && (
+                                    <Image src={convertFirebaseImageToCdn(item.images[0])} alt={item.sku || "Variant image"} fill sizes="56px" className="object-contain p-1.5" />
+                                  )}
+                                  {item.yt_iframe && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                      <div className="rounded-full bg-red-600 p-1 shadow-sm">
+                                        <svg className="h-2 w-2 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
                               ) : (
-                                <div className="h-full w-full bg-slate-50" />
+                                <div className="h-full w-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-slate-600">
+                                  <Plus className="h-5 w-5" />
+                                </div>
                               )}
                               
                               <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -1129,6 +1200,10 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
 
             if (options?.applyToAllSameColor && options?.color && options?.images) {
               applyImagesToColor(options.images, options.color.toLowerCase());
+            }
+
+            if (options?.applyVideoToAll && options?.yt_iframe !== undefined) {
+              applyVideoToAllVariants(options.yt_iframe);
             }
 
             setEditingVariant(null);

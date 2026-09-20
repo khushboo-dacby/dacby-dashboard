@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import ImagePreview from "@/components/inventory/ImagePreview";
+import VariantImagesSection from "@/components/inventory/VariantImagesSection";
 import { getYouTubeEmbedUrl } from "@/components/inventory/ProductFields";
 import { toast } from "sonner";
 import {
@@ -190,12 +191,7 @@ export function createCombinationItemPayload(
   selectedAttributes,
   formData
 ) {
-  const images = [
-    formData.image1,
-    formData.image2,
-    formData.image3,
-    formData.image4,
-  ]
+  const images = (formData.images || [])
     .map((imageUrl) => convertFirebaseImageToCdn(imageUrl))
     .filter(Boolean);
 
@@ -384,10 +380,7 @@ export default function AddVariant() {
         weight: "",
         stocks: "",
         availableForSell: true,
-        image1: "",
-        image2: "",
-        image3: "",
-        image4: "",
+        images: [],
         yt_iframe: "",
       });
 
@@ -511,10 +504,7 @@ export default function AddVariant() {
       weight: "",
       stocks: "",
       availableForSell: true,
-      image1: "",
-      image2: "",
-      image3: "",
-      image4: "",
+      images: [],
       yt_iframe: "",
     });
 
@@ -706,7 +696,7 @@ export default function AddVariant() {
             <p className="text-sm text-gray-400">No products found.</p>
           )}
       </div>
-      {productDetails && (
+      {selectedProduct && (
         <div className="mb-8 overflow-hidden rounded-xl border border-gray-200">
           <div className="bg-indigo-900 p-5 text-white">
             <p className="text-lg font-semibold">
@@ -719,7 +709,16 @@ export default function AddVariant() {
 
           <div className="p-5">
             {loadingDetails ? (
-              <p className="text-sm text-gray-500">Loading product details...</p>
+              <div className="animate-pulse space-y-6">
+                <div className="h-20 w-full rounded-lg bg-slate-100"></div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="h-24 rounded-lg bg-slate-100"></div>
+                  <div className="h-24 rounded-lg bg-slate-100"></div>
+                  <div className="h-24 rounded-lg bg-slate-100"></div>
+                </div>
+                <div className="h-10 w-full rounded-lg bg-slate-100"></div>
+                <div className="h-40 w-full rounded-lg bg-slate-100"></div>
+              </div>
             ) : detailsError ? (
               <p className="text-sm text-red-500">{detailsError}</p>
             ) : productDetails ? (
@@ -1248,27 +1247,10 @@ function ProductVariantForm({
           <p className="mb-3 font-semibold text-gray-800">
             Product Images (URLs)
           </p>
-          <ImagePreview
-            imageUrls={[
-              formData.image1,
-              formData.image2,
-              formData.image3,
-              formData.image4,
-            ]}
+          <VariantImagesSection
+            images={formData.images || []}
+            onChange={(images) => onFormChange("images", images)}
           />
-          <div className="grid gap-5 md:grid-cols-2">
-            {["image1", "image2", "image3", "image4"].map(
-              (field, index) => (
-                <FormField
-                  key={field}
-                  label={`Image ${index + 1}`}
-                  value={formData[field]}
-                  placeholder="https://..."
-                  onChange={(value) => onFormChange(field, value)}
-                />
-              )
-            )}
-          </div>
         </div>
 
         <div>

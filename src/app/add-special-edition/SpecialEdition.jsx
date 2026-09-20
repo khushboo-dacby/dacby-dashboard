@@ -14,6 +14,7 @@ import {
 import { addSpecialEdition, getProductDetail, searchProducts } from "@/app/apis/api";
 import { brandMap, typeMap } from "@/constants/inventory";
 import { getYouTubeEmbedUrl } from "@/components/inventory/ProductFields";
+import VariantImagesSection from "@/components/inventory/VariantImagesSection";
 
 function generateSpecialEditionSku(specId, productTitle) {
   const specWords = specId.toLowerCase().split("-");
@@ -58,10 +59,7 @@ function makeEmptyForm() {
     vendorNote: "",
     youtubeIframe: "",
     itemYoutubeIframe: "",
-    image1: "",
-    image2: "",
-    image3: "",
-    image4: "",
+    images: [],
   };
 }
 
@@ -195,12 +193,7 @@ export default function SpecialEdition() {
     const sellMaxPrice = Number(formData.sellMaxPrice) || 0;
     const weight = Number(formData.weight) || 0;
     const stocks = Number(formData.stocks) || 0;
-    const images = [
-      formData.image1,
-      formData.image2,
-      formData.image3,
-      formData.image4,
-    ]
+    const images = (formData.images || [])
       .map((imageUrl) => convertImageToCdn(imageUrl))
       .filter(Boolean);
 
@@ -623,18 +616,10 @@ function ProductDetailsStep({
       </div>
 
       <div>
-        <p className="mb-3 font-semibold">Product Images (URLs)</p>
-        <div className="grid gap-5 md:grid-cols-2">
-          {["image1", "image2", "image3", "image4"].map((field, index) => (
-            <TextField
-              key={field}
-              label={`Image ${index + 1}`}
-              value={formData[field]}
-              placeholder="https://..."
-              onChange={(value) => onFormChange(field, value)}
-            />
-          ))}
-        </div>
+        <VariantImagesSection
+          images={formData.images || []}
+          onChange={(images) => onFormChange("images", images)}
+        />
       </div>
 
       <div className="flex justify-end border-t border-slate-200 pt-6">

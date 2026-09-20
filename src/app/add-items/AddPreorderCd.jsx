@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Copy, RotateCcw, X } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, CheckCircle2, Copy, RotateCcw, X, Plus, Star, StarOff, Trash2, Eye } from "lucide-react";
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 import { toast } from "sonner";
 import { addProductToInventory } from "@/app/apis/api";
+import DeletePop from "@/components/confirmation-modal/DeletePop";
 import ImagePreview from "@/components/inventory/ImagePreview";
 import DescriptionEditor, {
   convertDescriptionObjectToFormState,
@@ -240,6 +244,7 @@ function makeEmptyForm(availableForSell = true, defaultWeight = "") {
     image2: "",
     image3: "",
     image4: "",
+    images: [],
   };
 }
 
@@ -286,9 +291,37 @@ export default function AddPreorderCd({ categoryName, code }) {
   if (isPreOrder) {
     descriptionTemplate = PREORDER_DESCRIPTION_JSON;
   }
+  const [isNewCondition, setIsNewCondition] = useState(false);
   const [formData, setFormData] = useState(
     makeEmptyForm(!isPreOrder, isGameCd ? 0.1 : ""),
   );
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [showSubmitPop, setShowSubmitPop] = useState(false);
+
+  const handleAddImage = () => {
+    if (!newImageUrl.trim()) return;
+    setFormData((prev) => ({
+      ...prev,
+      images: [...(prev.images || []), newImageUrl.trim()],
+    }));
+    setNewImageUrl("");
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, idx) => idx !== indexToRemove),
+    }));
+  };
+
+  const handleMakePrimary = (indexToPrimary) => {
+    setFormData((prev) => {
+      const newImages = [...prev.images];
+      const [movedImage] = newImages.splice(indexToPrimary, 1);
+      newImages.unshift(movedImage);
+      return { ...prev, images: newImages };
+    });
+  };
   const initialDescription = convertDescriptionObjectToFormState({});
   const {
     description: descriptionState,
@@ -317,17 +350,39 @@ export default function AddPreorderCd({ categoryName, code }) {
     }));
   }
 
+  function getGeneratedSku(title, conditionIsNew) {
+    const titleSlug = makeSlug(title);
+    if (!titleSlug) return "";
+    return conditionIsNew 
+      ? `${titleSlug}-${categorySettings.specId}-new`
+      : `${titleSlug}-${categorySettings.specId}`;
+  }
+
   function handleProductTitleChange(value) {
-    const titleSlug = makeSlug(value);
-    const generatedSku = titleSlug
-      ? `${titleSlug}-${categorySettings.specId}`
-      : "";
+    const generatedSku = getGeneratedSku(value, isNewCondition);
 
     setFormData((currentFormData) => ({
       ...currentFormData,
       productTitle: value,
       sku: generatedSku,
     }));
+  }
+
+  function handleConditionToggle(isNew) {
+    setIsNewCondition(isNew);
+    setFormData((currentFormData) => {
+      let currentSku = currentFormData.sku || "";
+      if (isNew) {
+        if (!currentSku.endsWith("-new")) {
+          currentSku = currentSku ? `${currentSku}-new` : getGeneratedSku(currentFormData.productTitle, isNew);
+        }
+      } else {
+        if (currentSku.endsWith("-new")) {
+          currentSku = currentSku.slice(0, -4);
+        }
+      }
+      return { ...currentFormData, sku: currentSku };
+    });
   }
 
   function handleReset() {
@@ -379,12 +434,7 @@ export default function AddPreorderCd({ categoryName, code }) {
       }
     }
 
-    const images = [
-      formData.image1,
-      formData.image2,
-      formData.image3,
-      formData.image4,
-    ]
+    const images = (formData.images || [])
       .map((imageUrl) => convertImageToCdn(imageUrl))
       .filter(Boolean);
 
@@ -402,7 +452,7 @@ export default function AddPreorderCd({ categoryName, code }) {
         product_title: formData.productTitle,
         code,
         category_name: categoryName,
-        condition: categorySettings.condition,
+        condition: isGameCd ? (isNewCondition ? "New" : "Pre Owned") : categorySettings.condition,
         mrp,
         price,
         sell: formData.availableForSell,
@@ -443,7 +493,7 @@ export default function AddPreorderCd({ categoryName, code }) {
 
     console.log("Generated product payload:", payload);
     setPreviewPayload(payload);
-    toast.success("Product preview generated successfully");
+    setShowSubmitPop(true);
   }
 
   async function handleFinalSubmit() {
@@ -451,18 +501,15 @@ export default function AddPreorderCd({ categoryName, code }) {
 
     try {
       setIsSubmitting(true);
-      const response = await addProductToInventory(previewPayload);
-      toast.success(response?.message || "Product added successfully!");
-      console.log("Inventory API response:", response);
-      setFormData(makeEmptyForm(!isPreOrder, isGameCd ? 0.1 : ""));
-      setDescriptionError("");
-      setPreviewPayload(null);
+      await addProductToInventory(previewPayload);
+      toast.success("Product added successfully!");
+      setShowSubmitPop(false);
+      router.push("/");
     } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Could not add the product. Please try again.";
+      console.error(error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to add product";
       toast.error(errorMessage);
+      setShowSubmitPop(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -493,14 +540,39 @@ export default function AddPreorderCd({ categoryName, code }) {
       >
         <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-indigo-950 to-indigo-700 px-7 py-6 text-white">
           <div>
-            <h2 className="text-2xl font-bold">{categorySettings.heading}</h2>
+            <h2 className="text-2xl font-bold">
+              {isGameCd ? (isNewCondition ? "Add New Product" : "Add Pre Owned Product") : categorySettings.heading}
+            </h2>
             <p className="mt-2 text-indigo-200">
               Category: {categoryName} · Code: {code}
             </p>
           </div>
-          <span className="rounded-full bg-white/20 px-5 py-2 font-semibold">
-            {categorySettings.badge}
-          </span>
+          {isGameCd ? (
+            <div className="flex items-center gap-1 rounded-full bg-white/20 p-1">
+              <button
+                type="button"
+                onClick={() => handleConditionToggle(true)}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  isNewCondition ? "bg-white text-indigo-900 shadow" : "text-white hover:bg-white/10"
+                }`}
+              >
+                New
+              </button>
+              <button
+                type="button"
+                onClick={() => handleConditionToggle(false)}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  !isNewCondition ? "bg-white text-indigo-900 shadow" : "text-white hover:bg-white/10"
+                }`}
+              >
+                Pre Owned
+              </button>
+            </div>
+          ) : (
+            <span className="rounded-full bg-white/20 px-5 py-2 font-semibold">
+              {categorySettings.badge}
+            </span>
+          )}
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -601,18 +673,22 @@ export default function AddPreorderCd({ categoryName, code }) {
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="font-semibold">Description *</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Use Form Mode or JSON Mode. Preview description before submitting.
-                </p>
+                {/* <p className="font-semibold">Description *</p> */}
+                {/* {!isGameCd && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    Use Form Mode or JSON Mode. Preview description before submitting.
+                  </p>
+                )} */}
               </div>
-              <button
-                type="button"
-                onClick={handleCopyDescription}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border border-indigo-300 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
-              >
-                <Copy className="h-4 w-4" /> Copy Prompt for Description
-              </button>
+              {/* {!isGameCd && (
+                <button
+                  type="button"
+                  onClick={handleCopyDescription}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-indigo-300 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+                >
+                  <Copy className="h-4 w-4" /> Copy Prompt for Description
+                </button>
+              )} */}
             </div>
             <DescriptionEditor
               description={descriptionState}
@@ -637,28 +713,90 @@ export default function AddPreorderCd({ categoryName, code }) {
           </div>
         )}
 
-        <div>
-          <p className="mb-3 font-semibold">Product Images (URLs)</p>
-          <ImagePreview
-            imageUrls={[
-              formData.image1,
-              formData.image2,
-              formData.image3,
-              formData.image4,
-            ]}
-          />
-          <div className="grid gap-5 md:grid-cols-2">
-            {["image1", "image2", "image3", "image4"].map((field, index) => (
-              <FormField
-                key={field}
-                label={`Image ${index + 1}`}
-                value={formData[field]}
-                placeholder={`Image ${index + 1} URL`}
-                onChange={(value) => handleFormChange(field, value)}
-              />
-            ))}
+        <section>
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+            Variant Images
+          </h3>
+
+          <div className="mb-6 flex gap-3">
+            <input
+              type="url"
+              value={newImageUrl}
+              onChange={(e) => setNewImageUrl(e.target.value)}
+              placeholder="Enter image URL to add..."
+              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-700 focus:ring-1 focus:ring-indigo-700"
+            />
+            <button
+              type="button"
+              onClick={handleAddImage}
+              disabled={!newImageUrl.trim()}
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" /> Add Image
+            </button>
           </div>
-        </div>
+
+          {(formData.images || []).length > 0 ? (
+            <PhotoProvider>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                {(formData.images || []).map((rawUrl, idx) => {
+                  const url = typeof rawUrl === 'string' ? rawUrl.trim() : "";
+                  if (!url) return null;
+
+                  const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=3840&q=75`;
+
+                  return (
+                    <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                      <PhotoView key={idx} src={optimizedUrl}>
+                        <div className="h-full w-full cursor-pointer relative">
+                          <Image
+                            src={url}
+                            alt={`Variant Image ${idx + 1}`}
+                            fill
+                            className="object-contain p-2"
+                          />
+                        </div>
+                      </PhotoView>
+                      <div className="absolute inset-0 flex flex-col justify-between bg-black/60 p-2 opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                        <div className="flex justify-between pointer-events-auto">
+                          {idx === 0 ? (
+                            <span className="inline-flex items-center gap-1 rounded bg-amber-500 px-2 py-1 text-[10px] font-bold text-white shadow">
+                              <Star className="h-3 w-3 fill-white" /> Primary
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleMakePrimary(idx); }}
+                              className="rounded bg-black/50 p-1.5 text-white transition hover:bg-black"
+                              title="Set as primary"
+                            >
+                              <StarOff className="h-4 w-4" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleRemoveImage(idx); }}
+                            className="rounded bg-rose-500 p-1.5 text-white transition hover:bg-rose-600"
+                            title="Delete image"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center">
+                          <Eye className="h-8 w-8 text-white/70 drop-shadow-md" />
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </PhotoProvider>
+          ) : (
+            <div className="flex h-32 flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-500">
+              <p className="text-sm text-slate-500">No images provided.</p>
+            </div>
+          )}
+        </section>
 
         <div>
           <label className="mb-2 block font-semibold">Vendor Note</label>
@@ -725,30 +863,30 @@ export default function AddPreorderCd({ categoryName, code }) {
             }`}
           >
             <CheckCircle2 className="h-5 w-5" />
-            Preview
+            Submit Product
           </button>
         </div>
 
-        {previewPayload ? (
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-            <h3 className="text-lg font-bold text-indigo-950">Preview</h3>
-            <pre className="mt-3 max-h-[520px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-800">
-              {JSON.stringify(previewPayload, null, 2)}
-            </pre>
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handleFinalSubmit}
-                className="flex items-center gap-2 rounded-lg bg-green-600 px-8 py-3 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400"
-              >
-                <CheckCircle2 className="h-5 w-5" />
-                {isSubmitting ? "Adding Product..." : "Final Submit"}
-              </button>
-            </div>
-          </div>
-        ) : null}
-
+        {showSubmitPop && (
+          <DeletePop
+            productName={formData.productTitle || "this product"}
+            title="Submit Product"
+            description={
+              <>
+                Please confirm that you want to submit and add{" "}
+                <span className="font-semibold text-slate-700">
+                  {formData.productTitle || "this product"}
+                </span>{" "}
+                to the inventory.
+              </>
+            }
+            confirmLabel="Submit"
+            processingLabel="Submitting..."
+            isProcessing={isSubmitting}
+            onCancel={() => setShowSubmitPop(false)}
+            onConfirm={handleFinalSubmit}
+          />
+        )}
       </form>
     </main>
   );

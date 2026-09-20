@@ -1,75 +1,31 @@
 import { useState } from "react";
-import { formatAttributeValue } from "@/utils/formatters";
 
 export default function useOptionDescriptionsState(initialDescriptions = []) {
-  const [optionDescriptions, setOptionDescriptions] =
-    useState(initialDescriptions);
+  const [optionDescriptions, setOptionDescriptions] = useState(initialDescriptions);
 
   function resetOptionDescriptions(nextDescriptions = []) {
     setOptionDescriptions(nextDescriptions);
   }
 
-  function getOptionDescription(option) {
-    const formattedOption = formatAttributeValue(option);
-    const match = (optionDescriptions || []).find(
-      (item) => formatAttributeValue(item.option) === formattedOption,
-    );
-    return match?.description || "";
+  function addOptionDescription() {
+    setOptionDescriptions((prev) => [...prev, { option: "", description: "" }]);
   }
 
-  function updateOptionDescriptionForValue(option, description) {
-    const formattedOption = formatAttributeValue(option);
-    if (!formattedOption) return;
-    setOptionDescriptions((prev) => {
-      const existingIdx = prev.findIndex(
-        (item) => formatAttributeValue(item.option) === formattedOption,
-      );
-
-      if (!String(description || "").trim()) {
-        return existingIdx >= 0
-          ? prev.filter((_, i) => i !== existingIdx)
-          : prev;
-      }
-
-      if (existingIdx >= 0) {
-        return prev.map((item, i) =>
-          i === existingIdx
-            ? { ...item, option: formattedOption, description }
-            : item,
-        );
-      }
-
-      return [...prev, { option: formattedOption, description }];
-    });
-  }
-
-  function removeOptionDescriptionForValue(option) {
-    const formattedOption = formatAttributeValue(option);
+  function updateOptionDescription(index, field, value) {
     setOptionDescriptions((prev) =>
-      prev.filter(
-        (item) => formatAttributeValue(item.option) !== formattedOption,
-      ),
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   }
 
-  function removeOptionDescriptionsForValues(options) {
-    const removedValues = new Set(
-      (options || []).map((option) => formatAttributeValue(option)),
-    );
-    if (!removedValues.size) return;
-    setOptionDescriptions((prev) =>
-      prev.filter(
-        (item) => !removedValues.has(formatAttributeValue(item.option)),
-      ),
-    );
+  function removeOptionDescription(index) {
+    setOptionDescriptions((prev) => prev.filter((_, i) => i !== index));
   }
 
   return {
     optionDescriptions,
     resetOptionDescriptions,
-    getOptionDescription,
-    updateOptionDescriptionForValue,
-    removeOptionDescriptionForValue,
-    removeOptionDescriptionsForValues,
+    addOptionDescription,
+    updateOptionDescription,
+    removeOptionDescription,
   };
 }

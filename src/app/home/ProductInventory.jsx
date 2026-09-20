@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoaderCircle, RefreshCw, Search, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import useSWR from "swr";
 import { deleteProduct as deleteProductApi, fetchInventory, searchProducts } from "../apis/api";
 import { toast } from "sonner";
@@ -71,17 +73,13 @@ function ProductRow({ product, onDelete }) {
     >
       <td className="px-5 py-5">
         <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
-          {thumbnail ? (
-            <Image
-              src={thumbnail}
-              alt={product.product_title}
-              fill
-              sizes="96px"
-              className="object-contain p-2"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-xs text-slate-400">No image</div>
-          )}
+          <Image
+            src={thumbnail || "/dacby-assets/download.svg"}
+            alt={thumbnail ? product.product_title : "No image available"}
+            fill
+            sizes="96px"
+            className={`object-contain p-2 ${!thumbnail ? "opacity-40" : ""}`}
+          />
         </div>
       </td>
       <td className="min-w-72 px-5 py-5">
@@ -177,26 +175,58 @@ export default function ProductInventory() {
           getProductsFromResponse(inventoryResponse).length > 0,
       }
     : null;
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategoryCode, setSelectedCategoryCode] = useState("");
+  const [cachedAllPages, setCachedAllPages] = useState([]);
   const [pages, setPages] = useState(() => (initialPage ? [initialPage] : []));
   const [isLoading, setIsLoading] = useState(true);
   const [loadingLabel, setLoadingLabel] = useState("Loading inventory...");
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const [isSearchActive, setIsSearchActive] = useState(false);
   const searchRequestId = useRef(0);
   const loaderRef = useRef(null);
 
-  const loadPage = useCallback(async ({ startAfter, pageIndex, reset = false }) => {
+  // Restore search state from sessionStorage synchronously before paint
+  useIsomorphicLayoutEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedActive = sessionStorage.getItem("inv_searchActive");
+      if (savedActive === "true") {
+        setSearchQuery(sessionStorage.getItem("inv_searchQuery") || "");
+        setIsSearchActive(true);
+        const savedResults = sessionStorage.getItem("inv_searchResults");
+        if (savedResults) {
+          try {
+            setSearchResults(JSON.parse(savedResults));
+          } catch (e) {}
+        }
+      }
+    }
+  }, []);
+
+  // Sync search state to sessionStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("inv_searchQuery", searchQuery);
+      sessionStorage.setItem("inv_searchResults", JSON.stringify(searchResults));
+      sessionStorage.setItem("inv_searchActive", String(isSearchActive));
+    }
+  }, [searchQuery, searchResults, isSearchActive]);
+
+  const loadPage = useCallback(async ({ startAfter, pageIndex, reset = false, code = undefined }) => {
     setIsLoading(true);
     setLoadingLabel(startAfter ? "Fetching next page..." : "Refreshing inventory...");
     setError("");
 
     try {
-      const response = await fetchInventory(startAfter ? { startAfter } : {});
+      const activeCode = code !== undefined ? code : selectedCategoryCode;
+      const payload = startAfter ? { startAfter } : {};
+      if (activeCode) {
+        payload.code = activeCode;
+      }
+      const response = await fetchInventory(payload);
       const products = getProductsFromResponse(response);
 
       if (pageIndex > 0 && products.length === 0) {
@@ -222,7 +252,7 @@ export default function ProductInventory() {
     } finally {
       setIsLoading(false);
     }
-  }, [mutateInventory]);
+  }, [mutateInventory, selectedCategoryCode]);
 
   useEffect(() => {
     if (!inventoryResponse) return;
@@ -255,14 +285,35 @@ export default function ProductInventory() {
   }, [hasNextPage, isLoading, isSearchActive, error, allProducts, pages.length, loadPage]);
 
   const listError = error || inventoryFetchError?.message || "";
-  const listLoading = isLoading && !inventoryResponse;
+  const listLoading = isLoading && allProducts.length === 0;
 
-  const filteredProducts = useMemo(
-    () => selectedCategory
-      ? allProducts.filter((product) => product.category_name === selectedCategory)
-      : allProducts,
-    [allProducts, selectedCategory]
-  );
+  const handleCategoryChange = async (newCode) => {
+    if (newCode === selectedCategoryCode) return;
+    
+    if (isSearchActive || searchQuery) {
+      setSearchQuery("");
+      setSearchResults([]);
+      setIsSearchActive(false);
+    }
+    
+    if (newCode === "") {
+      setSelectedCategoryCode("");
+      if (cachedAllPages.length > 0) {
+        setPages(cachedAllPages);
+      } else {
+        loadPage({ reset: true, code: "", pageIndex: 0 });
+      }
+    } else {
+      if (selectedCategoryCode === "") {
+        setCachedAllPages(pages);
+      }
+      setSelectedCategoryCode(newCode);
+      setPages([]);
+      loadPage({ reset: true, code: newCode, pageIndex: 0 });
+    }
+  };
+
+  const filteredProducts = allProducts;
 
   const displayProducts = isSearchActive 
     ? searchResults.map(result => ({
@@ -283,7 +334,7 @@ export default function ProductInventory() {
   async function executeSearch() {
     const query = searchQuery.trim();
     if (!query) {
-      clearSearch();
+      handleRefresh();
       return;
     }
     
@@ -305,13 +356,18 @@ export default function ProductInventory() {
     }
   }
 
-  function clearSearch() {
+  function handleRefresh() {
     setSearchQuery("");
     setIsSearchActive(false);
     setSearchResults([]);
     setSearchError("");
     searchRequestId.current += 1;
     setIsSearching(false);
+    
+    setSelectedCategoryCode("");
+    setCachedAllPages([]);
+    setPages([]);
+    loadPage({ reset: true, code: "", pageIndex: 0 });
   }
 
   function handleKeyDown(e) {
@@ -387,20 +443,35 @@ export default function ProductInventory() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <button
+             <button
               type="button"
               onClick={executeSearch}
               disabled={isSearching}
-              className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-6 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+              title="Search"
+              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70 shrink-0"
             >
-              Search
+              <Search className="h-5 w-5" />
             </button>
+            <select
+              className="h-11 min-w-[300px] cursor-pointer rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              value={selectedCategoryCode}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+            >
+              <option value="">All Category</option>
+              {categories.map((cat) => (
+                <option key={cat.code} value={cat.code}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+           
             <button
               type="button"
-              onClick={clearSearch}
-              className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-slate-100 px-6 text-sm font-medium text-slate-700 transition hover:bg-slate-200"
+              onClick={handleRefresh}
+              title="Refresh / Clear"
+              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition hover:bg-slate-200 shrink-0"
             >
-              Clear
+              <RefreshCw className="h-5 w-5" />
             </button>
           </div>
         </div>

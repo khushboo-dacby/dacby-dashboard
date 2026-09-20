@@ -5,10 +5,18 @@ import FormActions from "@/components/inventory/FormActions";
 import ProductFields from "@/components/inventory/ProductFields";
 import QuestionsSection from "@/components/inventory/QuestionsSection";
 import ResponsePreview from "@/components/inventory/ResponsePreview";
+import WarningPopup from "@/components/confirmation-modal/WarningPopup";
+import { useRouter } from "next/navigation";
 import SpecificationSection from "@/components/inventory/SpecificationSection";
 import VendorsSection from "@/components/inventory/VendorsSection";
 import WhatsInTheBoxSection from "@/components/inventory/WhatsInTheBoxSection";
-import { emptyItem,phoneOptionsDesc,laptopOptionsDesc,configurationIcons,cameraConfigurationIcons,androidQuestions} from "@/constants/inventory";
+import CombinationBuilder from "@/components/inventory/CombinationBuilder";
+import PricingRules from "@/components/inventory/PricingRules";
+import ProductVideoSection from "@/components/inventory/ProductVideoSection";
+import ColorCodeSection from "@/components/inventory/ColorCodeSection";
+import OptionDescriptionsSection from "@/components/inventory/OptionDescriptionsSection";
+import ConfigurationIconsSection from "@/components/inventory/ConfigurationIconsSection";
+import { emptyItem, phoneOptionsDesc, laptopOptionsDesc, configurationIcons, cameraConfigurationIcons, androidQuestions } from "@/constants/inventory";
 import {
   formatAttributeDisplayName,
   formatAttributeValue,
@@ -21,6 +29,7 @@ import useDescriptionState from "@/hooks/useDescriptionState";
 import useOptionDescriptionsState from "@/hooks/useOptionDescriptionsState";
 import useQuestionsState from "@/hooks/useQuestionsState";
 import useWhatsInTheBoxState from "@/hooks/useWhatsInTheBoxState";
+import useConfigurationIconsState from "@/hooks/useConfigurationIconsState";
 import { keepPayloadKeys, parseNumberIfPossible } from "@/utils/payload";
 import { generateSKUForItem } from "@/utils/sku";
 import { addProductToInventory } from "@/app/apis/api";
@@ -102,12 +111,15 @@ function hasValidCombinationAttributes(combination) {
 }
 
 export default function InventoryForm() {
-  
+
   const [resp, setResp] = useState(null);
   const [previewPayload, setPreviewPayload] = useState(null);
   const [sending, setSending] = useState(false);
   const [variantImagesByColor, setVariantImagesByColor] = useState({});
   const [confirmedImageColors, setConfirmedImageColors] = useState([]);
+  const [activeTab, setActiveTab] = useState("Inventory");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const router = useRouter();
 
   const fieldsRef = useRef(null);
   const vendorsRef = useRef(null);
@@ -125,8 +137,8 @@ export default function InventoryForm() {
     mrp: "",
     price: "",
     product_title: "",
-    rating: "",
-    rating_count: "",
+    rating: 4.5,
+    rating_count: 110,
     sell: false,
     sell_max_price: "",
     minimum_price: "",
@@ -171,12 +183,19 @@ export default function InventoryForm() {
   } = useWhatsInTheBoxState();
 
   const {
+    configurationIcons,
+    resetConfigurationIcons,
+    addConfigurationIcon,
+    updateConfigurationIcon,
+    removeConfigurationIcon,
+  } = useConfigurationIconsState();
+
+  const {
     optionDescriptions,
     resetOptionDescriptions,
-    getOptionDescription,
-    updateOptionDescriptionForValue,
-    removeOptionDescriptionForValue,
-    removeOptionDescriptionsForValues,
+    addOptionDescription,
+    updateOptionDescription,
+    removeOptionDescription,
   } = useOptionDescriptionsState();
 
   const {
@@ -263,26 +282,32 @@ export default function InventoryForm() {
       prev.map((v, i) =>
         i === vIdx
           ? {
-              ...v,
-              items: [
-                ...v.items,
-                (() => {
-                  const it = emptyItem();
-                  it.sku = generateVisibleSku(
-                    fields,
-                    it,
-                    specification.attributeDefinitions,
-                  );
-                  return it;
-                })(),
-              ],
-            }
+            ...v,
+            items: [
+              ...v.items,
+              (() => {
+                const it = emptyItem();
+                it.sku = generateVisibleSku(
+                  fields,
+                  it,
+                  specification.attributeDefinitions,
+                );
+                return it;
+              })(),
+            ],
+          }
           : v,
       ),
     );
   }
 
-  function saveCombinationVariant(vendorIndex, row, item, applyImagesToAll) {
+  function saveCombinationVariant(vendorIndex, row, item, optionsOrBoolean) {
+    // Handle both boolean and options object for backwards compatibility with other calls if any
+    const options = typeof optionsOrBoolean === 'object' ? optionsOrBoolean || {} : { applyToAllSameColor: optionsOrBoolean };
+    const applyImagesToAll = options.applyToAllSameColor;
+    const applyVideoToAll = options.applyVideoToAll;
+    const ytIframeSync = options.yt_iframe;
+    
     const savedItem = {
       ...item,
       _variantKey: row.key,
@@ -294,13 +319,12 @@ export default function InventoryForm() {
 
     setVendors((currentVendors) =>
       currentVendors.map((vendor, currentVendorIndex) => {
-        const shouldApplyImages =
-          applyImagesToAll && images.length > 0 && matchingColor;
+        const shouldApplyImages = applyImagesToAll && images.length > 0 && matchingColor;
         let found = false;
         const sourceItems = currentVendorIndex === vendorIndex
           ? vendor.items.filter(
-              (currentItem) => currentItem._variantKey || currentItem.combination_name
-            )
+            (currentItem) => currentItem._variantKey || currentItem.combination_name
+          )
           : vendor.items;
         const items = sourceItems.map((currentItem) => {
           const matches =
@@ -315,12 +339,17 @@ export default function InventoryForm() {
             found = true;
             return savedItem;
           }
-          const itemColor = String(currentItem.attributes?.color || "")
-            .trim()
-            .toLowerCase();
-          return shouldApplyImages && itemColor === matchingColor
-            ? { ...currentItem, images: [...images] }
-            : currentItem;
+          const itemColor = String(currentItem.attributes?.color || "").trim().toLowerCase();
+          
+          let nextItem = { ...currentItem };
+          if (shouldApplyImages && itemColor === matchingColor) {
+            nextItem.images = [...images];
+          }
+          if (applyVideoToAll && ytIframeSync !== undefined) {
+            nextItem.yt_iframe = ytIframeSync;
+          }
+          
+          return nextItem;
         });
 
         if (currentVendorIndex === vendorIndex && !found) items.push(savedItem);
@@ -337,11 +366,13 @@ export default function InventoryForm() {
         current.includes(matchingColor) ? current : [...current, matchingColor]
       );
     }
-    toast.success(
-      applyImagesToAll && matchingColor
-        ? `Variant saved and images applied to ${row.attributes.color} variants`
-        : "Variant saved"
-    );
+    if (typeof optionsOrBoolean === 'object') {
+      toast.success(
+        applyImagesToAll && matchingColor
+          ? `Variant saved and images applied to ${row.attributes.color} variants`
+          : "Variant saved"
+      );
+    }
   }
 
   function updateItem(vIdx, itemIdx, key, value) {
@@ -405,7 +436,7 @@ export default function InventoryForm() {
           comb.selectedValues && comb.selectedValues[attr.key] !== undefined
             ? comb.selectedValues[attr.key]
             : (comb.attributes || []).find((a) => a.key === attr.key)
-                ?.values?.[0];
+              ?.values?.[0];
 
         return String(selected || "") === String(attributes[attr.key] || "");
       }),
@@ -578,9 +609,9 @@ export default function InventoryForm() {
       const color_codes = exists
         ? prev.color_codes
         : [
-            ...(prev.color_codes || []),
-            { name: colorName, hex: hex || "#000000", description: "" },
-          ];
+          ...(prev.color_codes || []),
+          { name: colorName, hex: hex || "#000000", description: "" },
+        ];
       return { ...prev, color_codes };
     });
   }
@@ -771,10 +802,10 @@ export default function InventoryForm() {
       colorAttribute && colorAttribute.values.length >= 2
         ? colorAttribute
         : defs.reduce((largest, attribute) =>
-            attribute.values.length > largest.values.length
-              ? attribute
-              : largest,
-          );
+          attribute.values.length > largest.values.length
+            ? attribute
+            : largest,
+        );
     const combinationDefs = defs.filter(
       (attribute) => attribute !== commonAttribute,
     );
@@ -844,7 +875,7 @@ export default function InventoryForm() {
   function updateCombinations(updater) {
     setSpecification((prev) => {
       const previousCombinations = prev.combinations || [];
-        const combinations = updater(previousCombinations) || [];
+      const combinations = updater(previousCombinations) || [];
       const previousNames = new Set(
         previousCombinations
           .map((combination) => combination?.name)
@@ -949,7 +980,7 @@ export default function InventoryForm() {
   function finalizeAttributeDefinitionKey(idx, key) {
     updateAttributeDefinitions((prev) =>
       (prev || []).map((attr, i) =>
-        i === idx ? { ...attr, key: normalizeAttributeKey(key) } : attr,
+        i === idx ? { ...attr, key: normalizeAttributeKey(key !== undefined ? key : attr.key) } : attr,
       ),
     );
   }
@@ -988,7 +1019,6 @@ export default function InventoryForm() {
 
   function removeAttributeDefinitionValue(idx, valueIdx) {
     const value = specification.attributeDefinitions?.[idx]?.values?.[valueIdx];
-    if (value) removeOptionDescriptionForValue(value);
     updateAttributeDefinitions((prev) =>
       (prev || []).map((attr, i) => {
         if (i !== idx) return attr;
@@ -999,16 +1029,13 @@ export default function InventoryForm() {
   }
 
   function removeAttributeDefinition(idx) {
-    removeOptionDescriptionsForValues(
-      specification.attributeDefinitions?.[idx]?.values || [],
-    );
     updateAttributeDefinitions((prev) => (prev || []).filter((_, i) => i !== idx));
   }
-const isEmptyObject = (obj) =>
-  !obj || Object.keys(obj).length === 0;
+  const isEmptyObject = (obj) =>
+    !obj || Object.keys(obj).length === 0;
 
-const isEmptyArray = (arr) =>
-  !arr || arr.length === 0;
+  const isEmptyArray = (arr) =>
+    !arr || arr.length === 0;
   function buildPreviewPayload() {
     const fields = fieldsRef.current;
     const vendors = vendorsRef.current;
@@ -1033,14 +1060,14 @@ const isEmptyArray = (arr) =>
         mrp: it.mrp ? Number(it.mrp) : undefined,
         price: it.price ? Number(it.price) : undefined,
         sell_price: it.sell_price ? Number(it.sell_price) : undefined,
-        rating: it.rating ? Number(it.rating) : undefined,
-        rating_count: it.rating_count ? Number(it.rating_count) : undefined,
+        rating: it.rating ? Number(it.rating) : 4.5,
+        rating_count: it.rating_count ? Number(it.rating_count) : 110,
         sell: !!it.sell,
         yt_iframe: it.yt_iframe || undefined,
         images: Array.isArray(it.images) && it.images.some(isValidImageUrl)
           ? it.images
-              .map((url) => String(url || "").trim())
-              .filter(isValidImageUrl)
+            .map((url) => String(url || "").trim())
+            .filter(isValidImageUrl)
           : undefined,
       })),
     }));
@@ -1074,9 +1101,9 @@ const isEmptyArray = (arr) =>
 
     const images = fields.imagesText
       ? fields.imagesText
-          .split(/\r?\n/)
-          .map((s) => s.trim())
-          .filter(Boolean)
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean)
       : [];
     const whatsInTheBoxNormalized = (whatsInTheBox || [])
       .map((item) => ({
@@ -1127,8 +1154,8 @@ const isEmptyArray = (arr) =>
               weight: it.weight || 0,
               mrp: it.mrp || 0,
               price: it.price || 0,
-              rating: it.rating || 0,
-              rating_count: it.rating_count || 0,
+              rating: it.rating || 4.5,
+              rating_count: it.rating_count || 110,
               yt_iframe: it.yt_iframe || undefined,
               images: (it.images || []).map(toCDN),
               stocks: it.stocks || 0,
@@ -1173,8 +1200,8 @@ const isEmptyArray = (arr) =>
               weight: it.weight || 0,
               mrp: it.mrp || (fields.mrp ? Number(fields.mrp) : 0),
               price: it.price || (fields.price ? Number(fields.price) : 0),
-              rating: it.rating || 0,
-              rating_count: it.rating_count || 0,
+              rating: it.rating || 4.5,
+              rating_count: it.rating_count || 110,
               yt_iframe: it.yt_iframe || undefined,
               images: (it.images || []).map(toCDN),
               stocks: it.stocks || 0,
@@ -1215,8 +1242,8 @@ const isEmptyArray = (arr) =>
               sell_price: it.sell_price || 0,
               weight: it.weight || 0,
               stocks: it.stocks || 0,
-              rating: 0,
-              rating_count: 0,
+              rating: 4.5,
+              rating_count: 110,
               images: (it.images || []).map(toCDN),
             };
             return cAcc;
@@ -1237,7 +1264,17 @@ const isEmptyArray = (arr) =>
       {},
     );
     let finalOptionDescriptions = optionDescriptionsNormalized;
-    let finalConfigurationIcons = configurationIconsNormalized;
+    let finalConfigurationIcons = { ...configurationIconsNormalized };
+    
+    // Merge manual configuration icons
+    (configurationIcons || []).forEach((icon) => {
+      const key = String(icon.label || "").trim();
+      const val = String(icon.value || "").trim();
+      if (key && val) {
+        finalConfigurationIcons[key] = val;
+      }
+    });
+
     if (isEmptyObject(finalOptionDescriptions)) {
       switch (fields.category_name) {
         case "Smartphones":
@@ -1323,10 +1360,10 @@ const isEmptyArray = (arr) =>
                   typeof o === "string"
                     ? { label: o }
                     : {
-                        label: o.label,
-                        deduction: Number(o.deduction) || 0,
-                        icon: o.icon || undefined,
-                      },
+                      label: o.label,
+                      deduction: Number(o.deduction) || 0,
+                      icon: o.icon || undefined,
+                    },
                 ),
               };
             }
@@ -1343,8 +1380,8 @@ const isEmptyArray = (arr) =>
         condition: fields.condition || undefined,
         mrp: fields.mrp ? Number(fields.mrp) : 0,
         price: fields.price ? Number(fields.price) : 0,
-        rating: fields.rating ? Number(fields.rating) : 0,
-        rating_count: fields.rating_count ? Number(fields.rating_count) : 0,
+        rating: fields.rating ? Number(fields.rating) : 4.5,
+        rating_count: fields.rating_count ? Number(fields.rating_count) : 110,
         sell: !!fields.sell || hasSellableItem,
         sell_max_price: fields.sell_max_price ? Number(fields.sell_max_price) : 0,
         ...(fields.type?.trim() && { type: fields.type.trim() }),
@@ -1397,42 +1434,27 @@ const isEmptyArray = (arr) =>
     );
   }
 
-  async function handleSubmit(e) {
+  function handleSaveClick(e) {
     e.preventDefault();
+    setShowConfirmModal(true);
+  }
+
+  async function confirmSave() {
+    setShowConfirmModal(false);
     setSending(true);
     try {
       const payloadWithAllKeys = buildPreviewPayload();
-      console.log("Inventory payload preview:", payloadWithAllKeys);
-      setPreviewPayload(payloadWithAllKeys);
-      setResp(payloadWithAllKeys);
-      toast.success("Inventory preview generated successfully");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to add product";
-      setResp({ error: message });
-      toast.error(message);
-    } finally {
-      setSending(false);
-    }
-  }
-
-  function handlePreview(e) {
-    e.preventDefault();
-    void handleSubmit(e);
-  }
-
-  async function handleFinalSubmit() {
-    if (!previewPayload) return;
-
-    setSending(true);
-    try {
-      // const response = await addProductToInventory(previewPayload);
-      // setResp(response);
-      setPreviewPayload(null);
+      
+      // // If no image is present use dummy image
+      // if (!payloadWithAllKeys.images || payloadWithAllKeys.images.length === 0) {
+      //   payloadWithAllKeys.images = ["/dacby-assets/download.svg"];
+      // }
+      
+      await addProductToInventory(payloadWithAllKeys);
       toast.success("Product added successfully");
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to add product";
+      router.push("/");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to add product";
       toast.error(message);
     } finally {
       setSending(false);
@@ -1448,8 +1470,8 @@ const isEmptyArray = (arr) =>
       mrp: "",
       price: "",
       product_title: "",
-      rating: "",
-      rating_count: "",
+      rating: 4.5,
+      rating_count: 110,
       sell: false,
       sell_max_price: "",
       minimum_price: "",
@@ -1482,7 +1504,7 @@ const isEmptyArray = (arr) =>
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 [color-scheme:light]">
+    <main className="min-h-screen bg-slate-50 pb-28 text-slate-950">
       <style jsx global>{`
         select,
         select option,
@@ -1492,107 +1514,174 @@ const isEmptyArray = (arr) =>
           color-scheme: light !important;
         }
       `}</style>
-      <div className="mx-auto max-w-6xl rounded-2xl border border-cyan-100 bg-white p-6 shadow-xl shadow-cyan-100/60 [&_.bg-indigo-50]:!bg-cyan-50 [&_.bg-indigo-100]:!bg-cyan-100 [&_.bg-slate-50]:!bg-slate-50 [&_.bg-slate-100]:!bg-slate-100 [&_.bg-slate-200]:!bg-slate-200 [&_.bg-white]:!bg-white [&_.border-indigo-200]:!border-cyan-200 [&_.border-rose-200]:!border-pink-200 [&_.border-slate-200]:!border-slate-200 [&_.text-indigo-700]:!text-cyan-700 [&_.text-indigo-800]:!text-cyan-800 [&_.text-indigo-900]:!text-cyan-900 [&_.text-rose-700]:!text-pink-700 [&_.text-slate-500]:!text-slate-500 [&_.text-slate-700]:!text-slate-700 [&_.text-slate-800]:!text-slate-800 [&_.text-slate-900]:!text-slate-900 [&_.text-slate-950]:!text-slate-950 [&_button:hover]:!bg-cyan-50">
-        <h2 className="mb-6 text-2xl font-semibold tracking-tight text-slate-950">
-          Add Product
-        </h2>
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6 [color-scheme:light] [&_*]:[color-scheme:light] [&_button]:transition [&_input:not([type='checkbox']):not([type='color'])]:rounded-lg [&_input:not([type='checkbox']):not([type='color'])]:!border-slate-200 [&_input:not([type='checkbox']):not([type='color'])]:!bg-white [&_input:not([type='checkbox']):not([type='color'])]:text-sm [&_input:not([type='checkbox']):not([type='color'])]:!text-slate-900 [&_input:not([type='checkbox']):not([type='color'])]:shadow-sm [&_input:not([type='checkbox']):not([type='color'])]:transition [&_input:not([type='checkbox']):not([type='color'])]:placeholder:text-slate-400 [&_input:not([type='checkbox']):not([type='color'])]:focus:!border-cyan-500 [&_input:not([type='checkbox']):not([type='color'])]:focus:outline-none [&_input:not([type='checkbox']):not([type='color'])]:focus:ring-2 [&_input:not([type='checkbox']):not([type='color'])]:focus:ring-cyan-100 [&_label]:!text-slate-700 [&_option]:!bg-white [&_option]:!text-slate-900 [&_optgroup]:!bg-white [&_optgroup]:!text-slate-900 [&_select]:[color-scheme:light] [&_select]:rounded-lg [&_select]:!border-slate-200 [&_select]:!bg-white [&_select]:text-sm [&_select]:!text-slate-900 [&_select]:shadow-sm [&_select]:transition [&_select]:focus:!border-cyan-500 [&_select]:focus:outline-none [&_select]:focus:ring-2 [&_select]:focus:ring-cyan-100 [&_textarea]:rounded-lg [&_textarea]:!border-slate-200 [&_textarea]:!bg-white [&_textarea]:text-sm [&_textarea]:!text-slate-900 [&_textarea]:shadow-sm [&_textarea]:transition [&_textarea]:placeholder:text-slate-400 [&_textarea]:focus:!border-cyan-500 [&_textarea]:focus:outline-none [&_textarea]:focus:ring-2 [&_textarea]:focus:ring-cyan-100"
-        >
-          <ProductFields fields={fields} setField={setField} />
+      <div className="mx-auto w-full">
+        {/* Header Section */}
+        <header className="flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-6 sm:px-10 lg:px-20">
+          <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-indigo-950 to-indigo-700 px-7 py-6 text-white">
+            <div>
+              <h1 className="text-2xl font-bold">Add Product</h1>
+              <p className="mt-2 text-indigo-200">
+                Create a new product listing and set up its variants.
+              </p>
+            </div>
+          </div>
 
-          {/* vendors moved below specification (rendered after Specification section) */}
+          <div className="flex pt-2">
+            <nav className="inline-flex gap-1 rounded-full border border-slate-200 bg-slate-100/50 p-1">
+              <button
+                type="button"
+                onClick={() => setActiveTab("Inventory")}
+                className={`flex min-w-[150px] items-center justify-center rounded-full px-6 py-2 text-sm font-semibold transition ${
+                  activeTab === "Inventory"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Inventory
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("Specification")}
+                className={`flex min-w-[150px] items-center justify-center rounded-full px-6 py-2 text-sm font-semibold transition ${
+                  activeTab === "Specification"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Specification
+              </button>
+            </nav>
+          </div>
+        </header>
 
-          <QuestionsSection
-            questions={questions}
-            addQuestion={addQuestion}
-            updateQuestion={updateQuestion}
-            removeQuestion={removeQuestion}
-            addOption={addOption}
-            updateOption={updateOption}
-            removeOption={removeOption}
-          />
+        {/* Main Content Area */}
+        <div className="px-4 py-8 sm:px-10 lg:px-20">
+          <form
+            className="w-full space-y-6 [color-scheme:light] [&_*]:[color-scheme:light] [&_button]:transition [&_input:not([type='checkbox']):not([type='color'])]:rounded-lg [&_input:not([type='checkbox']):not([type='color'])]:!border-slate-200 [&_input:not([type='checkbox']):not([type='color'])]:!bg-white [&_input:not([type='checkbox']):not([type='color'])]:text-sm [&_input:not([type='checkbox']):not([type='color'])]:!text-slate-900 [&_input:not([type='checkbox']):not([type='color'])]:shadow-sm [&_input:not([type='checkbox']):not([type='color'])]:transition [&_input:not([type='checkbox']):not([type='color'])]:placeholder:text-slate-400 [&_input:not([type='checkbox']):not([type='color'])]:focus:!border-cyan-500 [&_input:not([type='checkbox']):not([type='color'])]:focus:outline-none [&_input:not([type='checkbox']):not([type='color'])]:focus:ring-2 [&_input:not([type='checkbox']):not([type='color'])]:focus:ring-cyan-100 [&_label]:!text-slate-700 [&_option]:!bg-white [&_option]:!text-slate-900 [&_optgroup]:!bg-white [&_optgroup]:!text-slate-900 [&_select]:[color-scheme:light] [&_select]:rounded-lg [&_select]:!border-slate-200 [&_select]:!bg-white [&_select]:text-sm [&_select]:!text-slate-900 [&_select]:shadow-sm [&_select]:transition [&_select]:focus:!border-cyan-500 [&_select]:focus:outline-none [&_select]:focus:ring-2 [&_select]:focus:ring-cyan-100 [&_textarea]:rounded-lg [&_textarea]:!border-slate-200 [&_textarea]:!bg-white [&_textarea]:text-sm [&_textarea]:!text-slate-900 [&_textarea]:shadow-sm [&_textarea]:transition [&_textarea]:placeholder:text-slate-400 [&_textarea]:focus:!border-cyan-500 [&_textarea]:focus:outline-none [&_textarea]:focus:ring-2 [&_textarea]:focus:ring-cyan-100"
+          >
+            {activeTab === "Inventory" && (
+              <>
+                <ProductFields fields={fields} setField={setField} />
+                <ProductVideoSection fields={fields} setField={setField} />
+                <CombinationBuilder
+                  specification={specification}
+                  updateCombinations={updateCombinations}
+                  addCombinationsFromAttributes={addCombinationsFromAttributes}
+                  addAttributeDefinition={addAttributeDefinition}
+                  updateAttributeDefinitionKey={updateAttributeDefinitionKey}
+                  finalizeAttributeDefinitionKey={finalizeAttributeDefinitionKey}
+                  removeAttributeDefinition={removeAttributeDefinition}
+                  removeAttributeDefinitionValue={removeAttributeDefinitionValue}
+                  updateAttributeDefinitionInput={updateAttributeDefinitionInput}
+                  addAttributeDefinitionValue={addAttributeDefinitionValue}
+                />
+                <VendorsSection
+                  vendors={vendors}
+                  specification={specification}
+                  addVendor={addVendor}
+                  updateVendor={updateVendor}
+                  removeVendor={removeVendor}
+                  fields={fields}
+                  sharedImagesByColor={variantImagesByColor}
+                  confirmedImageColors={confirmedImageColors}
+                  onSaveVariant={saveCombinationVariant}
+                />
+              </>
+            )}
 
-          <DescriptionEditor
-            description={description}
-            value={description}
-            onChange={setDescription}
-            updateSummary={updateSummary}
-            addDescriptionSection={addDescriptionSection}
-            removeDescriptionSection={removeDescriptionSection}
-            renameDescriptionSection={renameDescriptionSection}
-            finalizeDescriptionSection={finalizeDescriptionSection}
-            addDescriptionField={addDescriptionField}
-            updateDescriptionFieldKey={updateDescriptionFieldKey}
-            finalizeDescriptionFieldKey={finalizeDescriptionFieldKey}
-            updateDescriptionFieldValue={updateDescriptionFieldValue}
-            updateDescriptionFieldValueType={updateDescriptionFieldValueType}
-            removeDescriptionField={removeDescriptionField}
-            resetDescription={resetDescription}
-          />
+            {activeTab === "Specification" && (
+              <>
+                <ColorCodeSection
+                  specification={specification}
+                  addColorCode={addColorCode}
+                  updateColorCode={updateColorCode}
+                  removeColorCode={removeColorCode}
+                  addColorCodesFromText={addColorCodesFromText}
+                />
+                <ConfigurationIconsSection
+                  configurationIcons={configurationIcons}
+                  addConfigurationIcon={addConfigurationIcon}
+                  updateConfigurationIcon={updateConfigurationIcon}
+                  removeConfigurationIcon={removeConfigurationIcon}
+                />
+                <PricingRules fields={fields} setField={setField} />
+                <WhatsInTheBoxSection
+                  whatsInTheBox={whatsInTheBox}
+                  addBoxItem={addBoxItem}
+                  updateBoxItem={updateBoxItem}
+                  removeBoxItem={removeBoxItem}
+                />
+                <OptionDescriptionsSection
+                  optionDescriptions={optionDescriptions}
+                  addOptionDescription={addOptionDescription}
+                  updateOptionDescription={updateOptionDescription}
+                  removeOptionDescription={removeOptionDescription}
+                />
+                <DescriptionEditor
+                  description={description}
+                  value={description}
+                  onChange={setDescription}
+                  updateSummary={updateSummary}
+                  addDescriptionSection={addDescriptionSection}
+                  removeDescriptionSection={removeDescriptionSection}
+                  renameDescriptionSection={renameDescriptionSection}
+                  finalizeDescriptionSection={finalizeDescriptionSection}
+                  addDescriptionField={addDescriptionField}
+                  updateDescriptionFieldKey={updateDescriptionFieldKey}
+                  finalizeDescriptionFieldKey={finalizeDescriptionFieldKey}
+                  updateDescriptionFieldValue={updateDescriptionFieldValue}
+                  updateDescriptionFieldValueType={updateDescriptionFieldValueType}
+                  removeDescriptionField={removeDescriptionField}
+                  resetDescription={resetDescription}
+                />
+                <QuestionsSection
+                  questions={questions}
+                  addQuestion={addQuestion}
+                  updateQuestion={updateQuestion}
+                  removeQuestion={removeQuestion}
+                  addOption={addOption}
+                  updateOption={updateOption}
+                  removeOption={removeOption}
+                />
+              </>
+            )}
 
-          <WhatsInTheBoxSection
-            whatsInTheBox={whatsInTheBox}
-            addBoxItem={addBoxItem}
-            updateBoxItem={updateBoxItem}
-            removeBoxItem={removeBoxItem}
-          />
+          </form>
 
-          <SpecificationSection
-            specification={specification}
-            addColorCode={addColorCode}
-            updateColorCode={updateColorCode}
-            removeColorCode={removeColorCode}
-            addColorCodesFromText={addColorCodesFromText}
-            addAttributeDefinition={addAttributeDefinition}
-            updateAttributeDefinitionKey={updateAttributeDefinitionKey}
-            finalizeAttributeDefinitionKey={finalizeAttributeDefinitionKey}
-            updateAttributeDefinitionIcon={updateAttributeDefinitionIcon}
-            removeAttributeDefinition={removeAttributeDefinition}
-            removeAttributeDefinitionValue={removeAttributeDefinitionValue}
-            getOptionDescription={getOptionDescription}
-            updateOptionDescriptionForValue={updateOptionDescriptionForValue}
-            updateAttributeDefinitionInput={updateAttributeDefinitionInput}
-            addAttributeDefinitionValue={addAttributeDefinitionValue}
-            updateCombinations={updateCombinations}
-            addCombinationsFromAttributes={addCombinationsFromAttributes}
-          />
-
-          <VendorsSection
-            vendors={vendors}
-            specification={specification}
-            addVendor={addVendor}
-            updateVendor={updateVendor}
-            removeVendor={removeVendor}
-            addItemToVendor={addItemToVendor}
-            removeItem={removeItem}
-            updateItem={updateItem}
-            updateItemAttribute={updateItemAttribute}
-            addSpecificationValueFromItem={addSpecificationValueFromItem}
-            addColorCodeFromVariant={addColorCodeFromVariant}
-            addValueToCombination={addValueToCombination}
-            updateItemAttributeKey={updateItemAttributeKey}
-            finalizeItemAttributeKey={finalizeItemAttributeKey}
-            saveItemAttributeValue={saveItemAttributeValue}
-            removeItemAttribute={removeItemAttribute}
-            addItemAttribute={addItemAttribute}
-            fields={fields}
-            sharedImagesByColor={variantImagesByColor}
-            confirmedImageColors={confirmedImageColors}
-            onSaveVariant={saveCombinationVariant}
-          />
-
-          <FormActions sending={sending} onPreview={handlePreview} onReset={handleReset} />
-        </form>
-
-        <ResponsePreview
-          resp={resp}
-          isPreview={Boolean(previewPayload)}
-          sending={sending}
-          onFinalSubmit={handleFinalSubmit}
-        />
+          {showConfirmModal && (
+            <WarningPopup
+              title="Add this product?"
+              message="Please confirm that you want to add this product to the inventory."
+              confirmLabel="Add Product"
+              cancelLabel="Cancel"
+              isConfirming={sending}
+              onCancel={() => setShowConfirmModal(false)}
+              onClose={() => setShowConfirmModal(false)}
+              onConfirm={confirmSave}
+            />
+          )}
+        </div>
       </div>
-    </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-4px_20px_rgba(15,23,42,0.08)] backdrop-blur sm:px-10 lg:px-20">
+        <div className="mx-auto flex max-w-7xl items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900"
+          >
+            Discard
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveClick}
+            disabled={sending}
+            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+          >
+            {sending ? "Adding Product..." : "Add Product"}
+          </button>
+        </div>
+      </div>
+    </main>
   );
 }

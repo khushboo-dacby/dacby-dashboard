@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { PhotoProvider, PhotoView } from "react-photo-view";
+import Image from "next/image";
 import DescriptionEditor from "@/components/inventory/DescriptionEditor";
 import ImagePreview from "@/components/inventory/ImagePreview";
 
@@ -260,18 +261,15 @@ function ImagePreviewCell({ imageUrl }) {
     setIsBroken(false);
   }, [normalizedUrl]);
 
-  if (!normalizedUrl) {
+  if (!normalizedUrl || isBroken) {
     return (
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-slate-300 bg-slate-100 text-[9px] font-medium text-slate-400">
-        No image
-      </div>
-    );
-  }
-
-  if (isBroken) {
-    return (
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-slate-300 bg-slate-100 text-[9px] font-medium text-slate-400">
-        Error
+      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-white">
+        <Image
+          src="/dacby-assets/download.svg"
+          alt="No image"
+          fill
+          className="object-contain p-2 opacity-40"
+        />
       </div>
     );
   }
@@ -488,16 +486,28 @@ export default function SpecificationTab({
     }));
   }
 
+  function buildOptionDescriptionEntries(optionDescriptions) {
+    if (!optionDescriptions || typeof optionDescriptions !== "object") return [];
+
+    return Object.entries(optionDescriptions).map(([key, value], index) => ({
+      id: `opt-desc-${index}-${key || "empty"}`,
+      key: String(key ?? ""),
+      value: String(value ?? ""),
+    }));
+  }
+
   const hasHydratedEntryStateRef = useRef(false);
 
   const [iconEntries, setIconEntries] = useState(() => buildIconEntries(spec?.configuration_icons));
   const [colorEntries, setColorEntries] = useState(() => buildColorEntries(spec?.color_codes));
+  const [optionDescriptionEntries, setOptionDescriptionEntries] = useState(() => buildOptionDescriptionEntries(spec?.option_descriptions));
 
   useEffect(() => {
     if (!spec || hasHydratedEntryStateRef.current) return;
 
     setIconEntries(buildIconEntries(spec.configuration_icons));
     setColorEntries(buildColorEntries(spec.color_codes));
+    setOptionDescriptionEntries(buildOptionDescriptionEntries(spec.option_descriptions));
     hasHydratedEntryStateRef.current = true;
   }, [spec]);
 
@@ -598,6 +608,46 @@ export default function SpecificationTab({
     });
     setColorEntries(entries);
     syncColorEntries(entries);
+  }
+
+  function syncOptionDescriptionEntries(entries) {
+    const nextMap = {};
+
+    entries.forEach((entry) => {
+      const key = String(entry?.key ?? "").trim();
+      const value = String(entry?.value ?? "").trim();
+
+      if (key) {
+        nextMap[key] = value;
+      }
+    });
+
+    setKeyValue("option_descriptions", nextMap);
+  }
+
+  function updateOptionDescriptionEntry(index, field, value) {
+    const entries = [...optionDescriptionEntries];
+    entries[index] = { ...entries[index], [field]: value };
+    setOptionDescriptionEntries(entries);
+    syncOptionDescriptionEntries(entries);
+  }
+
+  function addOptionDescriptionEntry() {
+    const entries = [...optionDescriptionEntries];
+    entries.push({
+      id: `opt-desc-${Date.now()}-${entries.length}`,
+      key: "",
+      value: "",
+    });
+    setOptionDescriptionEntries(entries);
+    syncOptionDescriptionEntries(entries);
+  }
+
+  function removeOptionDescriptionEntry(index) {
+    const entries = [...optionDescriptionEntries];
+    entries.splice(index, 1);
+    setOptionDescriptionEntries(entries);
+    syncOptionDescriptionEntries(entries);
   }
 
   function removeColorEntry(index) {
@@ -1122,6 +1172,65 @@ export default function SpecificationTab({
 
           )}
 
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h3 className="text-lg font-semibold text-slate-900">Option Descriptions</h3>
+        </div>
+
+        <div className="space-y-3">
+          {optionDescriptionEntries.length > 0 ? (
+            optionDescriptionEntries.map((entry, index) => (
+              <div key={entry.id} className={readOnly ? "flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3" : "flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3"}>
+                {readOnly ? (
+                  <>
+                    <span className="text-sm font-semibold text-slate-900">{entry.key || "Unnamed key"}</span>
+                    <span className="text-sm text-slate-700 whitespace-pre-wrap">{entry.value || "No description"}</span>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-2 relative">
+                    <div className="flex gap-2 pr-12">
+                      <input
+                        value={entry.key}
+                        onChange={(event) => updateOptionDescriptionEntry(index, "key", event.target.value)}
+                        placeholder="Key (e.g., Visible Marks)"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-medium"
+                      />
+                    </div>
+                    <textarea
+                      value={entry.value}
+                      onChange={(event) => updateOptionDescriptionEntry(index, "value", event.target.value)}
+                      placeholder="Description"
+                      rows={3}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeOptionDescriptionEntry(index)}
+                      className="absolute top-0 right-0 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-rose-200 text-sm font-semibold text-rose-700 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-slate-500">No option descriptions set.</p>
+          )}
+          {!readOnly && (
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={addOptionDescriptionEntry}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+              >
+                <Plus className="h-4 w-4" /> Add Description
+              </button>
+            </div>
+          )}
         </div>
       </div>
       </PhotoProvider>

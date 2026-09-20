@@ -140,17 +140,10 @@ export default function CombinationEditor({
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={onGenerateFromAttributes}
-            className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
-          >
-            Generate from Attributes
-          </button>
-          <button
-            type="button"
             onClick={addCombination}
             className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50"
           >
-            + Add Manually
+            Add Combination
           </button>
         </div>
       </div>

@@ -73,22 +73,31 @@ export default function ProductFields({ fields, setField }) {
   const autoSpecId = autoSpecIdByCategory[fields.category_name] || "";
   const isSpecIdReadOnly = Boolean(autoSpecId);
   const isPreOrderCategory = fields.category_name === "Pre Orders";
-  const isCdCategory =
-    fields.category_name === "PS5 CDs" || fields.category_name === "PS4 CDs";
-  const showsTypeAndBrand =
-    fields.category_name === "Consoles" || fields.category_name === "Cameras";
   const typeOptions = typeMap[fields.category_name] || [];
   const brandOptions = brandMap[fields.category_name] || [];
-  const youtubePreviewUrl = getYouTubeEmbedUrl(fields.yt_iframe);
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 md:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-slate-900">Listing Details & Base Information</h3>
+        <p className="text-sm text-slate-500">Manage general product title, categorization, default pricing, and catalog presentation.</p>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {/* Row 1 */}
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Product Title</label>
+          <input
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            value={fields.product_title}
+            onChange={(e) => setField("product_title", e.target.value)}
+          />
+        </div>
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Category</label>
           <div className="relative">
             <select
-              className="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               value={fields.category_name}
               onChange={(e) => {
                 const sel = categories.find((x) => x.name === e.target.value) || {
@@ -104,15 +113,9 @@ export default function ProductFields({ fields, setField }) {
                 setField("spec_id", autoSpecIdByCategory[sel.name] || "");
               }}
             >
-              <option className="bg-white text-slate-900" value="">
-                Select category
-              </option>
+              <option value="">Select category</option>
               {categories.map((c) => (
-                <option
-                  className="bg-white text-slate-900"
-                  key={c.name}
-                  value={c.name}
-                >
+                <option key={c.name} value={c.name}>
                   {c.name}
                 </option>
               ))}
@@ -120,130 +123,95 @@ export default function ProductFields({ fields, setField }) {
             <SelectChevron />
           </div>
         </div>
-
-        {showsTypeAndBrand ? (
-          <div>
-            <label className="block text-sm font-medium mb-1">Type</label>
-            <div className="relative">
-              <select
-                className="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                value={addingCustomType ? "__other__" : fields.type}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const isOther = value === "__other__";
-                  setAddingCustomType(isOther);
-                  setField("type", isOther ? "" : value);
-                }}
-              >
-                <option className="bg-white text-slate-900" value="">
-                  Select type
-                </option>
-                {typeOptions.map((t) => (
-                  <option className="bg-white text-slate-900" key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-                <option className="bg-white text-slate-900" value="__other__">
-                  Other
-                </option>
-              </select>
-              <SelectChevron />
-            </div>
-            {addingCustomType ? (
-              <input
-                autoFocus
-                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                value={fields.type}
-                placeholder="Enter another type"
-                onChange={(e) => setField("type", e.target.value)}
-              />
-            ) : null}
-          </div>
-        ) : null}
-
-        {showsTypeAndBrand ? (
-          <div>
-            <label className="block text-sm font-medium mb-1">Brand</label>
-            <div className="relative">
-              <select
-                className="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                value={addingCustomBrand ? "__other__" : fields.brand}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const isOther = value === "__other__";
-                  setAddingCustomBrand(isOther);
-                  setField("brand", isOther ? "" : value);
-                }}
-              >
-                <option className="bg-white text-slate-900" value="">
-                  Select brand
-                </option>
-                {brandOptions.map((b) => (
-                  <option className="bg-white text-slate-900" key={b} value={b}>
-                    {b}
-                  </option>
-                ))}
-                <option className="bg-white text-slate-900" value="__other__">
-                  Other
-                </option>
-              </select>
-              <SelectChevron />
-            </div>
-            {addingCustomBrand ? (
-              <input
-                autoFocus
-                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                value={fields.brand}
-                placeholder="Enter another brand"
-                onChange={(e) => setField("brand", e.target.value)}
-              />
-            ) : null}
-          </div>
-        ) : null}
-
-        <input type="hidden" value={fields.code} />
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Condition</label>
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Condition</label>
           <select
-            className="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             value={fields.condition}
             required
             onChange={(e) => setField("condition", e.target.value)}
           >
-            <option className="bg-white text-slate-900" value="">
-              Select condition
-            </option>
-            <option className="bg-white text-slate-900" value="Pre Owned">
-              Pre Owned
-            </option>
-            <option className="bg-white text-slate-900" value="Open Box">
-              Open Box
-            </option>
-            <option className="bg-white text-slate-900" value="Pre Order">
-              Pre Order
-            </option>
-            <option className="bg-white text-slate-900" value="New">
-              New
-            </option>
+            <option value="">Select condition</option>
+            <option value="Pre Owned">Pre Owned</option>
+            <option value="Open Box">Open Box</option>
+            <option value="Pre Order">Pre Order</option>
+            <option value="New">New</option>
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Product Title</label>
-          <input
-            className="border rounded px-3 py-2 w-full"
-            value={fields.product_title}
-            onChange={(e) => setField("product_title", e.target.value)}
-          />
+        {/* Row 2 */}
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Brand</label>
+          <div className="relative">
+            <select
+              className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              value={addingCustomBrand ? "__other__" : fields.brand}
+              onChange={(e) => {
+                const value = e.target.value;
+                const isOther = value === "__other__";
+                setAddingCustomBrand(isOther);
+                setField("brand", isOther ? "" : value);
+              }}
+            >
+              <option value="">Select brand</option>
+              {brandOptions.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+              <option value="__other__">Other</option>
+            </select>
+            <SelectChevron />
+          </div>
+          {addingCustomBrand && (
+            <input
+              autoFocus
+              className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              value={fields.brand}
+              placeholder="Enter another brand"
+              onChange={(e) => setField("brand", e.target.value)}
+            />
+          )}
         </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Spec ID</label>
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Type</label>
+          <div className="relative">
+            <select
+              className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              value={addingCustomType ? "__other__" : fields.type}
+              onChange={(e) => {
+                const value = e.target.value;
+                const isOther = value === "__other__";
+                setAddingCustomType(isOther);
+                setField("type", isOther ? "" : value);
+              }}
+            >
+              <option value="">Select type</option>
+              {typeOptions.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+              <option value="__other__">Other</option>
+            </select>
+            <SelectChevron />
+          </div>
+          {addingCustomType && (
+            <input
+              autoFocus
+              className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              value={fields.type}
+              placeholder="Enter another type"
+              onChange={(e) => setField("type", e.target.value)}
+            />
+          )}
+        </div>
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Spec ID</label>
           <input
-            placeholder="samsung-galaxy-s24-ultra"
-            className={`border rounded px-3 py-2 w-full ${
-              isSpecIdReadOnly ? "bg-slate-50 text-slate-500" : ""
+            placeholder="e.g. macbook-pro-13"
+            className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+              isSpecIdReadOnly ? "bg-slate-50 text-slate-500" : "bg-white text-slate-800"
             }`}
             value={fields.spec_id}
             onChange={(e) => setField("spec_id", e.target.value)}
@@ -251,88 +219,55 @@ export default function ProductFields({ fields, setField }) {
           />
         </div>
 
-        {isPreOrderCategory ? (
-          <div>
-            <label className="block text-sm font-medium mb-1">Release Date</label>
+        {/* Optional Row 3 based on category */}
+        {isPreOrderCategory && (
+          <div className="md:col-span-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">Release Date</label>
             <input
               placeholder="25th September 2026"
-              className="border rounded px-3 py-2 w-full"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               value={fields.release_date}
               onChange={(e) => setField("release_date", e.target.value)}
-            />
-          </div>
-        ) : null}
-       
-        <div>
-          <label className="block text-sm font-medium mb-1">MRP</label>
-          <input
-            type="number"
-            className="border rounded px-3 py-2"
-            value={fields.mrp}
-            onChange={(e) => setField("mrp", e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Price</label>
-          <input
-            type="number"
-            className="border rounded px-3 py-2"
-            value={fields.price}
-            onChange={(e) => setField("price", e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Max Sell Price
-          </label>
-          <input
-            type="number"
-            className="border rounded px-3 py-2"
-            value={fields.sell_max_price}
-            onChange={(e) => setField("sell_max_price", e.target.value)}
-          />
-        </div>
-        {!isCdCategory ? (
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Minimum Price
-            </label>
-            <input
-              type="number"
-              className="border rounded px-3 py-2"
-              value={fields.minimum_price}
-              onChange={(e) => setField("minimum_price", e.target.value)}
-            />
-          </div>
-        ) : null}
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <label className="block text-sm font-medium mb-1">
-          YouTube Iframe
-        </label>
-        <textarea
-          rows={3}
-          className="w-full border rounded px-3 py-2"
-          value={fields.yt_iframe}
-          onChange={(e) => setField("yt_iframe", e.target.value)}
-        />
-        {youtubePreviewUrl && (
-          <div className="mt-4 w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-            <iframe
-              src={youtubePreviewUrl}
-              title="Global product video preview"
-              className="aspect-video w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
             />
           </div>
         )}
       </div>
 
-    </>
+      <div className="mt-8 mb-4">
+        <h4 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">Default Pricing Parameters</h4>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Maximum Retail Price (MRP)</label>
+          <input
+            type="number"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            value={fields.mrp}
+            onChange={(e) => setField("mrp", e.target.value)}
+          />
+        </div>
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Buy Price</label>
+          <input
+            type="number"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            value={fields.price}
+            onChange={(e) => setField("price", e.target.value)}
+          />
+        </div>
+        <div className="md:col-span-1">
+          <label className="mb-1 block text-sm font-medium text-slate-700">Max Sell Price</label>
+          <input
+            type="number"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            value={fields.sell_max_price}
+            onChange={(e) => setField("sell_max_price", e.target.value)}
+          />
+        </div>
+      </div>
+      
+      <input type="hidden" value={fields.code} />
+    </div>
   );
 }

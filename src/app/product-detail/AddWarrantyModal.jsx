@@ -8,11 +8,13 @@ const WARRANTY_OPTIONS = [
   { id: "1-year", label: "1 Year Total Warranty", months: 12 },
   { id: "7-months", label: "7 Months Total Warranty", months: 7 },
   { id: "6-months", label: "6 Months Total Warranty", months: 6 },
+  { id: "other", label: "Other" },
 ];
 
 export default function AddWarrantyModal({ specId, onClose, onSave }) {
   const [selectedWarranty, setSelectedWarranty] = useState(null);
   const [price, setPrice] = useState("");
+  const [customWarranty, setCustomWarranty] = useState("");
 
   useEffect(() => {
     function closeOnEscape(event) {
@@ -27,11 +29,21 @@ export default function AddWarrantyModal({ specId, onClose, onSave }) {
     event.preventDefault();
     if (!selectedWarranty) return;
 
+    const finalTitle =
+      selectedWarranty.id === "other"
+        ? customWarranty.trim()
+        : selectedWarranty.label;
+
+    if (!finalTitle) {
+      toast.error("Please enter a warranty name");
+      return;
+    }
+
     const payload = {
       spec_id: specId,
       warranties: [
         {
-          title: selectedWarranty.label,
+          title: finalTitle,
           price: Number(price),
         },
       ],
@@ -93,36 +105,49 @@ export default function AddWarrantyModal({ specId, onClose, onSave }) {
               const isSelected = selectedWarranty?.id === option.id;
 
               return (
-                <button
-                  key={option.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={isSelected}
-                  onClick={() => setSelectedWarranty(option)}
-                  className={`flex w-full cursor-pointer items-center gap-4 rounded-2xl border-2 px-5 py-5 text-left transition ${
-                    isSelected
-                      ? "border-blue-600 bg-blue-50 text-blue-900 shadow-sm"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
-                  }`}
-                >
-                  <span
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+                <div key={option.id} className="space-y-3">
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => setSelectedWarranty(option)}
+                    className={`flex w-full cursor-pointer items-center gap-4 rounded-2xl border-2 px-5 py-5 text-left transition ${
                       isSelected
-                        ? "border-blue-600 bg-blue-600"
-                        : "border-slate-300"
+                        ? "border-blue-600 bg-blue-50 text-blue-900 shadow-sm"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
                     }`}
                   >
-                    {isSelected && (
-                      <span className="h-2.5 w-2.5 rounded-full bg-white" />
-                    )}
-                  </span>
+                    <span
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-600"
+                          : "border-slate-300"
+                      }`}
+                    >
+                      {isSelected && (
+                        <span className="h-2.5 w-2.5 rounded-full bg-white" />
+                      )}
+                    </span>
 
-                  <span className="flex-1 text-base font-semibold sm:text-lg">
-                    {option.label}
-                  </span>
+                    <span className="flex-1 text-base font-semibold sm:text-lg">
+                      {option.label}
+                    </span>
 
-                  {isSelected && <Check className="h-6 w-6 text-blue-600" />}
-                </button>
+                    {isSelected && <Check className="h-6 w-6 text-blue-600" />}
+                  </button>
+
+                  {option.id === "other" && isSelected && (
+                    <div className="ml-10">
+                      <input
+                        type="text"
+                        value={customWarranty}
+                        onChange={(e) => setCustomWarranty(e.target.value)}
+                        placeholder="e.g. 2 Years Extended Warranty"
+                        className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

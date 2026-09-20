@@ -170,3 +170,26 @@ The Update Inventory feature is currently in an inventory-draft + payload-prepar
 - Add Variant stores separate global and item YouTube iframe values in its outer payload and nested item payload respectively. Both use the shared safe preview helper and accept only HTTPS YouTube embed iframe sources.
 - Special Edition now provides separate Global YouTube and Item YouTube iframe fields. The global value is stored on `product.yt_iframe`; the item value is stored on `product.vendors.VENDOR_001.combination_offered.combination_1.item_1.yt_iframe`.
 - New Add Variant and Special Edition payloads use `rating: 4.5` and `rating_count: 115` for global products and nested items.
+
+## 2026-09-19
+
+### Specification & Inventory UI Adjustments
+- Moved all internal additions (`+ Add Field`, `+ Add item`, `+ Add option`, `+ Add Dropdown`, etc.) to right-aligned placements at the bottom of their respective arrays/lists to ensure consistency and cleaner UI layouts.
+- Fixed a bug causing dynamic `Condition` and `Type` attributes to erroneously display in the inventory table headers by explicitly filtering them out of the generated `combinationKeys`.
+- Added a `Fast Pickup Deduction` field located next to `Minimum Price` under a unified "Pricing Rules" section. It dynamically renders a `+ Add` initialization button when the value is not present, rather than auto-rendering empty inputs.
+
+### Payload Cleanup & Type Validation
+- Introduced a `cleanInventoryPayload()` step in `UpdateInventory.jsx` that runs immediately before hitting the backend save endpoints.
+- Strictly parses and enforces `Number` typings for critical fields at both the root product and deep variant levels (`mrp`, `price`, `sell_price`, `stocks`, `rating`, `rating_count`), preventing numeric strings (e.g., `"2"`) from being stored in the database. 
+- Gracefully handles empty string `""` evaluations by defaulting them to `null` to avoid type errors in backend ingestion.
+- Safely strips localized `created_at` and `updated_at` payload keys to avoid accidental overwrite on update.
+- Parses user-facing weight formatting (removing appended `"kg"` strings) back into raw decimals for backend storage.
+
+### Product Inventory Filter Features
+- Replaced local client-side category filtering with a backend-driven API approach. When changing categories in `ProductInventory.jsx`, the UI passes `{ code: categoryCode }` to `fetchInventory` to load focused category results.
+- Built a smart caching mechanism for the "All Category" default state; switching back instantly pulls from memory to completely avoid a redundant API call.
+- Replaced the text-based "Search" and "Clear" buttons with clean, square icon buttons using Lucide's `Search` and `RefreshCw` icons.
+
+### Additional Fixes & Features
+- Fixed an issue preventing users from jumping to the Specification tab.
+- Added a `Weight` field directly to the Inventory table (positioned before MRP) for seamless viewing and inline editing.
