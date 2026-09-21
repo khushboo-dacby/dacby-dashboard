@@ -37,6 +37,7 @@ export default function VendorDetailsFields({
           type="button"
           className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
           onClick={() => removeVendor(vendorIndex)}
+          disabled={true}
         >
           Remove
         </button>

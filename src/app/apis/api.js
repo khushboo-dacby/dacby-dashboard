@@ -18,6 +18,10 @@ const UPDATE_INVENTORY_DOC = (productId) =>
   `${BASE_URL}/updateinventorydoc/${encodeURIComponent(productId)}`;
 const UPDATE_SPEC_DOC = (specId) =>
   `${BASE_URL}/updatespecdoc/${encodeURIComponent(specId)}`;
+const PRODUCT_SKUS = (productId) =>
+  `${BASE_URL}/api/product/skus/${encodeURIComponent(productId)}`;
+const LEDGER_BY_SKU = (sku) =>
+  `${BASE_URL}/api/ledger/bySku?sku=${encodeURIComponent(sku)}`;
 
 // Loads the complete product record used by the Update Inventory screen.
 // Returns { success, productId, spec_id, inventory_json, spec_json }.
@@ -39,6 +43,50 @@ export async function getProductFullJson(productId) {
       error?.response?.data?.error ||
       error?.message ||
       "Failed to load product";
+    throw new Error(message);
+  }
+}
+
+export async function getProductSkus(productId) {
+  try {
+    const { data } = await axios.get(PRODUCT_SKUS(productId));
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to load product SKUs");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to load product SKUs");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to load product SKUs";
+    throw new Error(message);
+  }
+}
+
+export async function getLedgerBySku(sku) {
+  try {
+    const { data } = await axios.get(LEDGER_BY_SKU(sku));
+
+    if (data?.success === false) {
+      throw new Error(data.message || "Failed to load ledger details");
+    }
+    if (data?.error) {
+      throw new Error(data.error || "Failed to load ledger details");
+    }
+
+    return data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to load ledger details";
     throw new Error(message);
   }
 }

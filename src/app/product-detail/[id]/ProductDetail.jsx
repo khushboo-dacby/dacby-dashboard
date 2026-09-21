@@ -13,7 +13,7 @@ import ImagePreview from "../../../components/inventory/ImagePreview";
 import { useProductContext } from "../../../context/ProductContext";
 import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
 import { toast } from "sonner";
-import PriceAnalysisForm from "@/components/price-analysis/PriceAnalysisForm";
+
 import PriceAnalysisModal from "@/components/price-analysis/PriceAnalysisModal";
 
 const ITEM_FIELDS = new Set([

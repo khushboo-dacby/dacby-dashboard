@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Pencil, Plus, X } from "lucide-react";
+import { Pencil, Plus, X, MoreHorizontal } from "lucide-react";
 import ItemDetailsFields from "@/components/inventory/ItemDetailsFields";
 import WarningPopup from "@/components/confirmation-modal/WarningPopup";
 import MediaModal from "@/app/update-inventory/[id]/MediaModal";
+import PriceAnalysisModal from "@/components/price-analysis/PriceAnalysisModal";
+import AccessoryModal from "@/components/inventory/AccessoryModal";
 import { emptyItem } from "@/constants/inventory";
 import { normalizeAttributeKey } from "@/utils/formatters";
 import { generateSKUForItem } from "@/utils/sku";
@@ -72,6 +74,19 @@ export default function CombinationVariantsTable({
   onSaveVariant,
 }) {
   const [mediaRow, setMediaRow] = useState(null);
+  const [priceAnalysisRow, setPriceAnalysisRow] = useState(null);
+  const [accessoryRow, setAccessoryRow] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (e.target.closest('.dropdown-trigger')) return;
+      setActiveDropdown(null);
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
+
   const rows = useMemo(
     () => getCombinationRows(specification.combinations || []),
     [specification.combinations]
@@ -121,6 +136,7 @@ export default function CombinationVariantsTable({
               <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Sell Price</th>
               <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Stock</th>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Sell</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -201,6 +217,47 @@ export default function CombinationVariantsTable({
                       <div className="peer h-5 w-9 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300"></div>
                     </label>
                   </td>
+                  <td className="px-6 py-4 align-top">
+                    <div className="relative flex items-center">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveDropdown(activeDropdown === row.key ? null : row.key);
+                        }}
+                        className="dropdown-trigger rounded-full p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+                      >
+                        <MoreHorizontal className="h-5 w-5 pointer-events-none" />
+                      </button>
+                      {activeDropdown === row.key && (
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute right-full top-0 z-20 mr-2 flex w-48 flex-col rounded-lg border border-slate-200 bg-white p-1 shadow-xl"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPriceAnalysisRow(row);
+                              setActiveDropdown(null);
+                            }}
+                            className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors"
+                          >
+                            Add Price Analysis
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAccessoryRow(row);
+                              setActiveDropdown(null);
+                            }}
+                            className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors"
+                          >
+                            Accessories
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               );
             })}
@@ -216,6 +273,40 @@ export default function CombinationVariantsTable({
           onApply={(nextItem, options) => {
             onSaveVariant(vendorIndex, mediaRow, nextItem, options);
             setMediaRow(null);
+          }}
+        />
+      )}
+
+      {priceAnalysisRow && (
+        <PriceAnalysisModal
+          isOpen={true}
+          initialData={getDraft(priceAnalysisRow).price_analysis || {}}
+          onClose={() => setPriceAnalysisRow(null)}
+          onSubmit={(data) => {
+            onSaveVariant(
+              vendorIndex,
+              priceAnalysisRow,
+              { ...getDraft(priceAnalysisRow), price_analysis: data },
+              false
+            );
+            setPriceAnalysisRow(null);
+          }}
+        />
+      )}
+
+      {accessoryRow && (
+        <AccessoryModal
+          isOpen={true}
+          initialAccessories={getDraft(accessoryRow).accessories || {}}
+          onClose={() => setAccessoryRow(null)}
+          onSave={(data) => {
+            onSaveVariant(
+              vendorIndex,
+              accessoryRow,
+              { ...getDraft(accessoryRow), accessories: data },
+              false
+            );
+            setAccessoryRow(null);
           }}
         />
       )}

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, LoaderCircle, Pencil, RotateCcw, Save } from "lucide-react";
+import { ArrowLeft, LoaderCircle, Pencil, RotateCcw, Save, Plus, MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -14,6 +14,8 @@ import {
 import { categories } from "../../../constants/inventory";
 import MediaModal from "./MediaModal";
 import SpecificationTab from "./SpecificationTab";
+import PriceAnalysisModal from "@/components/price-analysis/PriceAnalysisModal";
+import AccessoryModal from "@/components/inventory/AccessoryModal";
 import WarningPopup from "../../../components/confirmation-modal/WarningPopup";
 import { BASE_CONDITIONS } from "../../../constants/inventory";
 import { SelectWithOther } from "@/components/fields/SelectWithOther";
@@ -248,6 +250,8 @@ export default function UpdateInventory({ id }) {
   
   // Edit mode states
   const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [priceAnalysisVariant, setPriceAnalysisVariant] = useState(null);
+  const [accessoryVariant, setAccessoryVariant] = useState(null);
   const [isEditingVideo, setIsEditingVideo] = useState(false);
   const [isEditingInventory, setIsEditingInventory] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -260,6 +264,16 @@ export default function UpdateInventory({ id }) {
   const [pendingBack, setPendingBack] = useState(false);
   const [addingCustomBrand, setAddingCustomBrand] = useState(false);
   const [addingCustomType, setAddingCustomType] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (e.target.closest('.dropdown-trigger')) return;
+      setActiveDropdown(null);
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
 
   // Apply images to every variant that shares the same color attribute.
   const applyImagesToColor = useCallback((images, matchingColor) => {
@@ -935,6 +949,7 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
                     <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Sell Price</th>
                     <th className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Stock</th>
                     <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Sell</th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-700">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -1053,6 +1068,51 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
                               {isSelling ? 'Selling' : 'Not Selling'}
                             </span>
                           )}
+                        </td>
+                        
+                        <td className="px-6 py-4 align-top">
+                          <div className="relative flex items-center">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const key = `${variant.vendorId}-${variant.combinationId}-${variant.itemId}`;
+                                setActiveDropdown(activeDropdown === key ? null : key);
+                              }}
+                              className="dropdown-trigger rounded-full p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+                            >
+                              <MoreHorizontal className="h-5 w-5 pointer-events-none" />
+                            </button>
+                            {activeDropdown === `${variant.vendorId}-${variant.combinationId}-${variant.itemId}` && (
+                              <div
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-full top-0 z-20 mr-2 flex w-48 flex-col rounded-lg border border-slate-200 bg-white p-1 shadow-xl"
+                              >
+                                <button
+                                  type="button"
+                                  disabled={!isEditingInventory}
+                                  onClick={() => {
+                                    setPriceAnalysisVariant(variant);
+                                    setActiveDropdown(null);
+                                  }}
+                                  className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-700"
+                                >
+                                  Add Price Analysis
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={!isEditingInventory}
+                                  onClick={() => {
+                                    setAccessoryVariant(variant);
+                                    setActiveDropdown(null);
+                                  }}
+                                  className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-700"
+                                >
+                                  Accessories
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1207,6 +1267,40 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
             }
 
             setEditingVariant(null);
+          }}
+        />
+      )}
+
+      {priceAnalysisVariant && (
+        <PriceAnalysisModal
+          isOpen={true}
+          initialData={priceAnalysisVariant.item.price_analysis || {}}
+          onClose={() => setPriceAnalysisVariant(null)}
+          onSubmit={(data) => {
+            applyItem(
+              priceAnalysisVariant.vendorId,
+              priceAnalysisVariant.combinationId,
+              priceAnalysisVariant.itemId,
+              { price_analysis: data }
+            );
+            setPriceAnalysisVariant(null);
+          }}
+        />
+      )}
+
+      {accessoryVariant && (
+        <AccessoryModal
+          isOpen={true}
+          initialAccessories={accessoryVariant.item.accessories || {}}
+          onClose={() => setAccessoryVariant(null)}
+          onSave={(data) => {
+            applyItem(
+              accessoryVariant.vendorId,
+              accessoryVariant.combinationId,
+              accessoryVariant.itemId,
+              { accessories: data }
+            );
+            setAccessoryVariant(null);
           }}
         />
       )}

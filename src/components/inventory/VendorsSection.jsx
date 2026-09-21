@@ -61,13 +61,13 @@ export default function VendorsSection({
                     </div>
                     <div>
                       <h5 className="font-semibold text-amber-950">Create combinations before adding variants</h5>
-                      <p className="mt-1 text-sm text-amber-800">
+                      {/* <p className="mt-1 text-sm text-amber-800">
                         Variant forms open from the generated combinations table.
-                      </p>
+                      </p> */}
                       <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-amber-900">
-                        <li>Go to Specification and add attribute names with their values.</li>
-                        <li>Click Generate from Attributes in the Combinations section.</li>
-                        <li>Return here and click Add Variant on each combination row.</li>
+                        <li>Go to Variant & Combination Builder and add attribute names with their values.</li>
+                        <li>Click Generate Combinations.</li>
+                        <li>Return here and Add Values on each combination row.</li>
                       </ol>
                     </div>
                   </div>

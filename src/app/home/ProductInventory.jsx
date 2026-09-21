@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LoaderCircle, RefreshCw, Search, Trash2 } from "lucide-react";
+import { LoaderCircle, RefreshCw, Search, Trash2, ClipboardList } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -80,6 +80,11 @@ function ProductRow({ product, onDelete }) {
             sizes="96px"
             className={`object-contain p-2 ${!thumbnail ? "opacity-40" : ""}`}
           />
+          {(product.condition) && (
+            <span className="absolute right-0 top-0 rounded-bl-xl bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm uppercase tracking-wider">
+              {product.condition}
+            </span>
+          )}
         </div>
       </td>
       <td className="min-w-72 px-5 py-5">
@@ -124,18 +129,31 @@ function ProductRow({ product, onDelete }) {
         </span>
       </td>
       <td className="min-w-32 px-5 py-5">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowDeletePop(true);
-          }}
-          aria-label={`Delete ${product.product_title}`}
-          title="Delete"
-          className="cursor-pointer p-2 text-rose-500 transition hover:text-rose-700"
-        >
-          <Trash2 className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/ledger/${product.id}`);
+            }}
+            className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-3 py-2 text-[13px] font-medium text-white transition-all duration-200 ease-out hover:scale-[1.03] hover:bg-[#2F4BB5] hover:shadow-sm active:scale-[0.98]"
+          >
+            <ClipboardList className="h-4 w-4" />
+            Ledger Details
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDeletePop(true);
+            }}
+            aria-label={`Delete ${product.product_title}`}
+            title="Delete"
+            className="cursor-pointer p-2 text-rose-500 transition hover:text-rose-700"
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
+        </div>
       </td>
     </tr>
     {showDeletePop && (
@@ -328,6 +346,7 @@ export default function ProductInventory() {
         in_stock: !(result.product?.outOfStock || result.outOfStock),
         outofstock: result.product?.outOfStock || result.outOfStock,
         variants: result.product?.variants ?? 0,
+        condition: result.product?.condition,
       }))
     : filteredProducts;
 

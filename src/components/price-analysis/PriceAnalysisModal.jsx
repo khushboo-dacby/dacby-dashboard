@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 
 const emptyData = {
-  amazon: { link: "", buy_price: "", in_stock: true },
+  cashify: { link: "", link_sell: "", buy_price: "", sell_price: "" },
+  amazon: { link: "", buy_price: "", sell_price: "", in_stock: true },
   gameloot: { link: "", link_sell: "", buy_price: "", sell_price: "", in_stock: true },
   gamenation: { link: "", buy_price: "", sell_price: "", in_stock: true },
   recommended_price: {
@@ -86,6 +87,7 @@ export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSub
 
   function mergeData(initial) {
     return {
+      cashify: { ...emptyData.cashify, ...(initial?.cashify || {}) },
       amazon: { ...emptyData.amazon, ...(initial?.amazon || {}) },
       gameloot: { ...emptyData.gameloot, ...(initial?.gameloot || {}) },
       gamenation: { ...emptyData.gamenation, ...(initial?.gamenation || {}) },
@@ -108,37 +110,58 @@ export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSub
       },
     }));
 
-  const toNum = (v) => (v === "" ? 0 : Number(v));
+  const toNum = (v) => (v === "" || v === null || v === undefined ? 0 : Number(v));
+  const toStr = (v) => (!v || String(v).trim() === "" ? "NA" : String(v).trim());
+  
+  const getTimestamp = (existing) => {
+    if (existing && existing._seconds !== undefined) return existing;
+    return {
+      _seconds: Math.floor(Date.now() / 1000),
+      _nanoseconds: 0
+    };
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = {
+      cashify: {
+        link: toStr(data.cashify.link),
+        link_sell: toStr(data.cashify.link_sell),
+        buy_price: toNum(data.cashify.buy_price),
+        sell_price: toNum(data.cashify.sell_price),
+      },
       amazon: {
-        link: data.amazon.link,
+        link: toStr(data.amazon.link),
         buy_price: toNum(data.amazon.buy_price),
-        in_stock: data.amazon.in_stock,
+        sell_price: toNum(data.amazon.sell_price),
+        in_stock: data.amazon.in_stock ?? true,
+        updated_at: getTimestamp(data.amazon.updated_at),
       },
       gameloot: {
-        link: data.gameloot.link,
-        link_sell: data.gameloot.link_sell,
+        link: toStr(data.gameloot.link),
+        link_sell: toStr(data.gameloot.link_sell),
         buy_price: toNum(data.gameloot.buy_price),
         sell_price: toNum(data.gameloot.sell_price),
-        in_stock: data.gameloot.in_stock,
+        in_stock: data.gameloot.in_stock ?? true,
+        updated_at: getTimestamp(data.gameloot.updated_at),
       },
       gamenation: {
-        link: data.gamenation.link,
+        link: toStr(data.gamenation.link),
         buy_price: toNum(data.gamenation.buy_price),
         sell_price: toNum(data.gamenation.sell_price),
-        in_stock: data.gamenation.in_stock,
+        in_stock: data.gamenation.in_stock ?? true,
+        updated_at: getTimestamp(data.gamenation.updated_at),
       },
       recommended_price: {
         buy: {
           price: toNum(data.recommended_price.buy.price),
-          need_manual_price_check: data.recommended_price.buy.need_manual_price_check,
+          need_manual_price_check: Boolean(data.recommended_price.buy.need_manual_price_check),
+          updated_at: getTimestamp(data.recommended_price.buy.updated_at),
         },
         sell: {
           price: toNum(data.recommended_price.sell.price),
-          need_manual_price_check: data.recommended_price.sell.need_manual_price_check,
+          need_manual_price_check: Boolean(data.recommended_price.sell.need_manual_price_check),
+          updated_at: getTimestamp(data.recommended_price.sell.updated_at),
         },
       },
     };
@@ -164,7 +187,43 @@ export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSub
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-5">
+        <div 
+          className="space-y-4 p-5"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit(e);
+            }
+          }}
+        >
+          <SectionCard title="Cashify">
+            <TextField
+              label="Buy link"
+              value={data.cashify.link}
+              onChange={(v) => set("cashify", "link", v)}
+              placeholder="https://..."
+            />
+            <TextField
+              label="Sell link"
+              value={data.cashify.link_sell}
+              onChange={(v) => set("cashify", "link_sell", v)}
+              placeholder="https://..."
+            />
+            <TextField
+              label="Buy price"
+              type="number"
+              value={data.cashify.buy_price}
+              onChange={(v) => set("cashify", "buy_price", v)}
+              placeholder="0"
+            />
+            <TextField
+              label="Sell price"
+              type="number"
+              value={data.cashify.sell_price}
+              onChange={(v) => set("cashify", "sell_price", v)}
+              placeholder="0"
+            />
+          </SectionCard>
+
           <SectionCard title="Amazon">
             <div className="sm:col-span-2">
               <TextField
@@ -179,6 +238,13 @@ export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSub
               type="number"
               value={data.amazon.buy_price}
               onChange={(v) => set("amazon", "buy_price", v)}
+              placeholder="0"
+            />
+            <TextField
+              label="Sell price"
+              type="number"
+              value={data.amazon.sell_price}
+              onChange={(v) => set("amazon", "sell_price", v)}
               placeholder="0"
             />
             <InStockToggle
@@ -297,13 +363,14 @@ export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSub
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               className="flex-1 h-10 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition"
             >
               Save price analysis
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
