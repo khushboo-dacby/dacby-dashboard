@@ -42,7 +42,7 @@ export default function ItemDetailsFields({
             value={inputValue(item.weight)}
             type="number"
             onChange={(e) =>
-              updateItem(vendorIndex, itemIndex, "weight", Number(e.target.value || 0))
+              updateItem(vendorIndex, itemIndex, "weight", e.target.value)
             }
           />
         </div>
@@ -53,7 +53,7 @@ export default function ItemDetailsFields({
             value={inputValue(item.stocks)}
             type="number"
             onChange={(e) =>
-              updateItem(vendorIndex, itemIndex, "stocks", Number(e.target.value || 0))
+              updateItem(vendorIndex, itemIndex, "stocks", e.target.value)
             }
           />
         </div>
@@ -65,7 +65,7 @@ export default function ItemDetailsFields({
             className="w-full min-w-0 border rounded px-3 py-2"
             value={inputValue(item.mrp)}
             onChange={(e) =>
-              updateItem(vendorIndex, itemIndex, "mrp", Number(e.target.value || 0))
+              updateItem(vendorIndex, itemIndex, "mrp", e.target.value)
             }
           />
         </div>
@@ -76,7 +76,7 @@ export default function ItemDetailsFields({
             className="w-full min-w-0 border rounded px-3 py-2"
             value={inputValue(item.price)}
             onChange={(e) =>
-              updateItem(vendorIndex, itemIndex, "price", Number(e.target.value || 0))
+              updateItem(vendorIndex, itemIndex, "price", e.target.value)
             }
           />
         </div>
@@ -87,7 +87,7 @@ export default function ItemDetailsFields({
             className="w-full min-w-0 border rounded px-3 py-2"
             value={inputValue(item.sell_price)}
             onChange={(e) =>
-              updateItem(vendorIndex, itemIndex, "sell_price", Number(e.target.value || 0))
+              updateItem(vendorIndex, itemIndex, "sell_price", e.target.value)
             }
           />
         </div>

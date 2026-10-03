@@ -65,6 +65,7 @@ function findSavedItem(items, row) {
 }
 
 export default function CombinationVariantsTable({
+  productData,
   vendorIndex,
   items,
   specification,
@@ -77,7 +78,7 @@ export default function CombinationVariantsTable({
   const [priceAnalysisRow, setPriceAnalysisRow] = useState(null);
   const [accessoryRow, setAccessoryRow] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
-
+ console.log(productData,"productData");
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (e.target.closest('.dropdown-trigger')) return;
@@ -195,7 +196,7 @@ export default function CombinationVariantsTable({
                   </td>)}
                   <td className="px-4 py-4 align-top">
                     <div className="flex w-24 items-center gap-1 rounded-lg border border-slate-300 px-2 py-1.5 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-white">
-                      <input type="text" value={String(item.weight ?? "").replace("kg", "").trim()} onChange={(e) => handleUpdate({ weight: e.target.value + " kg" })} className="w-full text-sm outline-none bg-transparent" />
+                      <input type="text" value={String(item.weight ?? "").replace("kg", "").trim()} onChange={(e) => handleUpdate({ weight: e.target.value })} className="w-full text-sm outline-none bg-transparent" />
                       <span className="text-[10px] font-medium text-slate-400">kg</span>
                     </div>
                   </td>
@@ -281,6 +282,13 @@ export default function CombinationVariantsTable({
         <PriceAnalysisModal
           isOpen={true}
           initialData={getDraft(priceAnalysisRow).price_analysis || {}}
+          productInfo={{
+            name: productData?.product_title || "",
+            condition: productData.condition || "",
+            sku: getDraft(priceAnalysisRow).sku || "",
+            buy_price: getDraft(priceAnalysisRow).price || "",
+            sell_price: getDraft(priceAnalysisRow).sell_price || "",
+          }}
           onClose={() => setPriceAnalysisRow(null)}
           onSubmit={(data) => {
             onSaveVariant(

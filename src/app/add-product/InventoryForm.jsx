@@ -26,6 +26,7 @@ import {
   toCDN,
 } from "@/utils/formatters";
 import useDescriptionState from "@/hooks/useDescriptionState";
+import { serializeDescriptionState } from "@/components/inventory/DescriptionEditor";
 import useOptionDescriptionsState from "@/hooks/useOptionDescriptionsState";
 import useQuestionsState from "@/hooks/useQuestionsState";
 import useWhatsInTheBoxState from "@/hooks/useWhatsInTheBoxState";
@@ -203,10 +204,6 @@ export default function InventoryForm() {
     setDescription,
     resetDescription,
     updateSummary,
-    addDescriptionSection,
-    removeDescriptionSection,
-    renameDescriptionSection,
-    finalizeDescriptionSection,
     addDescriptionField,
     updateDescriptionFieldKey,
     finalizeDescriptionFieldKey,
@@ -1075,30 +1072,7 @@ export default function InventoryForm() {
       (vendor.items || []).some((item) => !!item.sell),
     );
 
-    const makeObjFromArr = (arr) =>
-      (arr || []).reduce((acc, f) => {
-        const key = formatDescriptionKey(f?.key);
-        if (key) {
-          if (f.valueType === "multiple") {
-            acc[key] = String(f.value || "")
-              .split(/\r?\n/)
-              .map((value) => parseNumberIfPossible(value))
-              .filter((value) => value !== "");
-          } else {
-            acc[key] = parseNumberIfPossible(f.value);
-          }
-        }
-        return acc;
-      }, {});
-
-    const descriptionNormalized = {
-      summary: description.summary || undefined,
-    };
-    Object.keys(description).forEach((k) => {
-      if (k === "summary") return;
-      descriptionNormalized[formatDescriptionKey(k)] = makeObjFromArr(description[k]);
-    });
-
+    const descriptionNormalized = serializeDescriptionState(description);
     const images = fields.imagesText
       ? fields.imagesText
         .split(/\r?\n/)
@@ -1132,7 +1106,7 @@ export default function InventoryForm() {
     ).reduce((acc, attr) => {
       const key = formatAttributeDisplayName(attr.key);
       const icon = String(attr.icon || "").trim();
-      if (key && icon) acc[key] = icon;
+      if (key && icon) acc[key] = toCDN(icon);
       return acc;
     }, {});
     const isPreOrder = fields.category_name === "Pre Orders";
@@ -1271,7 +1245,7 @@ export default function InventoryForm() {
       const key = String(icon.label || "").trim();
       const val = String(icon.value || "").trim();
       if (key && val) {
-        finalConfigurationIcons[key] = val;
+        finalConfigurationIcons[key] = toCDN(val);
       }
     });
 
@@ -1296,7 +1270,7 @@ export default function InventoryForm() {
           break;
 
         default:
-          finalConfigurationIcons = configurationIcons;
+          finalConfigurationIcons = {};
       }
     }
 
@@ -1448,8 +1422,8 @@ export default function InventoryForm() {
       // // If no image is present use dummy image
       // if (!payloadWithAllKeys.images || payloadWithAllKeys.images.length === 0) {
       //   payloadWithAllKeys.images = ["/dacby-assets/download.svg"];
-      // }
-      
+      // }  
+      console.log('payloadWithAllKeys ',payloadWithAllKeys);
       await addProductToInventory(payloadWithAllKeys);
       toast.success("Product added successfully");
       router.push("/");
@@ -1576,6 +1550,7 @@ export default function InventoryForm() {
                   addAttributeDefinitionValue={addAttributeDefinitionValue}
                 />
                 <VendorsSection
+                 productData={fields}
                   vendors={vendors}
                   specification={specification}
                   addVendor={addVendor}
@@ -1622,10 +1597,6 @@ export default function InventoryForm() {
                   value={description}
                   onChange={setDescription}
                   updateSummary={updateSummary}
-                  addDescriptionSection={addDescriptionSection}
-                  removeDescriptionSection={removeDescriptionSection}
-                  renameDescriptionSection={renameDescriptionSection}
-                  finalizeDescriptionSection={finalizeDescriptionSection}
                   addDescriptionField={addDescriptionField}
                   updateDescriptionFieldKey={updateDescriptionFieldKey}
                   finalizeDescriptionFieldKey={finalizeDescriptionFieldKey}

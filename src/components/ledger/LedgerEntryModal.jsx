@@ -25,18 +25,30 @@ export default function LedgerEntryModal({ entry, onClose }) {
     }).format(val);
   };
 
-  const formatDate = (dateObj) => {
-    if (!dateObj || !dateObj._seconds) return "—";
-    const date = new Date(dateObj._seconds * 1000);
-    return date.toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  };
+    const formatDate = (dateObj) => {
+  if (
+    !dateObj ||
+    typeof dateObj._seconds !== "number"
+  ) {
+    return "—";
+  }
+
+  const date = new Date(
+    dateObj._seconds * 1000 +
+    Math.floor((dateObj._nanoseconds || 0) / 1_000_000)
+  );
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
+  });
+};
 
   const renderField = (label, value, valueClassName = "text-sm font-medium text-slate-900 break-words", Icon = null, href = null) => {
     const valStr = value !== undefined && value !== null && value !== "" ? value : "—";

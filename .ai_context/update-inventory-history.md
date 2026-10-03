@@ -193,3 +193,98 @@ The Update Inventory feature is currently in an inventory-draft + payload-prepar
 ### Additional Fixes & Features
 - Fixed an issue preventing users from jumping to the Specification tab.
 - Added a `Weight` field directly to the Inventory table (positioned before MRP) for seamless viewing and inline editing.
+
+## 2026-09-21
+
+### Price Analysis Integration
+- Designed and added a new price analysis function to track product pricing metrics.
+- This function helps monitor profit margins and dynamically alerts on underpriced items.
+- Structured the pricing data to automatically compare current sell prices against the moving average.
+
+### Accessories Integration
+- Began integrating accessories functionality for core products (like consoles).
+- Prepared the UI to allow attaching related accessories seamlessly from the inventory page.
+- Adjusted underlying schemas to support relational accessory links without breaking core inventory logic.
+
+### Complete Ledger Details Overhaul
+- **Backend Integration**: 
+  - Integrated the `getLedgerBySku` API endpoint within `api.js`.
+  - Configured SWR caching for seamless and dynamic variant ledger data fetching.
+- **Ledger Entries Page Redesign**: 
+  - Built a completely new, visually striking layout from scratch.
+  - Re-engineered the top-level Summary Cards to use soft, distinct pastel backgrounds (`bg-sky-50`, `bg-amber-50`).
+  - Added dynamic Lucide icons for instant visual recognition of metrics.
+- **Advanced Table UI Implementation**: 
+  - Constrained the main data table within a scrollable `max-h-[70vh]` view.
+  - Implemented sticky headers (`sticky top-0`) to maintain context during deep scrolling.
+  - Revamped typography with bold dark headers and gray customer names against dark Order IDs.
+  - Added dynamic profit calculations (`sell_price - buy_price`) directly inside the table, highlighting positive margins in green and negative in red.
+  - Transformed basic status text into colored pill badges (e.g., Amber for Under Evaluation).
+- **Comprehensive Details Modal**: 
+  - Rebuilt the Ledger Entry modal using a clean, grid-based card layout.
+  - Added `Mail` and `Phone` icons wrapped in interactive `mailto:` and `tel:` links with hover states.
+  - Styled custom badges for specific metadata like Payment Method and Shipment Charge.
+
+## 2026-09-22
+
+### Description Editor Flattening
+- Completely redesigned the internal state management of `DescriptionEditor` and `SpecificationTab` to produce a fully flat product description JSON.
+- Eradicated all uses of the artificial `"TOP"` section and section headers from the codebase.
+- Added deep flattening logic to extract the deepest key-value pairs from nested JSON objects (e.g. `Global_Attributes` or `Gameplay`), ensuring a clean and direct property list.
+- Configured "Add Field" to inject new keys directly into the root description object rather than nesting them.
+
+### Price Analysis Integration Fixes
+- Updated `PriceAnalysisModal` rendering conditions to safely support and display values even when `buy_price` or `sell_price` are exactly `0`.
+- Fixed data propagation in `UpdateInventory.jsx` so that `sku`, `buy_price`, and `sell_price` route correctly from variant items into the analysis modal.
+
+### Search and Pricing Rules UI
+- Lifted category-selection constraints on the global search bar, allowing users to query freely without pre-selecting a category.
+- Refactored the `fast_pickup_deduction` logic in `PricingRules.jsx` to render an intuitive `+ Add Fast Pickup Deduction` button, replacing it with an input block and a clear "Remove" action when toggled.
+
+### Ledger UI Polish
+- Updated the "View Details" button styling within the `LedgerEntries` table to use a modern `violet` color theme (`bg-violet-50`, `text-violet-600`), replacing previous `orange` styling for better visual harmony.
+
+## 2026-09-26
+
+### Ledger & Inventory Analytics Dashboard Refresh
+- Completely revamped the `Analytics.jsx` UI to a clean, modern light theme using Tailwind CSS (following the Stitch design system).
+- Transformed static dummy statistics into a robust, data-driven React state structure capable of dynamic rendering.
+- Implemented visual horizontal progress bars for "Inventory by Category" and "Inventory Aging Analysis" that compute widths natively based on percentage data.
+- Built a localized category filter (`agingCategory` state) specific to the Aging Analysis block, allowing users to cross-reference global vs. category aging without modifying the global top-bar filter.
+- Systematically migrated all legacy Google Material Symbols (`material-symbols-outlined`) across the entire page to modern `lucide-react` SVGs while perfectly retaining layout sizes and brand colors.
+- Enhanced data visibility in the Aging Analysis layout by surfacing absolute unit counts (e.g. `4,240 Units`) and monetary values (e.g. `₹77.3 Lakh`) immediately adjacent to the percentage metrics.
+
+## 2026-09-28
+
+### Ledger Movement Simplification & Refactor
+- Completely rewrote the "Ledger Movement (Intake vs Outflow)" section in `Analytics.jsx` to exclusively track and display core inflow/outflow metrics (item count and ₹ value).
+- Removed extraneous metrics (e.g., Net Units, Net Capital Impact, Audit Status, Reconciled badges) in favor of a strictly focused intake/outflow paradigm.
+- Replaced the prior SVG area chart with a clean, dynamic grouped bar chart natively generated via SVG.
+
+### Advanced Data View Controls
+- Introduced a central `Daily` vs `Monthly` interval toggle.
+- **Daily View:** Added localized `Start Date` and `End Date` selectors, rendering the exact day-by-day item/value movement across the selected timeframe.
+- **Monthly View:** Designed a dual-dropdown layout (`Start Month` and `End Month`) traversing historical data from Jan 2025 onwards, allowing aggregation across multi-month spans instead of being locked to a single month.
+
+### Scalable UI Handlers for Large Datasets
+- Rebuilt the SVG chart container to handle infinitely scaling timeframes by decoupling it from the screen width. It now uses calculated dynamic widths and a `custom-scrollbar` wrapper for horizontal overflow, while natively flexing to 100% of available space when dates are sparse.
+- Constrained the data summary table to a reasonable `max-h-[300px]` with vertical scrolling and a `sticky top-0` header, ensuring large multi-month data pulls do not vertically distort the dashboard layout.
+- Strictly standardized the table format to output `[Date] | [Ledger In: +Units · ₹Value] | [Ledger Out: -Units · ₹Value]`.
+
+### Next.js Build Resolution
+- Diagnosed and repaired a severe JSX syntax compilation error (`Expected '</', got 'jsx text'`) at the end of `Analytics.jsx` caused by broken trailing `</div>` closures following heavy block refactoring, restoring successful `npm run build` execution.
+
+## 2026-09-29
+
+### Ledger Dashboard Streamlining
+- Removed the massive "Detailed Inventory Explorer" section and its associated table from `Analytics.jsx` entirely, aggressively streamlining the UI to focus purely on the core Ledger Movement and Aging data blocks. 
+- Executed `npm run build` after heavy block removal to verify structural integrity.
+
+### Strict Configuration Icons JSON Conversion
+- Modified the data layer in `InventoryForm.jsx` (Add Product) and `SpecificationTab.jsx` (Update Inventory) to enforce a strict key-value JSON object structure (`{ "Key": "URL" }`) for `configuration_icons`, migrating away from state arrays.
+- Ensured that if a user submits no icons, the payload gracefully defaults to an empty JSON object `{}` rather than an empty array `[]` inherited from the UI array-state.
+- Enforced real-time CDN conversion (`toCDN` / `convertImageToCdn`) on icon URL assignment to guarantee all generated links are fully CDN-wrapped.
+
+### Numeric Variants & Float Casting Bug Fixes
+- Fixed a widespread floating-point block in `ItemDetailsFields.jsx` where strict `Number()` evaluation wrapped inside `onChange` handlers forced decimals (like `0.`) to instantly collapse into integers, preventing users from typing valid floats like `0.5`. 
+- Removed hardcoded `" kg"` strings that were previously appended inside the payload state mapping of `CombinationVariantsTable.jsx`. These strings had silently forced the global payload compiler's `Number()` parser to fail with `NaN`, causing valid user inputs to be destructively overwritten by `0`.

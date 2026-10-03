@@ -66,97 +66,95 @@ function ProductRow({ product, onDelete }) {
 
   return (
     <>
-    <tr
-     onClick={() => router.push(`/update-inventory/${encodeURIComponent(product.id)}`)}
-      // onClick={() => router.push(`/product-detail/${product.id}`)}
-      className="cursor-pointer border-t border-slate-200 bg-white transition-colors hover:bg-slate-50/70"
-    >
-      <td className="px-5 py-5">
-        <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <Image
-            src={thumbnail || "/dacby-assets/download.svg"}
-            alt={thumbnail ? product.product_title : "No image available"}
-            fill
-            sizes="96px"
-            className={`object-contain p-2 ${!thumbnail ? "opacity-40" : ""}`}
-          />
-          {(product.condition) && (
-            <span className="absolute right-0 top-0 rounded-bl-xl bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm uppercase tracking-wider">
-              {product.condition}
-            </span>
-          )}
-        </div>
-      </td>
-      <td className="min-w-72 px-5 py-5">
-        <p className="text-base font-semibold text-slate-900">{product.product_title}</p>
-        <p className="mt-1 text-sm text-orange-700">
-          {variantsLength} {variantsLength === 1 ? "variant" : "variants"}
-        </p>
-      </td>
-      <td className="min-w-40 px-5 py-5">
-        <p className="text-[15px] font-medium text-slate-800">{product.category_name || "—"}</p>
-        <p className="mt-2 inline-block rounded bg-orange-100 px-2 py-1 text-[13px] font-semibold tracking-wider text-orange-900">
-          {product.code || "—"}
-        </p>
-      </td>
-      <td className="min-w-32 px-5 py-5">
-        <p className="text-base font-semibold text-slate-900">{formatPrice(product.price)}</p>
-        {product.mrp > product.price && (
-          <div className="mt-1 flex items-center gap-2">
-            <p className="text-[13px] text-slate-400 line-through">{formatPrice(product.mrp)}</p>
-            <p className="rounded bg-emerald-50 px-1.5 py-0.5 text-[13px] font-bold text-emerald-600">{discount}% OFF</p>
+      <tr
+        onClick={() => router.push(`/update-inventory/${encodeURIComponent(product.id)}`)}
+        // onClick={() => router.push(`/product-detail/${product.id}`)}
+        className="cursor-pointer border-t border-slate-200 bg-white transition-colors hover:bg-slate-50/70"
+      >
+        <td className="px-5 py-5">
+          <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <Image
+              src={thumbnail || "/dacby-assets/download.svg"}
+              alt={thumbnail ? product.product_title : "No image available"}
+              fill
+              sizes="96px"
+              className={`object-contain p-2 ${!thumbnail ? "opacity-40" : ""}`}
+            />
+            {(product.condition) && (
+              <span className="absolute right-0 top-0 rounded-bl-xl bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm uppercase tracking-wider">
+                {product.condition}
+              </span>
+            )}
           </div>
-        )}
-      </td>
-      <td className="min-w-28 px-5 py-5">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
-          product.in_stock && !product.outofstock
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-rose-50 text-rose-600"
-        }`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${product.in_stock && !product.outofstock ? "bg-emerald-500" : "bg-rose-500"}`}></span>
-          {product.in_stock && !product.outofstock ? "In" : "Out"}
-        </span>
-      </td>
-      <td className="min-w-28 px-5 py-5">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
-          product.is_active !== false && product.status !== "Deactive"
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-slate-100 text-slate-600"
-        }`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${product.is_active !== false && product.status !== "Deactive" ? "bg-emerald-500" : "bg-slate-400"}`}></span>
-          {product.is_active !== false && product.status !== "Deactive" ? "Active" : "Deactive"}
-        </span>
-      </td>
-      <td className="min-w-32 px-5 py-5">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/ledger/${product.id}`);
-            }}
-            className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-3 py-2 text-[13px] font-medium text-white transition-all duration-200 ease-out hover:scale-[1.03] hover:bg-[#2F4BB5] hover:shadow-sm active:scale-[0.98]"
-          >
-            <ClipboardList className="h-4 w-4" />
-            Ledger Details
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDeletePop(true);
-            }}
-            aria-label={`Delete ${product.product_title}`}
-            title="Delete"
-            className="cursor-pointer p-2 text-rose-500 transition hover:text-rose-700"
-          >
-            <Trash2 className="h-5 w-5" />
-          </button>
-        </div>
-      </td>
-    </tr>
-    {showDeletePop && (
+        </td>
+        <td className="min-w-72 px-5 py-5">
+          <p className="text-base font-semibold text-slate-900">{product.product_title}</p>
+          <p className="mt-1 text-sm text-orange-700">
+            {variantsLength} {variantsLength === 1 ? "variant" : "variants"}
+          </p>
+        </td>
+        <td className="min-w-40 px-5 py-5">
+          <p className="text-[15px] font-medium text-slate-800">{product.category_name || "—"}</p>
+          <p className="mt-2 inline-block rounded bg-orange-100 px-2 py-1 text-[13px] font-semibold tracking-wider text-orange-900">
+            {product.code || "—"}
+          </p>
+        </td>
+        <td className="min-w-32 px-5 py-5">
+          <p className="text-base font-semibold text-slate-900">{formatPrice(product.price)}</p>
+          {product.mrp > product.price && (
+            <div className="mt-1 flex items-center gap-2">
+              <p className="text-[13px] text-slate-400 line-through">{formatPrice(product.mrp)}</p>
+              <p className="rounded bg-emerald-50 px-1.5 py-0.5 text-[13px] font-bold text-emerald-600">{discount}% OFF</p>
+            </div>
+          )}
+        </td>
+        <td className="min-w-28 px-5 py-5">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${product.in_stock && !product.outofstock
+              ? "bg-emerald-50 text-emerald-600"
+              : "bg-rose-50 text-rose-600"
+            }`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${product.in_stock && !product.outofstock ? "bg-emerald-500" : "bg-rose-500"}`}></span>
+            {product.in_stock && !product.outofstock ? "In" : "Out"}
+          </span>
+        </td>
+        <td className="min-w-28 px-5 py-5">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${product.is_active !== false && product.status !== "Deactive"
+              ? "bg-emerald-50 text-emerald-600"
+              : "bg-slate-100 text-slate-600"
+            }`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${product.is_active !== false && product.status !== "Deactive" ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+            {product.is_active !== false && product.status !== "Deactive" ? "Active" : "Deactive"}
+          </span>
+        </td>
+        <td className="min-w-32 px-5 py-5">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/ledger/${product.id}`);
+              }}
+              className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-3 py-2 text-[13px] font-medium text-white transition-all duration-200 ease-out hover:scale-[1.03] hover:bg-[#2F4BB5] hover:shadow-sm active:scale-[0.98]"
+            >
+              <ClipboardList className="h-4 w-4" />
+              Ledger Details
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeletePop(true);
+              }}
+              aria-label={`Delete ${product.product_title}`}
+              title="Delete"
+              className="cursor-pointer p-2 text-rose-500 transition hover:text-rose-700"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          </div>
+        </td>
+      </tr>
+      {showDeletePop && (
         <DeletePop
           productName={product.product_title}
           isDeleting={isDeleting}
@@ -168,10 +166,12 @@ function ProductRow({ product, onDelete }) {
             if (deleted) setShowDeletePop(false);
           }}
         />
-    )}
+      )}
     </>
   );
 }
+
+let hasHandledReload = false;
 
 export default function ProductInventory() {
   const {
@@ -186,12 +186,12 @@ export default function ProductInventory() {
   });
   const initialPage = inventoryResponse
     ? {
-        products: getProductsFromResponse(inventoryResponse),
-        hasNext:
-          inventoryResponse?.hasNext ??
-          inventoryResponse?.hasMore ??
-          getProductsFromResponse(inventoryResponse).length > 0,
-      }
+      products: getProductsFromResponse(inventoryResponse),
+      hasNext:
+        inventoryResponse?.hasNext ??
+        inventoryResponse?.hasMore ??
+        getProductsFromResponse(inventoryResponse).length > 0,
+    }
     : null;
   const [selectedCategoryCode, setSelectedCategoryCode] = useState("");
   const [cachedAllPages, setCachedAllPages] = useState([]);
@@ -210,6 +210,22 @@ export default function ProductInventory() {
   // Restore search state from sessionStorage synchronously before paint
   useIsomorphicLayoutEffect(() => {
     if (typeof window !== "undefined") {
+      if (!hasHandledReload) {
+        hasHandledReload = true;
+        
+        const navEntry = window.performance && window.performance.getEntriesByType && window.performance.getEntriesByType("navigation")[0];
+        const isReload = navEntry?.type === "reload";
+        
+        // Only clear if they hard refreshed specifically on THIS page
+        // (Prevents clearing if they refreshed on a detail page and navigated here)
+        if (isReload && navEntry.name === window.location.href) {
+          sessionStorage.removeItem("inv_selectedCategoryCode");
+        }
+      }
+
+      const savedCategory = sessionStorage.getItem("inv_selectedCategoryCode");
+      if (savedCategory) setSelectedCategoryCode(savedCategory);
+
       const savedActive = sessionStorage.getItem("inv_searchActive");
       if (savedActive === "true") {
         setSearchQuery(sessionStorage.getItem("inv_searchQuery") || "");
@@ -218,7 +234,7 @@ export default function ProductInventory() {
         if (savedResults) {
           try {
             setSearchResults(JSON.parse(savedResults));
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     }
@@ -230,8 +246,9 @@ export default function ProductInventory() {
       sessionStorage.setItem("inv_searchQuery", searchQuery);
       sessionStorage.setItem("inv_searchResults", JSON.stringify(searchResults));
       sessionStorage.setItem("inv_searchActive", String(isSearchActive));
+      sessionStorage.setItem("inv_selectedCategoryCode", selectedCategoryCode);
     }
-  }, [searchQuery, searchResults, isSearchActive]);
+  }, [searchQuery, searchResults, isSearchActive, selectedCategoryCode]);
 
   const loadPage = useCallback(async ({ startAfter, pageIndex, reset = false, code = undefined }) => {
     setIsLoading(true);
@@ -284,7 +301,7 @@ export default function ProductInventory() {
 
   const allProducts = useMemo(() => pages.flatMap(p => p.products), [pages]);
   const hasNextPage = pages.length > 0 ? pages[pages.length - 1].hasNext : false;
-  
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -307,13 +324,13 @@ export default function ProductInventory() {
 
   const handleCategoryChange = async (newCode) => {
     if (newCode === selectedCategoryCode) return;
-    
+
     if (isSearchActive || searchQuery) {
       setSearchQuery("");
       setSearchResults([]);
       setIsSearchActive(false);
     }
-    
+
     if (newCode === "") {
       setSelectedCategoryCode("");
       if (cachedAllPages.length > 0) {
@@ -333,21 +350,21 @@ export default function ProductInventory() {
 
   const filteredProducts = allProducts;
 
-  const displayProducts = isSearchActive 
+  const displayProducts = isSearchActive
     ? searchResults.map(result => ({
-        id: result.docId,
-        isSearchResult: true,
-        image: result.product?.image,
-        product_title: result.product?.product_title,
-        code: result.product?.code,
-        category_name: result.product?.category,
-        price: result.product?.price,
-        mrp: result.product?.mrp,
-        in_stock: !(result.product?.outOfStock || result.outOfStock),
-        outofstock: result.product?.outOfStock || result.outOfStock,
-        variants: result.product?.variants ?? 0,
-        condition: result.product?.condition,
-      }))
+      id: result.docId,
+      isSearchResult: true,
+      image: result.product?.image,
+      product_title: result.product?.product_title,
+      code: result.product?.code,
+      category_name: result.product?.category,
+      price: result.product?.price,
+      mrp: result.product?.mrp,
+      in_stock: !(result.product?.outOfStock || result.outOfStock),
+      outofstock: result.product?.outOfStock || result.outOfStock,
+      variants: result.product?.variants ?? 0,
+      condition: result.product?.condition,
+    }))
     : filteredProducts;
 
   async function executeSearch() {
@@ -356,7 +373,7 @@ export default function ProductInventory() {
       handleRefresh();
       return;
     }
-    
+
     setIsSearchActive(true);
     setIsSearching(true);
     setSearchError("");
@@ -382,7 +399,7 @@ export default function ProductInventory() {
     setSearchError("");
     searchRequestId.current += 1;
     setIsSearching(false);
-    
+
     setSelectedCategoryCode("");
     setCachedAllPages([]);
     setPages([]);
@@ -462,7 +479,7 @@ export default function ProductInventory() {
             />
           </div>
           <div className="flex items-center gap-2">
-             <button
+            <button
               type="button"
               onClick={executeSearch}
               disabled={isSearching}
@@ -483,7 +500,7 @@ export default function ProductInventory() {
                 </option>
               ))}
             </select>
-           
+
             <button
               type="button"
               onClick={handleRefresh}
@@ -567,8 +584,8 @@ export default function ProductInventory() {
               <div className="px-6 py-16 text-center">
                 <p className="text-sm text-rose-600">{listError || searchError}</p>
                 {!isSearchActive && (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       if (displayProducts.length > 0) {
                         const lastProduct = allProducts.at(-1);
@@ -576,7 +593,7 @@ export default function ProductInventory() {
                       } else {
                         loadPage({ pageIndex: 0, reset: true });
                       }
-                    }} 
+                    }}
                     className="mt-4 cursor-pointer rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50"
                   >
                     Try again

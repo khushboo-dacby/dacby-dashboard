@@ -243,8 +243,8 @@ export default function SpecialEdition() {
     setSubmitting(true);
     try {
       console.log("Special edition payload:", payload);
-      // const response = await addSpecialEdition(payload);
-      // toast.success(response?.message || "Special edition added successfully");
+      const response = await addSpecialEdition(payload);
+      toast.success(response?.message || "Special edition added successfully");
     } catch (error) {
       toast.error(error.message || "Failed to add special edition");
     } finally {

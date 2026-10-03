@@ -68,10 +68,10 @@ function CloseIcon() {
   );
 }
 
-export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSubmit }) {
-  console.log("initialData ",initialData)
+export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSubmit, productInfo }) {
   const [data, setData] = useState(() => mergeData(initialData));
-
+ console.log("initialData ",initialData);
+ console.log("productInfo", productInfo);
   useEffect(() => {
     if (isOpen) setData(mergeData(initialData));
   }, [isOpen, initialData]);
@@ -175,16 +175,47 @@ export default function PriceAnalysisModal({ isOpen, onClose, initialData, onSub
       onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}
     >
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-gray-50 shadow-xl">
-        <div className="sticky top-0 flex items-center justify-between px-5 py-4 bg-gray-50 border-b border-gray-200 rounded-t-2xl">
-          <h2 className="text-lg font-semibold text-gray-900">Price analysis</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="text-gray-400 hover:text-gray-600 transition"
-          >
-            <CloseIcon />
-          </button>
+        <div className="sticky top-0 z-10 px-5 py-4 bg-gray-50 border-b border-gray-200 rounded-t-2xl">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold text-gray-900">Price analysis</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="text-gray-400 hover:text-gray-600 transition"
+            >
+              <CloseIcon />
+            </button>
+          </div>
+          {productInfo && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600">
+              {productInfo.name && <div className="font-medium text-gray-800">{productInfo.name}</div>}
+              {productInfo.sku && (
+                <div className="flex items-center gap-1.5 border-l border-gray-300 pl-4">
+                  <span className="text-gray-500">SKU:</span>
+                  <span className="font-medium text-gray-700">{productInfo.sku}</span>
+                </div>
+              )}
+              {productInfo.condition && (
+                <div className="flex items-center gap-1.5 border-l border-gray-300 pl-4">
+                  <span className="text-gray-500">Condition:</span>
+                  <span className="font-medium text-gray-700">{productInfo.condition}</span>
+                </div>
+              )}
+              {productInfo.buy_price !== undefined && productInfo.buy_price !== "" && (
+                <div className="flex items-center gap-1.5 border-l border-gray-300 pl-4">
+                  <span className="text-gray-500">Buy:</span>
+                  <span className="font-medium text-gray-700">₹{productInfo.buy_price}</span>
+                </div>
+              )}
+              {productInfo.sell_price !== undefined && productInfo.sell_price !== "" && (
+                <div className="flex items-center gap-1.5 border-l border-gray-300 pl-4">
+                  <span className="text-gray-500">Sell:</span>
+                  <span className="font-medium text-gray-700">₹{productInfo.sell_price}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div 

@@ -6,7 +6,7 @@ import { PhotoProvider, PhotoView } from "react-photo-view";
 import Image from "next/image";
 import DescriptionEditor from "@/components/inventory/DescriptionEditor";
 import ImagePreview from "@/components/inventory/ImagePreview";
-
+import { convertImageToCdn } from "@/utils/formatters";
 function clone(value) {
   return typeof structuredClone === "function"
     ? structuredClone(value)
@@ -78,24 +78,14 @@ function parseFieldValue(field) {
 function serializeDescriptionState(description) {
   const result = {};
 
-  Object.keys(description || {}).forEach((section) => {
-    if (section === "summary") {
-      result.summary = description.summary;
-      return;
-    }
+  if (description?.summary) {
+    result.summary = description.summary;
+  }
 
-    const sectionFields = description[section];
-    if (!Array.isArray(sectionFields)) {
-      result[section] = sectionFields;
-      return;
-    }
-
-    const sectionObject = {};
-    sectionFields.forEach((field) => {
-      if (!field || !field.key) return;
-      sectionObject[field.key] = parseFieldValue(field);
-    });
-    result[section] = sectionObject;
+  const fields = description?.fields || [];
+  fields.forEach((field) => {
+    if (!field || !field.key) return;
+    result[field.key] = parseFieldValue(field);
   });
 
   return result;
@@ -107,101 +97,97 @@ function isFieldArray(value) {
 }
 
 function convertValueToField(value) {
-  if (Array.isArray(value)) {
-    const isPrimitiveArray = value.every(
-      (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
-    );
-    if (isPrimitiveArray) {
-      return {
-        key: "value",
-        value: value.map((item) => (item === null ? "null" : String(item))).join("\n"),
-        valueType: "multiple",
-      };
+  const fields = [];
+  function recurse(current) {
+    if (current === null || current === undefined) return;
+    if (Array.isArray(current)) {
+      const isPrimitiveArray = current.every(
+        (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
+      );
+      if (isPrimitiveArray) {
+        fields.push({
+          key: "value",
+          value: current.map((item) => (item === null ? "null" : String(item))).join("\n"),
+          valueType: "multiple",
+        });
+      } else {
+        current.forEach(recurse);
+      }
+    } else if (typeof current === "object") {
+      Object.keys(current).forEach((key) => {
+        const val = current[key];
+        if (val && typeof val === "object" && !Array.isArray(val)) {
+          recurse(val);
+        } else if (Array.isArray(val)) {
+          const isPrimitiveArray = val.every(
+            (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
+          );
+          if (isPrimitiveArray) {
+            fields.push({ key: String(key), value: val.map((item) => (item === null ? "null" : String(item))).join("\n"), valueType: "multiple" });
+          } else {
+            recurse(val);
+          }
+        } else {
+          fields.push({ key: String(key), value: val === null || val === undefined ? "" : String(val), valueType: "single" });
+        }
+      });
+    } else {
+      fields.push({ key: "value", value: String(current), valueType: "single" });
     }
-    return {
-      key: "value",
-      value: JSON.stringify(value, null, 2),
-      valueType: "single",
-    };
   }
 
-  if (value && typeof value === "object") {
-    return {
-      key: "value",
-      value: JSON.stringify(value, null, 2),
-      valueType: "single",
-    };
-  }
-
-  return {
-    key: "value",
-    value: value === undefined || value === null ? "" : String(value),
-    valueType: "single",
-  };
+  recurse(value);
+  return fields;
 }
 
-function convertDescriptionObjectToFormState(parsed) {
-  const result = { summary: "" };
+  function convertDescriptionObjectToFormState(parsed) {
+    const result = { summary: "", fields: [] };
 
-  if (parsed?.summary !== undefined) {
-    result.summary = typeof parsed.summary === "string" ? parsed.summary : JSON.stringify(parsed.summary);
-  }
-
-  Object.keys(parsed || {}).forEach((key) => {
-    if (key === "summary") return;
-    const sectionValue = parsed[key];
-
-    if (isFieldArray(sectionValue)) {
-      result[key] = sectionValue;
-      return;
+    if (parsed?.summary !== undefined) {
+      result.summary = typeof parsed.summary === "string" ? parsed.summary : JSON.stringify(parsed.summary);
     }
 
-    if (sectionValue === null || typeof sectionValue !== "object" || Array.isArray(sectionValue)) {
-      result[key] = [convertValueToField(sectionValue)];
-      return;
-    }
+    Object.keys(parsed || {}).forEach((key) => {
+      if (key === "summary") return;
+      const sectionValue = parsed[key];
 
-    const sectionFields = Object.keys(sectionValue).map((fieldKey) => {
-      const fieldValue = sectionValue[fieldKey];
-
-      if (Array.isArray(fieldValue)) {
-        const isPrimitiveArray = fieldValue.every(
-          (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
-        );
-        if (isPrimitiveArray) {
-          return {
-            key: String(fieldKey),
-            value: fieldValue.map((item) => (item === null ? "null" : String(item))).join("\n"),
-            valueType: "multiple",
-          };
+      if (typeof sectionValue === "object" && sectionValue !== null) {
+        if (Array.isArray(sectionValue)) {
+          const flattened = convertValueToField(sectionValue);
+          if (flattened.length === 1 && flattened[0].key === "value") {
+            flattened[0].key = key;
+          }
+          result.fields.push(...flattened);
+        } else {
+          Object.keys(sectionValue).forEach((fieldKey) => {
+            const fieldValue = sectionValue[fieldKey];
+            if (fieldValue && typeof fieldValue === "object" && !Array.isArray(fieldValue)) {
+               const flattened = convertValueToField(fieldValue);
+               if (flattened.length === 1 && flattened[0].key === "value") {
+                   flattened[0].key = fieldKey;
+               }
+               result.fields.push(...flattened);
+            } else if (Array.isArray(fieldValue)) {
+               const isPrimitiveArray = fieldValue.every(
+                  (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
+               );
+               if (isPrimitiveArray) {
+                  result.fields.push({ key: String(fieldKey), value: fieldValue.map((item) => (item === null ? "null" : String(item))).join("\n"), valueType: "multiple" });
+               } else {
+                  result.fields.push(...convertValueToField(fieldValue));
+               }
+            } else {
+               result.fields.push({ key: String(fieldKey), value: fieldValue === undefined || fieldValue === null ? "" : String(fieldValue), valueType: "single" });
+            }
+          });
         }
-        return {
-          key: String(fieldKey),
-          value: JSON.stringify(fieldValue, null, 2),
-          valueType: "single",
-        };
+      } else {
+        result.fields.push({ key: String(key), value: sectionValue === undefined || sectionValue === null ? "" : String(sectionValue), valueType: "single" });
       }
-
-      if (fieldValue && typeof fieldValue === "object") {
-        return {
-          key: String(fieldKey),
-          value: JSON.stringify(fieldValue, null, 2),
-          valueType: "single",
-        };
-      }
-
-      return {
-        key: String(fieldKey),
-        value: fieldValue === undefined || fieldValue === null ? "" : String(fieldValue),
-        valueType: "single",
-      };
     });
 
-    result[key] = sectionFields;
-  });
-
-  return result;
-}
+    return result;
+  }
 
 function renderPrimitiveInput(value, onChange, multiline = false) {
   if (multiline) {
@@ -339,97 +325,52 @@ export default function SpecificationTab({
     }));
   }
 
-  function addDescriptionSection(name) {
-    const sectionName = String(name || "").trim();
-    if (!sectionName) return;
-    modifyDescriptionForm((current) => {
-      if (current[sectionName]) return current;
-      return { ...current, [sectionName]: [] };
-    });
-  }
-
-  function removeDescriptionSection(sectionName) {
-    if (!sectionName || sectionName === "summary") return;
-    modifyDescriptionForm((current) => {
-      if (!current[sectionName]) return current;
-      const next = { ...current };
-      delete next[sectionName];
-      return next;
-    });
-  }
-
-  function renameDescriptionSection(oldName, newName) {
-    if (!oldName || !newName || oldName === "summary") return;
-    const trimmed = String(newName).trim();
-    if (!trimmed || trimmed === oldName) return;
-    modifyDescriptionForm((current) => {
-      if (!current[oldName]) return current;
-      const next = { ...current };
-      next[trimmed] = next[oldName];
-      delete next[oldName];
-      return next;
-    });
-  }
-
-  function finalizeDescriptionSection(sectionName) {
-    if (!sectionName) return;
-    const trimmed = String(sectionName).trim();
-    if (!trimmed || trimmed === sectionName) return;
-    modifyDescriptionForm((current) => {
-      if (!current[sectionName]) return current;
-      const next = { ...current };
-      next[trimmed] = next[sectionName];
-      delete next[sectionName];
-      return next;
-    });
-  }
-
-  function addDescriptionField(sectionName) {
+  function addDescriptionField() {
     modifyDescriptionForm((current) => ({
       ...current,
-      [sectionName]: [...(current[sectionName] || []), { key: "", value: "", valueType: "single" }],
+      fields: [...(current.fields || []), { key: "", value: "", valueType: "single" }],
     }));
   }
 
-  function updateDescriptionFieldKey(sectionName, index, newKey) {
+  function updateDescriptionFieldKey(index, newKey) {
     modifyDescriptionForm((current) => {
-      const fields = [...(current[sectionName] || [])];
+      const fields = [...(current.fields || [])];
       fields[index] = { ...(fields[index] ?? {}), key: newKey };
-      return { ...current, [sectionName]: fields };
+      return { ...current, fields };
     });
   }
 
-  function finalizeDescriptionFieldKey(sectionName, index, newKey) {
+  function finalizeDescriptionFieldKey(index, newKey) {
     const trimmedKey = String(newKey || "").trim();
     modifyDescriptionForm((current) => {
-      const fields = [...(current[sectionName] || [])];
+      const fields = [...(current.fields || [])];
       fields[index] = { ...(fields[index] ?? {}), key: trimmedKey };
-      return { ...current, [sectionName]: fields };
+      return { ...current, fields };
     });
   }
 
-  function updateDescriptionFieldValue(sectionName, index, newValue) {
+  function updateDescriptionFieldValue(index, newValue) {
     modifyDescriptionForm((current) => {
-      const fields = [...(current[sectionName] || [])];
+      const fields = [...(current.fields || [])];
       fields[index] = { ...(fields[index] ?? {}), value: newValue };
-      return { ...current, [sectionName]: fields };
+      return { ...current, fields };
     });
   }
 
-  function updateDescriptionFieldValueType(sectionName, index, newType) {
+  function updateDescriptionFieldValueType(index, newType) {
     modifyDescriptionForm((current) => {
-      const fields = [...(current[sectionName] || [])];
+      const fields = [...(current.fields || [])];
       fields[index] = { ...(fields[index] ?? {}), valueType: newType };
-      return { ...current, [sectionName]: fields };
+      return { ...current, fields };
     });
   }
 
-  function removeDescriptionField(sectionName, index) {
+  function removeDescriptionField(index) {
     modifyDescriptionForm((current) => {
-      const fields = [...(current[sectionName] || [])];
+      const fields = [...(current.fields || [])];
       return {
         ...current,
-        [sectionName]: fields.filter((_, itemIndex) => itemIndex !== index),
+        fields: fields.filter((_, i) => i !== index),
       };
     });
   }
@@ -547,7 +488,7 @@ export default function SpecificationTab({
       const items = Array.isArray(next.whats_in_the_box)
         ? [...next.whats_in_the_box]
         : [];
-      items.push({ label: "New item", image_url: "" });
+      items.push({ label: "", image_url: "" });
       next.whats_in_the_box = items;
       return next;
     });
@@ -665,7 +606,7 @@ export default function SpecificationTab({
       const value = String(entry?.value ?? "");
 
       if (label) {
-        nextMap[label] = value;
+        nextMap[label] = convertImageToCdn(value);
       }
     });
 
@@ -899,10 +840,6 @@ export default function SpecificationTab({
     <DescriptionEditor
         description={descriptionForm}
         updateSummary={updateDescriptionSummary}
-        addDescriptionSection={addDescriptionSection}
-        removeDescriptionSection={removeDescriptionSection}
-        renameDescriptionSection={renameDescriptionSection}
-        finalizeDescriptionSection={finalizeDescriptionSection}
         addDescriptionField={addDescriptionField}
         updateDescriptionFieldKey={updateDescriptionFieldKey}
         finalizeDescriptionFieldKey={finalizeDescriptionFieldKey}
@@ -1009,7 +946,7 @@ export default function SpecificationTab({
        <PhotoProvider>
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
-
+           {/* What's in the box */}
           <h3 className="text-lg font-semibold text-slate-900">What&apos;s in the box</h3>
 
         </div>
@@ -1048,7 +985,7 @@ export default function SpecificationTab({
                     <input
                       value={item?.image_url ?? ""}
                       onChange={(event) =>
-                        updateBoxItem(index, "image_url", event.target.value)
+                        updateBoxItem(index, "image_url", convertImageToCdn(event.target.value))
                       }
                       placeholder="Image URL"
                       className="min-w-0 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -1128,7 +1065,7 @@ export default function SpecificationTab({
                     />
                     <input
                       value={entry.value}
-                      onChange={(event) => updateIconEntry(index, "value", event.target.value)}
+                      onChange={(event) => updateIconEntry(index, "value", convertImageToCdn(event.target.value))}
                       placeholder="https://example.com/icon.png"
                       className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />

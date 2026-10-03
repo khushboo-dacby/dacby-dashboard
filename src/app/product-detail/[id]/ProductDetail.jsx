@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Eye, LoaderCircle, Star, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getProductDetail, updateSkuImages } from "../../apis/api";
+import { deleteProduct as deleteProductApi, updateSkuImages, updateInventoryDoc } from "../../apis/api";
 import ItemDetailsFields from "../../../components/inventory/ItemDetailsFields";
 import WarningPopup from "../../../components/confirmation-modal/WarningPopup";
 import AddWarrantyModal from "../AddWarrantyModal";
@@ -360,7 +360,8 @@ export default function ProductDetail({ id }) {
   const [retryCount, setRetryCount] = useState(0);
   const [showDescriptionPreview, setShowDescriptionPreview] = useState(false);
   const [showWarrantyModal, setShowWarrantyModal] = useState(false);
-  const [showWebsiteLink, setShowWebsiteLink] = useState(false);
+  const [priceAnalysisVariant, setPriceAnalysisVariant] = useState(null);
+  const [isUpdatingPriceAnalysis, setIsUpdatingPriceAnalysis] = useState(false);
 
 // Updated imports to include getProductFullJson
 
@@ -486,6 +487,50 @@ useEffect(() => {
     }
   }
 
+  async function handleSavePriceAnalysis(data) {
+    if (!priceAnalysisVariant || !productData) return;
+    setIsUpdatingPriceAnalysis(true);
+    try {
+      setProductData((current) => {
+        const currentDetails = current?.details ?? {};
+        const currentVendors = currentDetails.vendors ?? {};
+        const vendor = currentVendors[priceAnalysisVariant.vendorId] ?? {};
+        const offered = vendor.combination_offered ?? {};
+        const combination = offered[priceAnalysisVariant.combinationId] ?? {};
+        const currentItem = combination[priceAnalysisVariant.itemId] ?? {};
+
+        const newItem = { ...currentItem, price_analysis: data };
+
+        return {
+          ...current,
+          details: {
+            ...currentDetails,
+            vendors: {
+              ...currentVendors,
+              [priceAnalysisVariant.vendorId]: {
+                ...vendor,
+                combination_offered: {
+                  ...offered,
+                  [priceAnalysisVariant.combinationId]: {
+                    ...combination,
+                    [priceAnalysisVariant.itemId]: newItem,
+                  },
+                },
+              },
+            },
+          },
+        };
+      });
+      toast.success("Price analysis updated locally!");
+    } catch (err) {
+      console.error("Error saving price analysis:", err);
+      toast.error(err.message || "Failed to save price analysis");
+    } finally {
+      setIsUpdatingPriceAnalysis(false);
+      setPriceAnalysisVariant(null);
+    }
+  }
+
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 text-blue-600">
@@ -502,7 +547,7 @@ useEffect(() => {
       </main>
     );
   }
-
+   console.log(priceAnalysisVariant, "priceAnalysisVariant")
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-10 lg:px-20">
       <div className="mx-auto w-full space-y-6">
@@ -519,13 +564,7 @@ useEffect(() => {
             {details.condition && <span className="rounded-full bg-white px-3 py-1 text-sm font-medium shadow-sm">{formatDisplayValue(details.condition)}</span>}
           </div>
           <div className="ml-auto flex items-center gap-3">
-             <button
-              type="button"
-              onClick={() => setShowWebsiteLink(true)}
-              className="cursor-pointer rounded-lg border border-blue-200 px-5 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
-            >
-              Add Website Links
-            </button>
+
             <button
               type="button"
               onClick={() => router.push(`/update-inventory/${encodeURIComponent(id)}`)}
@@ -603,6 +642,9 @@ useEffect(() => {
                     <td className="px-4 py-4">
                       <button type="button" onClick={() => setViewingVariant(variant)} className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50">
                         <Eye className="h-4 w-4" /> View Variant
+                      </button>
+                      <button type="button" onClick={() => setPriceAnalysisVariant(variant)} className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-indigo-200 px-3 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 ml-2">
+                        Links
                       </button>
                     </td>
                   </tr>
@@ -694,13 +736,22 @@ useEffect(() => {
           onClose={() => setShowDescriptionPreview(false)}
         />
       )}
-     
-     { showWebsiteLink && <PriceAnalysisModal
- isOpen={showWebsiteLink}
-  onClose={() => setShowWebsiteLink(false)}
-  initialData={productData}
- 
- />}
+   
+      {priceAnalysisVariant && (
+        <PriceAnalysisModal
+          isOpen={true}
+          onClose={() => setPriceAnalysisVariant(null)}
+          initialData={priceAnalysisVariant.item.price_analysis || {}}
+          onSubmit={handleSavePriceAnalysis}
+          productInfo={{
+            name: productData?.details?.product_title || "",
+            condition: productData?.details?.condition || "",
+            sku: priceAnalysisVariant.item.sku || "",
+            buy_price: priceAnalysisVariant.item.buy_price ?? priceAnalysisVariant.item.price ?? "",
+            sell_price: priceAnalysisVariant.item.sell_price || "",
+          }}
+        />
+      )}
     </main>
   );
 }

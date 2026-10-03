@@ -3,6 +3,7 @@ import CombinationVariantsTable from "@/components/inventory/CombinationVariants
 import { Info } from "lucide-react";
 
 export default function VendorsSection({
+  productData,
   vendors,
   specification,
   addVendor,
@@ -45,6 +46,7 @@ export default function VendorsSection({
               </div>
               {(specification.combinations || []).length > 0 ? (
                 <CombinationVariantsTable
+                productData={productData}
                   vendorIndex={vendorIndex}
                   items={vendor.items}
                   specification={specification}

@@ -6,10 +6,11 @@ import useSWR from "swr";
 import { 
   ArrowLeft, RefreshCw, Search, Box, XCircle, 
   Eye, Calendar, Filter, X,
-  List, ShieldAlert, Wrench, PackageCheck, LogOut, Link2, ShoppingCart, TrendingUp, BarChart3
+  List, ShieldAlert, Wrench, PackageCheck, LogOut, Link2, ShoppingCart, TrendingUp, BarChart3, MapPin
 } from "lucide-react";
 import { getLedgerBySku } from "../../../apis/api";
 import LedgerEntryModal from "../../../../components/ledger/LedgerEntryModal";
+import TopNavigationBar from "@/components/common/TopNavigationBar";
 
 const formatPrice = (val) => {
   if (val === undefined || val === null || isNaN(val)) return "—";
@@ -117,12 +118,24 @@ export default function LedgerEntries({ id, sku }) {
     );
   }
 
-  const avgInventoryValue = totalCount > 0 
-    ? (stats.total_buy_price || 0) / totalCount 
-    : 0;
+  const readyToShipItems = items.filter(
+    (item) => item.current_status?.code === "LDR-003"
+  );
+
+  const purchaseValue = readyToShipItems.reduce(
+    (sum, item) => sum + Number(item.buy_price || 0),
+    0
+  );
+
+  const avgInventoryValue =
+    readyToShipItems.length > 0
+      ? purchaseValue / readyToShipItems.length
+      : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-50">
+      <TopNavigationBar />
+      <div className="p-4 md:p-6 lg:p-8">
       {/* HEADER */}
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
@@ -135,7 +148,7 @@ export default function LedgerEntries({ id, sku }) {
           </button>
           <div>
             <h1 className="text-xl font-bold text-slate-900 md:text-2xl">Ledger Entries</h1>
-            <p className="mt-1 text-sm text-slate-500">SKU: {sku}</p>
+            <p className="mt-1 text-base text-slate-7 00">SKU: {sku}</p>
           </div>
         </div>
         <button
@@ -172,7 +185,7 @@ export default function LedgerEntries({ id, sku }) {
       {/* FILTERS */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-col lg:flex-row lg:items-end gap-4">
         <div className="flex-1">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Search</label>
+          <label className="block text-xs font-semibold text-slate-900 uppercase tracking-wide mb-2">Search</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -180,13 +193,13 @@ export default function LedgerEntries({ id, sku }) {
               value={draftFilters.search}
               onChange={(e) => setDraftFilters(p => ({ ...p, search: e.target.value }))}
               placeholder="Serial No., Name, Order ID..."
-              className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#3B5BDB] focus:ring-1 focus:ring-[#3B5BDB]"
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-base text-slate-900 shadow-sm outline-none transition focus:border-[#3B5BDB] focus:ring-1 focus:ring-[#3B5BDB]"
             />
           </div>
         </div>
         
         <div className="w-full lg:w-48">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Status</label>
+          <label className="block text-xs font-semibold text-slate-900 uppercase tracking-wide mb-2">Status</label>
           <select
             value={draftFilters.status}
             onChange={(e) => setDraftFilters(p => ({ ...p, status: e.target.value }))}
@@ -202,7 +215,7 @@ export default function LedgerEntries({ id, sku }) {
         </div>
 
         <div className="w-full lg:w-36">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Buy Price</label>
+          <label className="block text-xs font-semibold text-slate-900 uppercase tracking-wide mb-2">Purchase Price</label>
           <input
             type="number"
             value={draftFilters.buyPrice}
@@ -213,7 +226,7 @@ export default function LedgerEntries({ id, sku }) {
         </div>
 
         <div className="w-full lg:w-36">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Sell Price</label>
+          <label className="block text-xs font-semibold text-slate-900 uppercase tracking-wide mb-2">Sell Price</label>
           <input
             type="number"
             value={draftFilters.salePrice}
@@ -256,9 +269,10 @@ export default function LedgerEntries({ id, sku }) {
         </div>
 
         <div className="overflow-auto max-h-[70vh]">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="sticky top-0 z-10 bg-slate-50 text-slate-900 font-bold border-b border-slate-200 shadow-sm">
+          <table className="w-full text-left text-[15px] whitespace-nowrap">
+            <thead className="sticky top-0 z-10 bg-slate-50 text-slate-950 font-extrabold border-b border-slate-200 shadow-sm">
               <tr>
+                <th className="px-6 py-4">Ledger ID</th>
                 <th className="px-6 py-4">Serial Number</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Purchase Price</th>
@@ -270,17 +284,17 @@ export default function LedgerEntries({ id, sku }) {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-slate-100 text-slate-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan="9" className="p-8 text-center text-slate-400">
+                  <td colSpan="10" className="p-8 text-center text-slate-400">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-slate-300" />
                     Loading entries...
                   </td>
                 </tr>
               ) : filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="p-12 text-center text-slate-400">
+                  <td colSpan="10" className="p-12 text-center text-slate-400">
                     No ledger entries found matching the criteria.
                   </td>
                 </tr>
@@ -299,55 +313,64 @@ export default function LedgerEntries({ id, sku }) {
                     case 'LDR-003': statusClasses = "bg-blue-50 text-blue-700 border-blue-200"; break;
                     case 'LDR-004': statusClasses = "bg-purple-50 text-purple-700 border-purple-200"; break;
                     case 'LDR-005': statusClasses = "bg-emerald-50 text-emerald-700 border-emerald-200"; break;
+                    case 'LDR-006': statusClasses = "bg-orange-50 text-orange-700 border-orange-200"; break;
+                    case 'LDR-007': statusClasses = "bg-indigo-50 text-indigo-700 border-indigo-200"; break;
                   }
 
                   return (
                     <tr key={item.ledgerId} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-mono text-xs text-slate-800 font-medium">{item.ledgerId}</td>
                       <td className="px-6 py-4 font-mono text-xs">{item.serial_number || "—"}</td>
                       <td className="px-6 py-4">
                         {item.current_status?.status ? (
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold border ${statusClasses}`}>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-semibold border ${statusClasses}`}>
                             {item.current_status.status}
                           </span>
                         ) : "—"}
                       </td>
-                      <td className="px-6 py-4 font-medium">{formatPrice(buyPrice)}</td>
-                      <td className={`px-6 py-4 font-medium ${sellPrice ? profitColorClass : ''}`}>
+                      <td className="px-6 py-4 font-bold">{formatPrice(buyPrice)}</td>
+                      <td className={`px-6 py-4 font-bold ${sellPrice ? profitColorClass : ''}`}>
                         {sellPrice ? formatPrice(sellPrice) : "—"}
                       </td>
-                      <td className={`px-6 py-4 font-medium ${profit !== null ? profitColorClass : ''}`}>
+                      <td className={`px-6 py-4 font-bold ${profit !== null ? profitColorClass : ''}`}>
                         {profit !== null ? formatPrice(profit) : "—"}
                       </td>
                       <td className="px-6 py-4">
                         {item.source ? (
-                          <div className="flex flex-col">
-                            <span className="text-slate-500 text-sm">{item.source.name || "—"}</span>
-                            <span className="text-slate-900 text-sm font-mono">{item.source.orderId || "—"}</span>
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <ShoppingCart className="w-4 h-4 text-slate-400" />
+                              <span className="text-slate-900 text-[15px] font-bold">{item.source.name || "—"}</span>
+                            </div>
+                            <span className="text-slate-600 text-[14px] font-mono ml-[22px]">{item.source.orderId || "—"}</span>
                           </div>
                         ) : "—"}
                       </td>
                       <td className="px-6 py-4">
                         {item.destination ? (
-                          <div className="flex flex-col">
-                            <span className="text-slate-500 text-sm">{item.destination.name || "—"}</span>
-                            <span className="text-slate-900 text-sm font-mono">{item.destination.orderId || "—"}</span>
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="w-4 h-4 text-slate-400" />
+                              <span className="text-slate-900 text-[15px] font-bold">{item.destination.name || "—"}</span>
+                            </div>
+                            <span className="text-slate-600 text-[14px] font-mono ml-[22px]">{item.destination.orderId || "—"}</span>
                           </div>
                         ) : "—"}
                       </td>
-                      <td className="px-6 py-4 text-slate-500">
+                      <td className="px-6 py-4 text-slate-900">
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3 w-3" />
                           {formatDateShort(item.created_at)}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => setSelectedEntry(item)}
-                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-600 border border-orange-200 shadow-sm transition hover:bg-orange-100 hover:text-orange-700 hover:border-orange-300"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          View Details
-                        </button>
+                      <button
+  onClick={() => setSelectedEntry(item)}
+  className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-600 shadow-sm transition hover:border-violet-300 hover:bg-violet-100 hover:text-violet-700"
+>
+  <Eye className="h-3.5 w-3.5" />
+  View Details
+</button>
                       </td>
                     </tr>
                   );
@@ -365,6 +388,7 @@ export default function LedgerEntries({ id, sku }) {
           onClose={() => setSelectedEntry(null)} 
         />
       )}
+      </div>
     </div>
   );
 }

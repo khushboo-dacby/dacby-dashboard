@@ -26,6 +26,7 @@ import {
 } from "../../../context/ProductContext";
 import { convertFirebaseImageToCdn } from "@/app/add-variant/AddVariant";
 import AddWarrantyModal from "@/app/product-detail/AddWarrantyModal";
+import TopNavigationBar from "@/components/common/TopNavigationBar";
 const TABS = ["Overview", "Inventory", "Specification"];
 const INVENTORY_DESCRIPTION_CODES = new Set(["D001Y", "D002Y", "D003Y"]);
 
@@ -265,7 +266,7 @@ export default function UpdateInventory({ id }) {
   const [addingCustomBrand, setAddingCustomBrand] = useState(false);
   const [addingCustomType, setAddingCustomType] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-
+  console.log("priceAnalysisVariant", priceAnalysisVariant);
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (e.target.closest('.dropdown-trigger')) return;
@@ -460,6 +461,7 @@ export default function UpdateInventory({ id }) {
         const response = await updateInventoryDoc(meta.productId, finalInventoryPayload);
         // Update baseline and notify user
         setInventoryBaseline(JSON.stringify(finalInventoryPayload));
+        setInventoryDraft(finalInventoryPayload);
         const successMessage = response?.message || "Inventory saved successfully.";
         toast.success(successMessage);
         
@@ -504,6 +506,7 @@ export default function UpdateInventory({ id }) {
       console.log("Update Specification Payload:", finalSpecPayload);
       const response = await updateSpecDoc(targetSpecId, finalSpecPayload);
       setSpecBaseline(JSON.stringify(finalSpecPayload));
+      setSpecDraft(finalSpecPayload);
       const successMessage = response?.message || "Specification saved successfully.";
       toast.success(successMessage);
       const refreshed = await getProductDetail(meta.productId || id);
@@ -562,6 +565,7 @@ const brandOptions = brandMap[inventoryDraft.category_name] || [];
 const typeOptions = typeMap[inventoryDraft.category_name] || [];
   return (
     <main className="min-h-screen bg-slate-50 pb-28 text-slate-950">
+      <TopNavigationBar />
       <div className="mx-auto w-full">
         {/* Header Section */}
         <header className="flex flex-wrap items-center justify-between gap-5 border-b border-slate-200 bg-white px-4 py-4 sm:px-10 lg:px-20">
@@ -574,7 +578,6 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
-            
             <div className="flex min-w-0 flex-col gap-1">
               <div className="flex items-center gap-2 text-[13px] font-semibold tracking-wide text-slate-400">
                 <span className="uppercase">{formatDisplay(inventoryDraft.category_name)}</span>
@@ -1270,11 +1273,18 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
           }}
         />
       )}
-
+   
       {priceAnalysisVariant && (
         <PriceAnalysisModal
           isOpen={true}
           initialData={priceAnalysisVariant.item.price_analysis || {}}
+          productInfo={{
+            name: inventoryDraft?.product_title || "",
+            condition: inventoryDraft?.condition || "",
+            sku: priceAnalysisVariant.item.sku || "",
+            buy_price: priceAnalysisVariant.item.price || "",
+            sell_price: priceAnalysisVariant.item.sell_price || "",
+          }}
           onClose={() => setPriceAnalysisVariant(null)}
           onSubmit={(data) => {
             applyItem(

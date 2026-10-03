@@ -78,3 +78,14 @@ const CDN_PREFIX =
     ? url.replace(FIREBASE_PREFIX, CDN_PREFIX)
     : url;
 }
+
+export function convertImageToCdn(imageUrl) {
+  const firebasePrefix =
+    "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/";
+  const cdnPrefix = "https://dacby-database.web.app/cdn/";
+  const trimmedUrl = imageUrl.trim();
+
+  if (!trimmedUrl.startsWith(firebasePrefix)) return trimmedUrl;
+
+  return `${cdnPrefix}${trimmedUrl.slice(firebasePrefix.length)}`;
+}

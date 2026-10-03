@@ -43,24 +43,14 @@ function parseFieldValue(field) {
 export function serializeDescriptionState(description) {
   const result = {};
 
-  Object.keys(description || {}).forEach((section) => {
-    if (section === "summary") {
-      result.summary = description.summary;
-      return;
-    }
+  if (description?.summary) {
+    result.summary = description.summary;
+  }
 
-    const sectionFields = description[section];
-    if (!Array.isArray(sectionFields)) {
-      result[section] = sectionFields;
-      return;
-    }
-
-    const sectionObject = {};
-    sectionFields.forEach((field) => {
-      if (!field || !field.key) return;
-      sectionObject[field.key] = parseFieldValue(field);
-    });
-    result[section] = sectionObject;
+  const fields = description?.fields || [];
+  fields.forEach((field) => {
+    if (!field || !field.key) return;
+    result[field.key] = parseFieldValue(field);
   });
 
   return result;
@@ -113,44 +103,51 @@ function isFieldArray(value) {
 }
 
 function convertValueToField(value) {
-  if (Array.isArray(value)) {
-    const isPrimitiveArray = value.every(
-      (item) =>
-        item === null ||
-        item === undefined ||
-        ["string", "number", "boolean"].includes(typeof item),
-    );
-    if (isPrimitiveArray) {
-      return {
-        key: "value",
-        value: value.map((item) => (item === null ? "null" : String(item))).join("\n"),
-        valueType: "multiple",
-      };
+  const fields = [];
+  function recurse(current) {
+    if (current === null || current === undefined) return;
+    if (Array.isArray(current)) {
+      const isPrimitiveArray = current.every(
+        (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
+      );
+      if (isPrimitiveArray) {
+        fields.push({
+          key: "value",
+          value: current.map((item) => (item === null ? "null" : String(item))).join("\n"),
+          valueType: "multiple",
+        });
+      } else {
+        current.forEach(recurse);
+      }
+    } else if (typeof current === "object") {
+      Object.keys(current).forEach((key) => {
+        const val = current[key];
+        if (val && typeof val === "object" && !Array.isArray(val)) {
+          recurse(val);
+        } else if (Array.isArray(val)) {
+          const isPrimitiveArray = val.every(
+            (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
+          );
+          if (isPrimitiveArray) {
+            fields.push({ key: String(key), value: val.map((item) => (item === null ? "null" : String(item))).join("\n"), valueType: "multiple" });
+          } else {
+            recurse(val);
+          }
+        } else {
+          fields.push({ key: String(key), value: val === null || val === undefined ? "" : String(val), valueType: "single" });
+        }
+      });
+    } else {
+      fields.push({ key: "value", value: String(current), valueType: "single" });
     }
-    return {
-      key: "value",
-      value: JSON.stringify(value, null, 2),
-      valueType: "single",
-    };
   }
 
-  if (value && typeof value === "object") {
-    return {
-      key: "value",
-      value: JSON.stringify(value, null, 2),
-      valueType: "single",
-    };
-  }
-
-  return {
-    key: "value",
-    value: value === undefined || value === null ? "" : String(value),
-    valueType: "single",
-  };
+  recurse(value);
+  return fields;
 }
 
 export function convertDescriptionObjectToFormState(parsed) {
-  const result = { summary: "" };
+  const result = { summary: "", fields: [] };
 
   if (parsed?.summary !== undefined) {
     result.summary =
@@ -163,70 +160,39 @@ export function convertDescriptionObjectToFormState(parsed) {
     if (key === "summary") return;
     const sectionValue = parsed[key];
 
-    if (sectionValue === null || sectionValue === undefined) {
-      result[key] = "";
-      return;
-    }
-
-    if (isFieldArray(sectionValue)) {
-      result[key] = sectionValue;
-      return;
-    }
-
-    if (typeof sectionValue === "string" || typeof sectionValue === "number" || typeof sectionValue === "boolean") {
-      result[key] = sectionValue;
-      return;
-    }
-
-    if (Array.isArray(sectionValue)) {
-      result[key] = [convertValueToField(sectionValue)];
-      return;
-    }
-
-    const sectionFields = Object.keys(sectionValue).map((fieldKey) => {
-      const fieldValue = sectionValue[fieldKey];
-      if (Array.isArray(fieldValue)) {
-        const isPrimitiveArray = fieldValue.every(
-          (item) =>
-            item === null ||
-            item === undefined ||
-            ["string", "number", "boolean"].includes(typeof item),
-        );
-        if (isPrimitiveArray) {
-          return {
-            key: String(fieldKey),
-            value: fieldValue
-              .map((item) => (item === null ? "null" : String(item)))
-              .join("\n"),
-            valueType: "multiple",
-          };
+    if (typeof sectionValue === "object" && sectionValue !== null) {
+      if (Array.isArray(sectionValue)) {
+        const flattened = convertValueToField(sectionValue);
+        if (flattened.length === 1 && flattened[0].key === "value") {
+          flattened[0].key = key;
         }
-        return {
-          key: String(fieldKey),
-          value: JSON.stringify(fieldValue, null, 2),
-          valueType: "single",
-        };
+        result.fields.push(...flattened);
+      } else {
+        Object.keys(sectionValue).forEach((fieldKey) => {
+          const fieldValue = sectionValue[fieldKey];
+          if (fieldValue && typeof fieldValue === "object" && !Array.isArray(fieldValue)) {
+             const flattened = convertValueToField(fieldValue);
+             if (flattened.length === 1 && flattened[0].key === "value") {
+                 flattened[0].key = fieldKey;
+             }
+             result.fields.push(...flattened);
+          } else if (Array.isArray(fieldValue)) {
+             const isPrimitiveArray = fieldValue.every(
+                (item) => item === null || item === undefined || ["string", "number", "boolean"].includes(typeof item),
+             );
+             if (isPrimitiveArray) {
+                result.fields.push({ key: String(fieldKey), value: fieldValue.map((item) => (item === null ? "null" : String(item))).join("\n"), valueType: "multiple" });
+             } else {
+                result.fields.push(...convertValueToField(fieldValue));
+             }
+          } else {
+             result.fields.push({ key: String(fieldKey), value: fieldValue === undefined || fieldValue === null ? "" : String(fieldValue), valueType: "single" });
+          }
+        });
       }
-
-      if (fieldValue && typeof fieldValue === "object") {
-        return {
-          key: String(fieldKey),
-          value: JSON.stringify(fieldValue, null, 2),
-          valueType: "single",
-        };
-      }
-
-      return {
-        key: String(fieldKey),
-        value:
-          fieldValue === undefined || fieldValue === null
-            ? ""
-            : String(fieldValue),
-        valueType: "single",
-      };
-    });
-
-    result[key] = sectionFields;
+    } else {
+      result.fields.push({ key: String(key), value: sectionValue === undefined || sectionValue === null ? "" : String(sectionValue), valueType: "single" });
+    }
   });
 
   return result;
@@ -257,58 +223,31 @@ export default function DescriptionEditor({
   const descriptionState = description ?? {};
   const [showPreview, setShowPreview] = useState(false);
 
-  const flatFields = [];
-  Object.keys(descriptionState).forEach((section) => {
-    if (section === "summary") return;
-    const val = descriptionState[section];
-
-    if (Array.isArray(val)) {
-      val.forEach((field, index) => {
-        flatFields.push({
-          id: `${section}-${index}`,
-          section,
-          index,
-          key: field.key,
-          value: field.value,
-          valueType: field.valueType,
-          isTopLevel: false,
-        });
-      });
-    } else if (val !== null && typeof val !== "object") {
-      flatFields.push({
-        id: `top-${section}`,
-        section: "TOP",
-        key: section,
-        value: val,
-        valueType: "single",
-        isTopLevel: true,
-      });
-    }
-  });
+  const flatFields = (descriptionState.fields || []).map((field, index) => ({
+    id: `field-${index}`,
+    index,
+    key: field.key,
+    value: field.value,
+    valueType: field.valueType,
+  }));
 
   const summaryText =
     typeof descriptionState?.summary === "string" ? descriptionState.summary : "";
 
   function handleAddField() {
-    addDescriptionField("Details");
+    addDescriptionField();
   }
 
   function handleKeyChange(field, newKey) {
-    if (!field.isTopLevel) {
-      updateDescriptionFieldKey(field.section, field.index, newKey);
-    }
+    updateDescriptionFieldKey(field.index, newKey);
   }
 
   function handleValueChange(field, newValue) {
-    if (!field.isTopLevel) {
-      updateDescriptionFieldValue(field.section, field.index, newValue);
-    }
+    updateDescriptionFieldValue(field.index, newValue);
   }
 
   function handleRemove(field) {
-    if (!field.isTopLevel) {
-      removeDescriptionField(field.section, field.index);
-    }
+    removeDescriptionField(field.index);
   }
 
   function toReadableLabel(key) {

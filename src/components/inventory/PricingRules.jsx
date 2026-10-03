@@ -20,14 +20,14 @@ export default function PricingRules({ fields, setField }) {
           />
         </div>
         <div>
-          {fields.fast_pickup_deduction !== undefined && fields.fast_pickup_deduction !== null && fields.fast_pickup_deduction !== "" ? (
+          {fields.fast_pickup_deduction !== undefined ? (
             <>
               <span className="mb-1 flex items-center justify-between text-sm font-medium text-slate-700">
                 Fast Pickup Deduction
                 <button
                   type="button"
-                  onClick={() => setField("fast_pickup_deduction", "")}
-                  className="text-xs text-rose-500 hover:text-rose-700 font-semibold"
+                  onClick={() => setField("fast_pickup_deduction", undefined)}
+                  className="text-xs font-semibold text-rose-500 hover:text-rose-700"
                 >
                   Remove
                 </button>
@@ -45,7 +45,7 @@ export default function PricingRules({ fields, setField }) {
             <div className="flex h-full items-end">
               <button
                 type="button"
-                onClick={() => setField("fast_pickup_deduction", 0)}
+                onClick={() => setField("fast_pickup_deduction", "")}
                 className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
               >
                 <Plus className="h-4 w-4" /> Add Fast Pickup Deduction
