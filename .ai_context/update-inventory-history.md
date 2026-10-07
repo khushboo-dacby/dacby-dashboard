@@ -1,5 +1,23 @@
 # Update Inventory History
 
+## 2026-10-03
+
+### Description Editor AI Integration
+
+- Integrated Gemini (`gemini-2.5-flash`) via the `✨ Generate with AI` button inside `DescriptionEditor.jsx`.
+- Successfully implemented structured JSON generation using Gemini with Google Search grounding, enabling automatic form population.
+- Abstracted and centralized prompt logic into a new utility file `src/utils/description-prompts.js` for better modularity (separating the strict CD description prompt from the generic fallback prompt).
+- Improved the `✨ Generate with AI` button UI by adding a cycling loading state indicator (`🔍 Researching product...`, `✍️ Writing description...`, `✓ Preparing product details...`).
+
+### Ollama Migration & Current Bugs
+
+- Migrated the `/api/generate-product/route.js` API route from Gemini to local Ollama (`qwen2.5:7b`) utilizing `ollama.webSearch` and `ollama.chat`.
+- **Bugs/Issues to handle:**
+  - Ollama struggles to consistently output valid JSON, resulting in parsing errors and frontend crashes.
+  - The model often returns improper or hallucinated data that does not reliably match the requested JSON schema from `description-prompts.js`.
+  - Generation time is excessively slow compared to the previous Gemini implementation.
+  - Result parsing and error handling in `route.js` is not robust enough to recover from Ollama's failure modes.
+
 ## 2026-09-15
 
 ### Product data sharing and caching

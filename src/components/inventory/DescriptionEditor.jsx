@@ -212,16 +212,39 @@ function getTopLevelFieldRows(description) {
 }
 
 export default function DescriptionEditor({
+  productTitle,
+  category,
+  condition,
+  promptType,
   description,
   updateSummary,
   addDescriptionField,
   updateDescriptionFieldKey,
   updateDescriptionFieldValue,
   removeDescriptionField,
+  resetDescription,
   readOnly = false,
 }) {
   const descriptionState = description ?? {};
   const [showPreview, setShowPreview] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  const loadingTexts = [
+    "🔍 Researching product...",
+    "✍️ Writing description...",
+    "✓ Preparing product details..."
+  ];
+
+  useEffect(() => {
+    if (aiLoading) {
+      setLoadingTextIndex(0);
+      const interval = setInterval(() => {
+        setLoadingTextIndex((prev) => (prev < loadingTexts.length - 1 ? prev + 1 : prev));
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [aiLoading]);
 
   const flatFields = (descriptionState.fields || []).map((field, index) => ({
     id: `field-${index}`,
@@ -237,6 +260,48 @@ export default function DescriptionEditor({
   function handleAddField() {
     addDescriptionField();
   }
+
+  const handleGenerateWithAI = async () => {
+    if (!productTitle) {
+      setAiError("Please enter a product title first.");
+      return;
+    }
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const response = await fetch("/api/generate-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productTitle, category, condition, promptType }),
+      });
+      const data = await response.json();
+      console.log("Gemini API Response:", data);
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate");
+      }
+      
+      let rawJson = data.result;
+      if (typeof rawJson === 'string') {
+        rawJson = rawJson.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/, '').trim();
+      }
+      let parsedJson = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+      if (parsedJson && parsedJson.description) {
+        const newState = convertDescriptionObjectToFormState(parsedJson.description);
+        if (resetDescription) {
+          resetDescription(newState);
+        } else {
+          console.warn("resetDescription prop is missing. Cannot populate form.");
+        }
+      } else {
+         throw new Error("Invalid format from AI");
+      }
+    } catch (err) {
+      console.error(err);
+      setAiError(err.message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   function handleKeyChange(field, newKey) {
     updateDescriptionFieldKey(field.index, newKey);
@@ -282,6 +347,23 @@ export default function DescriptionEditor({
                 Manage all product specification fields here.
               </p>
             </div>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={handleGenerateWithAI}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-purple-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+              >
+                {aiLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {loadingTexts[loadingTextIndex]}
+                  </span>
+                ) : (
+                  "✨ Generate with AI"
+                )}
+              </button>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -353,6 +435,23 @@ export default function DescriptionEditor({
               >
                 + Add Field
               </button>
+            </div>
+          )}
+
+          {/* AI Error Box */}
+          {aiError && (
+            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
+              <div className="mb-2 flex items-center justify-between">
+                <h5 className="font-semibold text-red-900">AI Generation Failed</h5>
+                <button
+                  type="button"
+                  onClick={() => setAiError("")}
+                  className="text-sm font-medium text-red-600 hover:text-red-800"
+                >
+                  Dismiss
+                </button>
+              </div>
+              <div className="rounded-lg bg-white p-3 text-sm text-red-600 border border-red-100">{aiError}</div>
             </div>
           )}
         </section>

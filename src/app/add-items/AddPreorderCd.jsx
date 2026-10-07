@@ -691,6 +691,10 @@ export default function AddPreorderCd({ categoryName, code }) {
               )} */}
             </div>
             <DescriptionEditor
+              productTitle={formData.productTitle}
+              category={categoryName}
+              condition={isGameCd ? (isNewCondition ? "New" : "Pre Owned") : categorySettings.condition}
+              promptType="cd"
               description={descriptionState}
               updateSummary={updateSummary}
               addDescriptionSection={addDescriptionSection}

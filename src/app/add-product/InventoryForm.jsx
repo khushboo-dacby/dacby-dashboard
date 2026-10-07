@@ -1593,6 +1593,9 @@ export default function InventoryForm() {
                   removeOptionDescription={removeOptionDescription}
                 />
                 <DescriptionEditor
+                  productTitle={fields.product_title}
+                  category={fields.category_name}
+                  condition={fields.condition}
                   description={description}
                   value={description}
                   onChange={setDescription}
