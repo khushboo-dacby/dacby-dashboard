@@ -13,6 +13,7 @@ import ImagePreview from "../../../components/inventory/ImagePreview";
 import { useProductContext } from "../../../context/ProductContext";
 import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
 import { toast } from "sonner";
+import { sanitizeImageSrc } from "@/utils/imageValidation";
 
 import PriceAnalysisModal from "@/components/price-analysis/PriceAnalysisModal";
 
@@ -630,7 +631,15 @@ useEffect(() => {
                   <tr key={`${variant.vendorId}-${variant.combinationId}-${variant.itemId}`} className="border-b border-slate-100 last:border-0">
                     <td className="px-4 py-4">
                       <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-slate-200">
-                        {variant.item.images?.[0] ? <Image src={variant.item.images[0]} alt={variant.item.sku || "Variant"} fill sizes="48px" className="object-contain p-1" /> : null}
+                        {variant.item.images?.[0] ? (
+                          <Image
+                            src={sanitizeImageSrc(convertFirebaseImageToCdn(variant.item.images[0])) || "/dacby-assets/download.svg"}
+                            alt={variant.item.sku || "Variant"}
+                            fill
+                            sizes="48px"
+                            className="object-contain p-1"
+                          />
+                        ) : null}
                       </div>
                     </td>
                     <td className="max-w-72 px-4 py-4 font-mono text-xs">{formatDisplayValue(variant.item.sku)}</td>

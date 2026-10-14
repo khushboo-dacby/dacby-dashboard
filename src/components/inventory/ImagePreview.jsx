@@ -4,6 +4,8 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 
+import { sanitizeImageSrc } from "@/utils/imageValidation";
+
 function isPreviewableImageUrl(value) {
   try {
     const url = new URL(String(value || "").trim());
@@ -21,9 +23,10 @@ function getOptimizedImageUrl(src) {
   return `/_next/image?url=${encodeURIComponent(src)}&w=2048&q=75`;
 }
 
-export default function ImagePreview({ imageUrls, hw="h-20 w-20" }) {
-  const previewableImages = imageUrls
-    .map((imageUrl) => String(imageUrl || "").trim())
+export default function ImagePreview({ imageUrls = [], hw="h-20 w-20" }) {
+  const previewableImages = (Array.isArray(imageUrls) ? imageUrls : [imageUrls])
+    .map((imageUrl) => sanitizeImageSrc(imageUrl))
+    .filter(Boolean)
     .filter(isPreviewableImageUrl);
 
   if (previewableImages.length === 0) return null;

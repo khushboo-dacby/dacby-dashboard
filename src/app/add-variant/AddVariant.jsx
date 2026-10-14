@@ -168,12 +168,17 @@ export function makeVariantSku(productDetails, selectedAttributes) {
 }
 
 export function convertFirebaseImageToCdn(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== "string") return "";
+  let trimmedUrl = imageUrl.trim();
+  if (!trimmedUrl) return "";
+  if (trimmedUrl.startsWith("//")) {
+    trimmedUrl = `https:${trimmedUrl}`;
+  }
+
   const firebasePrefix =
     "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/";
   const cdnPrefix = "https://dacby-database.web.app/cdn/";
-  const trimmedUrl = imageUrl.trim();
 
-  if (!trimmedUrl) return "";
   if (!trimmedUrl.startsWith(firebasePrefix)) return trimmedUrl;
 
   const imagePathAndQuery = trimmedUrl.slice(firebasePrefix.length);

@@ -65,9 +65,14 @@ function getCdSku(productTitle) {
 }
 
 function isValidImageUrl(value) {
+  const str = String(value || "").trim();
+  if (!str || str.startsWith("//")) return false;
   try {
-    const url = new URL(String(value || "").trim());
-    return url.protocol === "http:" || url.protocol === "https:";
+    const url = new URL(str);
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      Boolean(url.hostname && url.hostname.includes("."))
+    );
   } catch {
     return false;
   }

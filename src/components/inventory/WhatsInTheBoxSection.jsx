@@ -1,5 +1,10 @@
 import { Trash2, Plus } from "lucide-react";
 import ImagePreview from "@/components/inventory/ImagePreview";
+import {
+  handleImageInputChange,
+  handleImageInputPaste,
+  handleImageInputBlur,
+} from "@/utils/imageValidation";
 
 export default function WhatsInTheBoxSection({
   whatsInTheBox,
@@ -35,7 +40,19 @@ export default function WhatsInTheBoxSection({
               <input
                 value={item?.image_url ?? ""}
                 onChange={(event) =>
-                  updateBoxItem(index, "image_url", event.target.value)
+                  handleImageInputChange(event.target.value, (val) =>
+                    updateBoxItem(index, "image_url", val)
+                  )
+                }
+                onPaste={(event) =>
+                  handleImageInputPaste(event, (val) =>
+                    updateBoxItem(index, "image_url", val)
+                  )
+                }
+                onBlur={(event) =>
+                  handleImageInputBlur(event.target.value, (val) =>
+                    updateBoxItem(index, "image_url", val)
+                  )
                 }
                 placeholder="Image URL"
                 className="min-w-0 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"

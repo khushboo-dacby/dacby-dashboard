@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { ArrowLeft, RefreshCw, Search, Package, CheckCircle, XCircle, Filter, RotateCcw } from "lucide-react";
-import { getProductSkus } from "../../apis/api";
-import TopNavigationBar from "@/components/common/TopNavigationBar";
-import skusJson from "./[sku]/skus.json";
+import { getProductDetail } from "../apis/api";
+// import TopNavigationBar from "@/components/common/TopNavigationBar";
+
 import { PhotoProvider, PhotoView } from "react-photo-view";
 
 
@@ -23,7 +23,7 @@ export default function LedgerDetail({ id }) {
   const router = useRouter();
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     `ledger-skus-${id}`,
-    () => getProductSkus(id),
+    () => getProductDetail(id),
     {
       revalidateOnFocus: false,
     }
@@ -31,22 +31,34 @@ export default function LedgerDetail({ id }) {
 
   const [filters, setFilters] = useState({});
 
-  // Safely default to an empty array
-  const skus = Array.isArray(skusJson?.skus) ? skusJson.skus : [];
+  const skus = useMemo(() => {
+    if (!data?.details?.vendors) return [];
+    const items = [];
+    Object.values(data.details.vendors).forEach(vendor => {
+      if (vendor.combination_offered) {
+        Object.values(vendor.combination_offered).forEach(combo => {
+          Object.values(combo).forEach(item => {
+            items.push(item);
+          });
+        });
+      }
+    });
+    return items;
+  }, [data]);
 
   const filterKeys = useMemo(() => {
-    if (!skus || skus.length === 0) return [];
-    const baseKeys = ["sku", "title", "images", "firstImage", "price", "mrp", "sell_price", "id"];
+    if (!data?.specifications?.combination) return [];
+    const ignoreKeys = ["Condition", "Type"];
     const allKeys = new Set();
-    skus.forEach(sku => {
-      Object.keys(sku).forEach(key => {
-        if (!baseKeys.includes(key) && typeof sku[key] === 'string') {
+    Object.values(data.specifications.combination).forEach(comboObj => {
+      Object.keys(comboObj).forEach(key => {
+        if (!ignoreKeys.includes(key)) {
           allKeys.add(key);
         }
       });
     });
     return Array.from(allKeys);
-  }, [skus]);
+  }, [data]);
 
   const filterOptions = useMemo(() => {
     const options = {};
@@ -118,7 +130,7 @@ export default function LedgerDetail({ id }) {
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <TopNavigationBar />
+      {/* <TopNavigationBar /> */}
       <div className="p-4 md:p-6">
         {/* HEADER */}
         <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -135,27 +147,19 @@ export default function LedgerDetail({ id }) {
                 <div className="h-8 w-64 animate-pulse rounded bg-slate-200"></div>
               ) : (
                 <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
-                  {skusJson?.productTitle || "Product SKUs"}
+                  {data?.details?.product_title || "Product SKUs"}
                 </h1>
               )}
               <p className="mt-1 text-sm text-slate-500">Manage product SKU variants</p>
             </div>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isValidating}
-            className="flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${isValidating ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
         </header>
 
         {/* FILTERS CONTAINER */}
         <div className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
                 <Filter className="h-4 w-4" />
               </div>
               <h2 className="text-sm font-bold text-slate-800">Filters</h2>
@@ -164,7 +168,7 @@ export default function LedgerDetail({ id }) {
               onClick={() => setFilters({})}
               className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-rose-50 text-rose-600 group-hover:bg-rose-100 transition">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-50 text-slate-600 group-hover:bg-slate-100 transition">
                 <RotateCcw className="h-3.5 w-3.5" />
               </div>
               Clear Filters
@@ -177,9 +181,9 @@ export default function LedgerDetail({ id }) {
                   {key.replace(/_/g, ' ')}
                 </label>
                 <select
-                  className={`h-9 w-full rounded-lg border px-3 text-sm font-semibold shadow-sm outline-none transition focus:border-[#3B5BDB] focus:ring-1 focus:ring-[#3B5BDB] cursor-pointer ${
+                  className={`h-9 w-full rounded-lg border px-3 text-sm font-semibold shadow-sm outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-400 cursor-pointer ${
                     effectiveFilters[key] !== undefined && effectiveFilters[key] !== "All"
-                      ? "border-[#3B5BDB] bg-blue-50/50 text-[#3B5BDB]"
+                      ? "border-slate-300 bg-slate-50 text-slate-900"
                       : "border-slate-200 bg-white text-slate-700"
                   }`}
                   value={effectiveFilters[key] || "All"}
@@ -198,16 +202,16 @@ export default function LedgerDetail({ id }) {
         {/* METRICS */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row">
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm w-full sm:w-auto">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-50 text-[#3B5BDB]">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700">
               <Package className="h-3.5 w-3.5" />
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total SKUs</p>
-              <p className="text-sm font-bold text-slate-900 leading-none">{isLoading ? "-" : skusJson?.totalSkus ?? skus.length}</p>
+              <p className="text-sm font-bold text-slate-900 leading-none">{isLoading ? "-" : skus.length}</p>
             </div>
           </div>
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm w-full sm:w-auto">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700">
               <CheckCircle className="h-3.5 w-3.5" />
             </div>
             <div>
@@ -220,23 +224,57 @@ export default function LedgerDetail({ id }) {
         {/* CONTENT */}
         {isLoading ? (
           // Loading Skeleton
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-                <div className="flex aspect-video w-full animate-pulse items-center justify-center bg-slate-100">
-                  <div className="h-20 w-20 rounded-full bg-slate-200"></div>
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <div className="mb-4 h-6 w-3/4 animate-pulse rounded bg-slate-200"></div>
-                  <div className="space-y-3">
-                    <div className="h-4 w-1/2 animate-pulse rounded bg-slate-200"></div>
-                    <div className="h-4 w-1/3 animate-pulse rounded bg-slate-200"></div>
-                    <div className="h-4 w-full animate-pulse rounded bg-slate-200"></div>
-                  </div>
-                  <div className="mt-6 h-10 w-full animate-pulse rounded-lg bg-slate-200"></div>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm flex flex-col">
+            <div className="max-h-[65vh] overflow-auto">
+              <table className="w-full text-left text-sm text-slate-600 relative">
+                <thead className="bg-slate-50 text-sm uppercase text-slate-900 sticky top-0 z-10 border-b border-slate-200 outline outline-1 outline-slate-200">
+                  <tr>
+                    <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">
+                      <div className="h-4 w-12 animate-pulse rounded bg-slate-200"></div>
+                    </th>
+                    <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">
+                      <div className="h-4 w-32 animate-pulse rounded bg-slate-200"></div>
+                    </th>
+                    <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">
+                      <div className="h-4 w-20 animate-pulse rounded bg-slate-200"></div>
+                    </th>
+                    <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">
+                      <div className="h-4 w-20 animate-pulse rounded bg-slate-200"></div>
+                    </th>
+                    <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">
+                      <div className="h-4 w-20 animate-pulse rounded bg-slate-200"></div>
+                    </th>
+                    <th className="px-4 py-3 font-black text-center whitespace-nowrap bg-slate-50">
+                      <div className="mx-auto h-4 w-16 animate-pulse rounded bg-slate-200"></div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <tr key={i}>
+                      <td className="px-4 py-3">
+                        <div className="h-12 w-12 animate-pulse rounded-lg bg-slate-200"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 w-48 animate-pulse rounded bg-slate-200"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 w-24 animate-pulse rounded bg-slate-200"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 w-20 animate-pulse rounded bg-slate-200"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 w-24 animate-pulse rounded bg-slate-200"></div>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="mx-auto h-8 w-24 animate-pulse rounded-lg bg-slate-200"></div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : skus.length === 0 ? (
           // Empty State
@@ -265,9 +303,7 @@ export default function LedgerDetail({ id }) {
                       {filterKeys.map(key => (
                         <th key={key} className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">{key.replace(/_/g, ' ')}</th>
                       ))}
-                      <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">MRP</th>
-                      <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">Buy Price</th>
-                      <th className="px-4 py-3 font-black whitespace-nowrap bg-slate-50">Sell Price</th>
+
                       <th className="px-4 py-3 font-black text-center whitespace-nowrap bg-slate-50">Action</th>
                     </tr>
                   </thead>
@@ -276,10 +312,10 @@ export default function LedgerDetail({ id }) {
                       <tr key={sku.sku} className="hover:bg-slate-50 transition-colors">
                         <td className="px-4 py-3">
                           <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100 transition-all hover:border-slate-300 hover:shadow-sm">
-                            {sku.firstImage ? (
-                              <PhotoView src={sku.firstImage}>
+                            {sku.images?.[0] ? (
+                              <PhotoView src={sku.images[0]}>
                                 <Image 
-                                  src={sku.firstImage} 
+                                  src={sku.images[0]} 
                                   alt={sku.sku} 
                                   width={48} 
                                   height={48} 
@@ -299,22 +335,14 @@ export default function LedgerDetail({ id }) {
                             {sku[key] || "-"}
                           </td>
                         ))}
-                        <td className="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">
-                          {sku.mrp ? formatPrice(sku.mrp) : "-"}
-                        </td>
-                        <td className="px-4 py-3 font-black text-emerald-700 whitespace-nowrap">
-                          {sku.price ? formatPrice(sku.price) : "-"}
-                        </td>
-                        <td className="px-4 py-3 font-black text-rose-600 whitespace-nowrap">
-                          {sku.sell_price ? formatPrice(sku.sell_price) : "-"}
-                        </td>
+
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               router.push(`/ledger/${id}/${sku.sku}`);
                             }}
-                            className="rounded-lg bg-[#3B5BDB] px-4 py-2 text-xs font-medium text-white shadow-sm transition-all hover:bg-[#2F4BB5] active:scale-[0.98] whitespace-nowrap"
+                            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 active:scale-[0.98] whitespace-nowrap"
                           >
                             View Details
                           </button>

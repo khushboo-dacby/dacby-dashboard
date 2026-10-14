@@ -1,5 +1,10 @@
 import { Plus, Trash2 } from "lucide-react";
 import ImagePreview from "@/components/inventory/ImagePreview";
+import {
+  handleImageInputChange,
+  handleImageInputPaste,
+  handleImageInputBlur,
+} from "@/utils/imageValidation";
 
 export default function ConfigurationIconsSection({
   configurationIcons,
@@ -33,7 +38,19 @@ export default function ConfigurationIconsSection({
               <input
                 value={entry.value}
                 onChange={(event) =>
-                  updateConfigurationIcon(index, "value", event.target.value)
+                  handleImageInputChange(event.target.value, (val) =>
+                    updateConfigurationIcon(index, "value", val)
+                  )
+                }
+                onPaste={(event) =>
+                  handleImageInputPaste(event, (val) =>
+                    updateConfigurationIcon(index, "value", val)
+                  )
+                }
+                onBlur={(event) =>
+                  handleImageInputBlur(event.target.value, (val) =>
+                    updateConfigurationIcon(index, "value", val)
+                  )
                 }
                 placeholder="https://example.com/icon.png"
                 className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"

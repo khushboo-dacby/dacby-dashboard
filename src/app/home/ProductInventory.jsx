@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LoaderCircle, RefreshCw, Search, Trash2, ClipboardList } from "lucide-react";
+import { LoaderCircle, RefreshCw, Search, Trash2, ClipboardList, ChevronDown, Check } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -12,6 +12,7 @@ import { deleteProduct as deleteProductApi, fetchInventory, searchProducts } fro
 import { toast } from "sonner";
 import { categories } from "../../constants/inventory";
 import AddNewProduct from "./AddNewProduct";
+import { sanitizeImageSrc } from "@/utils/imageValidation";
 import DeletePop from "../../components/confirmation-modal/DeletePop";
 
 function getVariantItems(product) {
@@ -74,55 +75,47 @@ function ProductRow({ product, onDelete }) {
         <td className="px-5 py-5">
           <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <Image
-              src={thumbnail || "/dacby-assets/download.svg"}
+              src={sanitizeImageSrc(thumbnail) || "/dacby-assets/download.svg"}
               alt={thumbnail ? product.product_title : "No image available"}
               fill
               sizes="96px"
               className={`object-contain p-2 ${!thumbnail ? "opacity-40" : ""}`}
             />
             {(product.condition) && (
-              <span className="absolute right-0 top-0 rounded-bl-xl bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm uppercase tracking-wider">
+              <span className="absolute right-0 top-0 rounded-bl-xl bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-black shadow-sm uppercase tracking-wider">
                 {product.condition}
               </span>
             )}
           </div>
         </td>
         <td className="min-w-72 px-5 py-5">
-          <p className="text-base font-semibold text-slate-900">{product.product_title}</p>
-          <p className="mt-1 text-sm text-orange-700">
+          <p className="text-sm font-semibold text-slate-900">{product.product_title}</p>
+          <p className="mt-1 text-xs text-slate-600">
             {variantsLength} {variantsLength === 1 ? "variant" : "variants"}
           </p>
         </td>
         <td className="min-w-40 px-5 py-5">
-          <p className="text-[15px] font-medium text-slate-800">{product.category_name || "—"}</p>
-          <p className="mt-2 inline-block rounded bg-orange-100 px-2 py-1 text-[13px] font-semibold tracking-wider text-orange-900">
+          <p className="text-[13px] font-medium text-slate-800">{product.category_name || "—"}</p>
+          <p className="mt-1.5 inline-block rounded bg-slate-100 px-2 py-1 text-xs font-semibold tracking-wider text-slate-600">
             {product.code || "—"}
           </p>
         </td>
         <td className="min-w-32 px-5 py-5">
-          <p className="text-base font-semibold text-slate-900">{formatPrice(product.price)}</p>
+          <p className="text-sm font-semibold text-slate-900">{formatPrice(product.price)}</p>
           {product.mrp > product.price && (
             <div className="mt-1 flex items-center gap-2">
-              <p className="text-[13px] text-slate-400 line-through">{formatPrice(product.mrp)}</p>
-              <p className="rounded bg-emerald-50 px-1.5 py-0.5 text-[13px] font-bold text-emerald-600">{discount}% OFF</p>
+              <p className="text-xs text-slate-400 line-through">{formatPrice(product.mrp)}</p>
+              <p className="whitespace-nowrap rounded bg-emerald-50 px-1.5 py-0.5 text-xs font-bold text-emerald-500">{discount}% OFF</p>
             </div>
           )}
         </td>
         <td className="min-w-28 px-5 py-5">
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${product.in_stock && !product.outofstock
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-rose-50 text-rose-600"
-            }`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${product.in_stock && !product.outofstock ? "bg-emerald-500" : "bg-rose-500"}`}></span>
+          <span className="inline-flex items-center rounded-full px-3 py-1 text-[13px] font-medium bg-white border border-slate-200 text-slate-700">
             {product.in_stock && !product.outofstock ? "In" : "Out"}
           </span>
         </td>
         <td className="min-w-28 px-5 py-5">
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${product.is_active !== false && product.status !== "Deactive"
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-slate-100 text-slate-600"
-            }`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${product.is_active !== false && product.status !== "Deactive" ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+          <span className="inline-flex items-center rounded-full px-3 py-1 text-[13px] font-medium bg-white border border-slate-200 text-slate-700">
             {product.is_active !== false && product.status !== "Deactive" ? "Active" : "Deactive"}
           </span>
         </td>
@@ -134,9 +127,8 @@ function ProductRow({ product, onDelete }) {
                 e.stopPropagation();
                 router.push(`/ledger/${product.id}`);
               }}
-              className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-3 py-2 text-[13px] font-medium text-white transition-all duration-200 ease-out hover:scale-[1.03] hover:bg-[#2F4BB5] hover:shadow-sm active:scale-[0.98]"
+              className="flex whitespace-nowrap items-center rounded-lg bg-white border border-emerald-200 px-4 py-1.5 text-[13px] font-semibold text-emerald-500 transition-all duration-200 hover:bg-emerald-50 active:scale-[0.98]"
             >
-              <ClipboardList className="h-4 w-4" />
               Ledger Details
             </button>
             <button
@@ -196,6 +188,8 @@ export default function ProductInventory() {
   const [selectedCategoryCode, setSelectedCategoryCode] = useState("");
   const [cachedAllPages, setCachedAllPages] = useState([]);
   const [pages, setPages] = useState(() => (initialPage ? [initialPage] : []));
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const ITEMS_PER_PAGE = 20;
   const [isLoading, setIsLoading] = useState(true);
   const [loadingLabel, setLoadingLabel] = useState("Loading inventory...");
   const [error, setError] = useState("");
@@ -206,6 +200,19 @@ export default function ProductInventory() {
   const [searchError, setSearchError] = useState("");
   const searchRequestId = useRef(0);
   const loaderRef = useRef(null);
+  
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const categoryDropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setIsCategoryOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Restore search state from sessionStorage synchronously before paint
   useIsomorphicLayoutEffect(() => {
@@ -302,28 +309,41 @@ export default function ProductInventory() {
   const allProducts = useMemo(() => pages.flatMap(p => p.products), [pages]);
   const hasNextPage = pages.length > 0 ? pages[pages.length - 1].hasNext : false;
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isLoading && !isSearchActive && !error) {
-          const lastProduct = allProducts.at(-1);
-          if (lastProduct?.id) {
-            loadPage({ startAfter: lastProduct.id, pageIndex: pages.length });
-          }
+  const handleNextPage = async () => {
+    if (isSearchActive) {
+      if ((currentPageIndex + 1) * ITEMS_PER_PAGE < searchResults.length) {
+        setCurrentPageIndex(prev => prev + 1);
+      }
+    } else {
+      if (currentPageIndex < pages.length - 1) {
+        setCurrentPageIndex(prev => prev + 1);
+      } else if (hasNextPage) {
+        const lastProduct = allProducts.at(-1);
+        if (lastProduct?.id) {
+          await loadPage({ startAfter: lastProduct.id, pageIndex: pages.length });
+          setCurrentPageIndex(prev => prev + 1);
         }
-      },
-      { root: null, rootMargin: "150px", threshold: 0.1 }
-    );
+      }
+    }
+  };
 
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, isLoading, isSearchActive, error, allProducts, pages.length, loadPage]);
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      setCurrentPageIndex(prev => prev - 1);
+    }
+  };
+
+  const canGoNext = isSearchActive 
+    ? (currentPageIndex + 1) * ITEMS_PER_PAGE < searchResults.length 
+    : (currentPageIndex < pages.length - 1 || hasNextPage);
 
   const listError = error || inventoryFetchError?.message || "";
   const listLoading = isLoading && allProducts.length === 0;
 
   const handleCategoryChange = async (newCode) => {
     if (newCode === selectedCategoryCode) return;
+    
+    setCurrentPageIndex(0);
 
     if (isSearchActive || searchQuery) {
       setSearchQuery("");
@@ -348,10 +368,12 @@ export default function ProductInventory() {
     }
   };
 
-  const filteredProducts = allProducts;
+  const currentSearchProducts = useMemo(() => {
+    return searchResults.slice(currentPageIndex * ITEMS_PER_PAGE, (currentPageIndex + 1) * ITEMS_PER_PAGE);
+  }, [searchResults, currentPageIndex]);
 
   const displayProducts = isSearchActive
-    ? searchResults.map(result => ({
+    ? currentSearchProducts.map(result => ({
       id: result.docId,
       isSearchResult: true,
       image: result.product?.image,
@@ -365,7 +387,7 @@ export default function ProductInventory() {
       variants: result.product?.variants ?? 0,
       condition: result.product?.condition,
     }))
-    : filteredProducts;
+    : pages[currentPageIndex]?.products || [];
 
   async function executeSearch() {
     const query = searchQuery.trim();
@@ -374,6 +396,7 @@ export default function ProductInventory() {
       return;
     }
 
+    setCurrentPageIndex(0);
     setIsSearchActive(true);
     setIsSearching(true);
     setSearchError("");
@@ -393,6 +416,7 @@ export default function ProductInventory() {
   }
 
   function handleRefresh() {
+    setCurrentPageIndex(0);
     setSearchQuery("");
     setIsSearchActive(false);
     setSearchResults([]);
@@ -488,18 +512,57 @@ export default function ProductInventory() {
             >
               <Search className="h-5 w-5" />
             </button>
-            <select
-              className="h-11 min-w-[300px] cursor-pointer rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-              value={selectedCategoryCode}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-            >
-              <option value="">All Category</option>
-              {categories.map((cat) => (
-                <option key={cat.code} value={cat.code}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative" ref={categoryDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                className="flex h-11 min-w-[200px] sm:min-w-[260px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 hover:bg-slate-50"
+              >
+                <span className="truncate">
+                  <span className="text-slate-500 font-normal mr-1.5">Category:</span>
+                  {selectedCategoryCode === "" ? "All Categories" : categories.find(c => c.code === selectedCategoryCode)?.name || "All Categories"}
+                </span>
+                <ChevronDown className="h-4 w-4 shrink-0 ml-2 text-slate-500" />
+              </button>
+
+              {isCategoryOpen && (
+                <div className="absolute left-0 top-full z-50 mt-1.5 max-h-[400px] w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-200/40">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleCategoryChange("");
+                      setIsCategoryOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm transition-colors ${
+                      selectedCategoryCode === ""
+                        ? "bg-slate-100 font-medium text-slate-900"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>All Categories</span>
+                    {selectedCategoryCode === "" && <Check className="h-4 w-4 text-slate-700" />}
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.code}
+                      type="button"
+                      onClick={() => {
+                        handleCategoryChange(cat.code);
+                        setIsCategoryOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm transition-colors ${
+                        selectedCategoryCode === cat.code
+                          ? "bg-slate-100 font-medium text-slate-900"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span className="truncate pr-2">{cat.name}</span>
+                      {selectedCategoryCode === cat.code && <Check className="h-4 w-4 shrink-0 text-slate-700" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <button
               type="button"
@@ -539,7 +602,7 @@ export default function ProductInventory() {
           </button>
         </div> */}
 
-        <div className="mt-7 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="mt-7 relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="relative min-h-0 flex-1 overflow-auto">
             <table className="w-full border-collapse text-left text-sm">
               <thead className="sticky top-0 z-10 bg-slate-50 text-sm font-medium uppercase tracking-wider text-slate-500 shadow-[0_1px_0_0_#e2e8f0]">
@@ -555,32 +618,10 @@ export default function ProductInventory() {
               </thead>
               <tbody>
                 {displayProducts.map((product) => <ProductRow key={product.id} product={product} onDelete={deleteProduct} />)}
-                {!isSearchActive && hasNextPage && displayProducts.length > 0 && !listError && (
-                  <tr ref={loaderRef}>
-                    <td colSpan={7} className="py-8 text-center">
-                      <div className="flex items-center justify-center gap-2 text-sm font-medium text-slate-500">
-                        <LoaderCircle className="h-5 w-5 animate-spin text-blue-600" />
-                        Loading more products...
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                {!isSearchActive && !hasNextPage && displayProducts.length > 0 && !listError && (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-sm text-slate-500">
-                      All products loaded.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
-            {(listLoading || isSearching) && (
-              <div className="absolute inset-0 z-20 flex items-center justify-center gap-3 bg-white/80 text-sm font-medium text-blue-600 backdrop-blur-[1px]">
-                <LoaderCircle className="h-6 w-6 animate-spin" />
-                <span>{isSearching ? "Searching products..." : loadingLabel}</span>
-              </div>
-            )}
-            {!listLoading && !isSearching && (listError || searchError) && (
+            
+            {!isLoading && !isSearching && (listError || searchError) && (
               <div className="px-6 py-16 text-center">
                 <p className="text-sm text-rose-600">{listError || searchError}</p>
                 {!isSearchActive && (
@@ -601,17 +642,44 @@ export default function ProductInventory() {
                 )}
               </div>
             )}
-            {!listLoading && !isSearching && !(listError || searchError) && displayProducts.length === 0 && (
+            
+            {!isLoading && !isSearching && !(listError || searchError) && displayProducts.length === 0 && (
               <div className="px-6 py-16 text-center text-sm text-slate-500">
                 {isSearchActive ? "No products found for your search." : "No products found in this category."}
               </div>
             )}
           </div>
+          
+          {(isLoading || isSearching) && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center gap-3 bg-white/80 text-sm font-medium text-blue-600 backdrop-blur-[1px]">
+              <LoaderCircle className="h-6 w-6 animate-spin" />
+              <span>{isSearching ? "Searching products..." : loadingLabel}</span>
+            </div>
+          )}
 
-          <div className="border-t border-slate-200 bg-slate-50 px-5 py-4 text-center sm:text-left">
-            <p className="text-sm font-medium text-slate-600">
-              {isSearchActive ? "Search Results" : "Total Loaded"} · {displayProducts.length} {displayProducts.length === 1 ? "product" : "products"}
+          <div className="border-t border-slate-200 bg-slate-50 px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm font-medium text-slate-600">
+            <p>
+              Page {currentPageIndex + 1}
+              {isSearchActive && ` of ${Math.ceil(searchResults.length / ITEMS_PER_PAGE) || 1}`}
+              {" · "} 
+              {isSearchActive ? `${searchResults.length} products found` : `${displayProducts.length} products on this page`}
             </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPageIndex === 0 || isLoading}
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                &lt; Previous
+              </button>
+              <button
+                onClick={handleNextPage}
+                disabled={!canGoNext || isLoading}
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                Next &gt;
+              </button>
+            </div>
           </div>
         </div>
       </section>

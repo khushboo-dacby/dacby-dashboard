@@ -1,5 +1,59 @@
 # Update Inventory History
 
+## 2026-10-13
+
+### SLA Industry Operations Dashboard (`/sla-industry`)
+- **Interactive Multi-Category Architecture**: Converted the mockup into full React JSX with Tailwind CSS v4 in `src/app/sla-industry/Sla_Industry.jsx`, supporting dynamic category switching across `All Categories (21)`, `B2C Purchases (6)`, `B2B Purchases (2)`, `B2C Sales (9)`, `B2B Sales (1)`, and `Inventory (3)`.
+- **Status Filtering Engine**: Added dynamic status dropdown filtering (`Overdue`, `Due Soon`, `On Track`, `SLA Not Configured`, `All Cases`) wired simultaneously into the interactive horizontal bar chart and detailed data table.
+- **Explicit Category Association**: Explicitly mapped each operational issue to its respective category badge pill (`B2C Purchases`, `B2C Sales`, `Inventory`, `B2B Purchases`, `B2B Sales`) in the **Top Breached Issues (All Categories)** card, the **Category Issues Breakdown Bar Chart**, and the **Operational Issues Table**, enabling click-to-filter navigation directly to each category.
+- **Theme Unification & Color Restraint**: Converted the dashboard aesthetic to match the Scanner Console reference design:
+  - Added solid Dark Navy (`#242b5c`) header bars across all major cards and data tables.
+  - Replaced noisy rainbow colors with a cohesive palette (`#242b5c` dark navy, `#3b82f6` royal blue, `#94a3b8` cool slate, `#eff2fc` lavender-navy pills).
+  - Aligned KPI summary cards with unified `#eff2fc` / `#242b5c` icon containers and muted typography.
+  - Restyled donut chart and proportion progress bars with cohesive navy and slate tones.
+- **Console-Styled Top Header**: Replaced the original header with a Scanner Console-style header card featuring an uppercase kicker (`OPERATIONS SLA`), bold console title, and a pulsing green `Ready & Active` pill indicator.
+- **Sidebar & Clutter Removal**: Removed the Left Navigation Sidebar completely (`<aside>` and collapse state), stripped out redundant table search and date range filters, and expanded the dashboard layout to a clean full width.
+
+### SLA Breach Monitor Dashboard (`/sla-breach`)
+- **Dashboard Implementation**: Built `src/app/sla-breach/SLA_Breach.jsx` and connected to route `src/app/sla-breach/page.js` adhering strictly to the dashboard's blueish theme (`#232d65` navy, white cards, elevated shadows, slate typography).
+- **Owners & Filters Removal**: Removed owner-related elements (owner dropdown, table owner columns, breaches by owner card) and top header filter controls (status/warehouse dropdowns, apply button) for an uncluttered live view.
+- **Elevated Shadows & Layout**: Applied `shadow-md hover:shadow-lg` across all KPI cards, area breakdown bars, and data tables with full-width responsive padding.
+
+## 2026-10-12
+
+### Image URL Validation & Next.js Crash Fix
+- **Image Input Sanitization**: Created `src/utils/imageValidation.js` with diagnostics, auto-clearing of invalid input strings, and red toast warnings (`toast.error("Please fill correct url using http or https")`).
+- **Protocol-Relative Normalization**: Updated `formatters.js` and image helpers to convert `//` to `https://`, preventing fatal `next/image` runtime crashes.
+- **Universal Form Protection**: Enforced validation and safe preview rendering across Add Items (PS5/PS4 CD, Preorders), Add Variant, Special Edition, New Product, and Update Inventory.
+
+### Live Data Analytics Dashboard (`/live-data`)
+- **Complete Analytics Interface**: Built all 8 modules in `src/app/live-data/LiveData_Analytics.js` and wired into `src/app/live-data/page.js` (B2C/B2B Sales, Volume, Quality, Purchases, Inventory, Returns).
+- **Brand Theme Adherence**: Styled strictly with Navy `#232d65`, slate neutrals, emerald accents, and white cards (zero rainbow colors).
+- **Layout & Visual Polish**: Reduced side padding for a full-width layout, added elevated card shadows (`shadow-md`), and combined "Sales today" and "Sales, last 30 days" into a single card.
+- **Aggregated Sales Performance**: Replaced the per-day bar chart with a toggleable view for **Overall 30 days** (revenue, target completion, category distribution) and **Today only** (live revenue, dispatch pipeline, peak hour metrics).
+
+
+
+## 2026-10-07
+
+### Ledger Encapsulation & Refactoring
+- Completely decoupled Ledger UI components from global space, relocating \`LedgerDetail\`, \`LedgerEntries\`, \`LedgerEntryDetail\`, and \`ItemJourneyTimeline\` entirely into \`src/app/ledger\`.
+- Transformed \`LedgerEntryDetail\` into a conditional state-based view component that cleanly overlays the main list context instead of forcing full route navigations.
+
+### Ledger Entries Filters & Client-side Pagination
+- Revamped the table filters to trigger real-time clears whenever inputs are emptied, avoiding stale state.
+- Enhanced filter UX to gracefully execute upon "Enter" key press.
+- Implemented robust client-side pagination (10, 25, 50 rows) layered perfectly on top of the search and filter pipelines without breaking existing API fetch models.
+
+### Ledger Entry Insights & UI Polishing
+- Re-engineered the detailed information card layouts to employ consistent unified grid gaps (\`gap-4\`) and aligned standard informational cards into crisp 3-column rows (\`grid-cols-3\`).
+- Developed a dynamic "Inventory Aging" pipeline under Current Status, automatically discerning whether to calculate aging relative to a past sale event or simply bounding it to the current date.
+
+### Minimalist Item Journey Timeline
+- Authored a dynamic mock backend generator for the Item Journey sequence to unblock frontend layout iteration before server-side models are ready.
+- Designed a minimalist, elegant grayscale timeline, connected vertically via continuous thin grey lines, stripping away excess visual noise, icons, and bulky containers to purely focus on precise chronological milestones.
+- Applied responsive layout padding to automatically rein in peripheral content on ultra-wide formats.
+
 ## 2026-09-15
 
 ### Product data sharing and caching

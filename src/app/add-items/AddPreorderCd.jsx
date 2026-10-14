@@ -15,6 +15,14 @@ import DescriptionEditor, {
   serializeDescriptionState,
 } from "@/components/inventory/DescriptionEditor";
 import useDescriptionState from "@/hooks/useDescriptionState";
+import {
+  diagnoseImageUrl,
+  notifyInvalidImageUrl,
+  sanitizeImageSrc,
+  handleImageInputChange,
+  handleImageInputPaste,
+  handleImageInputBlur,
+} from "@/utils/imageValidation";
 
 const PS5_DESCRIPTION_TEMPLATE = {
   Packaging: "Pre-Owned Game Case",
@@ -187,10 +195,16 @@ function formatReleaseDate(value) {
 }
 
 function convertImageToCdn(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== "string") return "";
+  let trimmedUrl = imageUrl.trim();
+  if (!trimmedUrl) return "";
+  if (trimmedUrl.startsWith("//")) {
+    trimmedUrl = `https:${trimmedUrl}`;
+  }
+
   const firebasePrefix =
     "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/";
   const cdnPrefix = "https://dacby-database.web.app/cdn/";
-  const trimmedUrl = imageUrl.trim();
 
   if (!trimmedUrl.startsWith(firebasePrefix)) return trimmedUrl;
 
@@ -299,10 +313,20 @@ export default function AddPreorderCd({ categoryName, code }) {
   const [showSubmitPop, setShowSubmitPop] = useState(false);
 
   const handleAddImage = () => {
-    if (!newImageUrl.trim()) return;
+    const trimmed = newImageUrl.trim();
+    if (!trimmed) return;
+
+    const diagnosis = diagnoseImageUrl(trimmed);
+    if (!diagnosis.isValid) {
+      setNewImageUrl("");
+      notifyInvalidImageUrl();
+      return;
+    }
+
+    const cdnUrl = convertImageToCdn(trimmed);
     setFormData((prev) => ({
       ...prev,
-      images: [...(prev.images || []), newImageUrl.trim()],
+      images: [...(prev.images || []), cdnUrl],
     }));
     setNewImageUrl("");
   };
@@ -436,6 +460,7 @@ export default function AddPreorderCd({ categoryName, code }) {
 
     const images = (formData.images || [])
       .map((imageUrl) => convertImageToCdn(imageUrl))
+      .map((imageUrl) => sanitizeImageSrc(imageUrl))
       .filter(Boolean);
 
     const mrp = Number(formData.mrp) || 0;
@@ -722,7 +747,15 @@ export default function AddPreorderCd({ categoryName, code }) {
             <input
               type="url"
               value={newImageUrl}
-              onChange={(e) => setNewImageUrl(e.target.value)}
+              onChange={(e) => handleImageInputChange(e.target.value, setNewImageUrl)}
+              onPaste={(e) => handleImageInputPaste(e, setNewImageUrl)}
+              onBlur={(e) => handleImageInputBlur(e.target.value, setNewImageUrl)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddImage();
+                }
+              }}
               placeholder="Enter image URL to add..."
               className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-700 focus:ring-1 focus:ring-indigo-700"
             />
@@ -740,7 +773,7 @@ export default function AddPreorderCd({ categoryName, code }) {
             <PhotoProvider>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                 {(formData.images || []).map((rawUrl, idx) => {
-                  const url = typeof rawUrl === 'string' ? rawUrl.trim() : "";
+                  const url = sanitizeImageSrc(rawUrl);
                   if (!url) return null;
 
                   const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=3840&q=75`;

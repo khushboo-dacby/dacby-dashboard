@@ -13,6 +13,7 @@ import { normalizeAttributeKey } from "@/utils/formatters";
 import { generateSKUForItem } from "@/utils/sku";
 import Image from "next/image";
 import { convertFirebaseImageToCdn } from "@/app/add-variant/AddVariant";
+import { sanitizeImageSrc } from "@/utils/imageValidation";
 
 function titleCase(value) {
   return String(value || "")
@@ -164,7 +165,7 @@ export default function CombinationVariantsTable({
                           <>
                             {hasImages && (
                               <Image
-                                src={convertFirebaseImageToCdn(item.images[0])}
+                                src={sanitizeImageSrc(convertFirebaseImageToCdn(item.images[0])) || "/dacby-assets/download.svg"}
                                 alt="Variant thumbnail"
                                 fill
                                 sizes="56px"

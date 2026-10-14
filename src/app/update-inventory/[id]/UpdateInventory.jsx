@@ -25,6 +25,7 @@ import {
   useProductContext,
 } from "../../../context/ProductContext";
 import { convertFirebaseImageToCdn } from "@/app/add-variant/AddVariant";
+import { sanitizeImageSrc } from "@/utils/imageValidation";
 import AddWarrantyModal from "@/app/product-detail/AddWarrantyModal";
 import TopNavigationBar from "@/components/common/TopNavigationBar";
 const TABS = ["Overview", "Inventory", "Specification"];
@@ -974,7 +975,7 @@ const typeOptions = typeMap[inventoryDraft.category_name] || [];
                               {item.images?.[0]?.trim() || item.yt_iframe ? (
                                 <>
                                   {item.images?.[0]?.trim() && (
-                                    <Image src={convertFirebaseImageToCdn(item.images[0])} alt={item.sku || "Variant image"} fill sizes="56px" className="object-contain p-1.5" />
+                                    <Image src={sanitizeImageSrc(convertFirebaseImageToCdn(item.images[0])) || "/dacby-assets/download.svg"} alt={item.sku || "Variant image"} fill sizes="56px" className="object-contain p-1.5" />
                                   )}
                                   {item.yt_iframe && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">

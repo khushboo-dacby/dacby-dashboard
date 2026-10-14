@@ -68,22 +68,32 @@ export function formatAttributeDisplayName(value) {
     .join(" ");
 }
 export function toCDN(url) {
-  const FIREBASE_PREFIX =
-  "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o";
+  if (typeof url !== "string") return url;
+  let trimmed = url.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("//")) {
+    trimmed = `https:${trimmed}`;
+  }
 
-const CDN_PREFIX =
-  "https://dacby-database.web.app/cdn";
-  
-  return typeof url === "string"
-    ? url.replace(FIREBASE_PREFIX, CDN_PREFIX)
-    : url;
+  const FIREBASE_PREFIX =
+    "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o";
+  const CDN_PREFIX =
+    "https://dacby-database.web.app/cdn";
+
+  return trimmed.replace(FIREBASE_PREFIX, CDN_PREFIX);
 }
 
 export function convertImageToCdn(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== "string") return "";
+  let trimmedUrl = imageUrl.trim();
+  if (!trimmedUrl) return "";
+  if (trimmedUrl.startsWith("//")) {
+    trimmedUrl = `https:${trimmedUrl}`;
+  }
+
   const firebasePrefix =
     "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/";
   const cdnPrefix = "https://dacby-database.web.app/cdn/";
-  const trimmedUrl = imageUrl.trim();
 
   if (!trimmedUrl.startsWith(firebasePrefix)) return trimmedUrl;
 

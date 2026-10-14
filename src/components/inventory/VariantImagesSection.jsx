@@ -3,13 +3,30 @@ import Image from "next/image";
 import { Trash2, Plus, Star, StarOff, Eye } from "lucide-react";
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
+import {
+  diagnoseImageUrl,
+  notifyInvalidImageUrl,
+  sanitizeImageSrc,
+  handleImageInputChange,
+  handleImageInputPaste,
+  handleImageInputBlur,
+} from "@/utils/imageValidation";
 
 export default function VariantImagesSection({ images = [], onChange }) {
   const [newImageUrl, setNewImageUrl] = useState("");
 
   function handleAddImage() {
-    if (!newImageUrl.trim()) return;
-    onChange([...images, newImageUrl.trim()]);
+    const trimmed = newImageUrl.trim();
+    if (!trimmed) return;
+
+    const diagnosis = diagnoseImageUrl(trimmed);
+    if (!diagnosis.isValid) {
+      setNewImageUrl("");
+      notifyInvalidImageUrl();
+      return;
+    }
+
+    onChange([...images, trimmed]);
     setNewImageUrl("");
   }
 
@@ -34,7 +51,15 @@ export default function VariantImagesSection({ images = [], onChange }) {
         <input
           type="url"
           value={newImageUrl}
-          onChange={(e) => setNewImageUrl(e.target.value)}
+          onChange={(e) => handleImageInputChange(e.target.value, setNewImageUrl)}
+          onPaste={(e) => handleImageInputPaste(e, setNewImageUrl)}
+          onBlur={(e) => handleImageInputBlur(e.target.value, setNewImageUrl)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleAddImage();
+            }
+          }}
           placeholder="Enter image URL to add..."
           className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
@@ -52,7 +77,7 @@ export default function VariantImagesSection({ images = [], onChange }) {
         <PhotoProvider>
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
             {images.map((rawUrl, idx) => {
-              const url = typeof rawUrl === 'string' ? rawUrl.trim() : "";
+              const url = sanitizeImageSrc(rawUrl);
               if (!url) return null;
 
               const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=3840&q=75`;

@@ -1,9 +1,23 @@
 "use client";
 import React, { useState } from 'react';
-import { categories } from '../../constants/inventory';
+// import { categories } from '../../constants/inventory';
 import TopNavigationBar from '../../components/common/TopNavigationBar';
 import { AlertTriangle, Aperture, ArrowDown, ArrowLeftRight, ArrowRight, ArrowUp, BarChart2, Calendar, Camera, Clock, Columns, CornerDownLeft, Cpu, Database, Disc, Disc3, Filter, Gamepad, Gamepad2, Gauge, Headphones, History, IndianRupee, Info, Laptop, LineChart, Link, List, LogOut, MoreVertical, Package, Plug, PlusCircle, Shield, ShieldAlert, ShoppingCart, Smartphone, Tag, TrendingDown, TrendingUp, Watch, Wrench } from 'lucide-react';
-
+const categories = [
+  { name: "PS5 CDs", code: "D001Y" },
+  { name: "PS4 CDs", code: "D002Y" },
+  { name: "Pre Orders", code: "D003Y" },
+  { name: "Consoles", code: "D004Y" },
+  { name: "Controllers", code: "D005Y" },
+  { name: "Accessories", code: "D006Y" },
+  { name: "PC Components", code: "D009Y" },
+  { name: "Cameras", code: "D014Y" },
+  { name: "Camera Lens", code: "D015Y" },
+  { name: "Laptops", code: "D018Y" },
+  { name: "Smartphones", code: "D019Y" },
+  { name: "Smart Devices", code: "D020Y" },
+  { name: "Audio Devices", code: "D021Y" },
+];
 export default function Analytics() {
     const [selectedCategory, setSelectedCategory] = useState('All Category');
     const [agingCategory, setAgingCategory] = useState('All Category');
@@ -15,7 +29,7 @@ export default function Analytics() {
     return (
         <div className="bg-slate-50 text-sm text-slate-900 antialiased">
             {/* Added container to replicate body classes */}
-            <TopNavigationBar />
+            {/* <TopNavigationBar /> */}
             <main className="w-full px-4 sm:px-10 lg:px-20 py-8 flex-1"><div className="flex flex-col w-full pb-12">
                 {/* Top Metadata & Action Bar */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { sanitizeImageSrc } from "@/utils/imageValidation";
 import {
   CheckCircle2,
   Package,
@@ -31,10 +32,16 @@ function generateSpecialEditionSku(specId, productTitle) {
 }
 
 function convertImageToCdn(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== "string") return "";
+  let trimmedUrl = imageUrl.trim();
+  if (!trimmedUrl) return "";
+  if (trimmedUrl.startsWith("//")) {
+    trimmedUrl = `https:${trimmedUrl}`;
+  }
+
   const firebasePrefix =
     "https://firebasestorage.googleapis.com/v0/b/dacby-database.appspot.com/o/";
   const cdnPrefix = "https://dacby-database.web.app/cdn/";
-  const trimmedUrl = imageUrl.trim();
 
   if (!trimmedUrl.startsWith(firebasePrefix)) return trimmedUrl;
 
@@ -195,6 +202,7 @@ export default function SpecialEdition() {
     const stocks = Number(formData.stocks) || 0;
     const images = (formData.images || [])
       .map((imageUrl) => convertImageToCdn(imageUrl))
+      .map((imageUrl) => sanitizeImageSrc(imageUrl))
       .filter(Boolean);
 
     const product = {
@@ -365,7 +373,7 @@ function SearchProductStep({
                 }`}
               >
                 <Image
-                  src={item.product.image}
+                  src={sanitizeImageSrc(item.product.image) || "/dacby-assets/download.svg"}
                   alt={item.product.product_title}
                   width={64}
                   height={64}

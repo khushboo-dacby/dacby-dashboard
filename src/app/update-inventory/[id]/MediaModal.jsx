@@ -6,6 +6,14 @@ import { X, Trash2, Plus, Star, StarOff, AlertTriangle, Eye } from "lucide-react
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 import { convertFirebaseImageToCdn } from "../../add-variant/AddVariant";
+import {
+  diagnoseImageUrl,
+  notifyInvalidImageUrl,
+  sanitizeImageSrc,
+  handleImageInputChange,
+  handleImageInputPaste,
+  handleImageInputBlur,
+} from "@/utils/imageValidation";
 
 export default function MediaModal({ variant, isEditing, onClose, onApply }) {
   const item = variant?.item || {};
@@ -20,8 +28,17 @@ export default function MediaModal({ variant, isEditing, onClose, onApply }) {
   const hasColor = Boolean(colorStr?.trim());
 
   function handleAddImage() {
-    if (!newImageUrl.trim()) return;
-    setImages((prev) => [...prev, convertFirebaseImageToCdn(newImageUrl.trim())]);
+    const trimmed = newImageUrl.trim();
+    if (!trimmed) return;
+
+    const diagnosis = diagnoseImageUrl(trimmed);
+    if (!diagnosis.isValid) {
+      setNewImageUrl("");
+      notifyInvalidImageUrl();
+      return;
+    }
+
+    setImages((prev) => [...prev, convertFirebaseImageToCdn(trimmed)]);
     setNewImageUrl("");
   }
 
@@ -87,7 +104,15 @@ export default function MediaModal({ variant, isEditing, onClose, onApply }) {
                     <input
                       type="url"
                       value={newImageUrl}
-                      onChange={(e) => setNewImageUrl(e.target.value)}
+                      onChange={(e) => handleImageInputChange(e.target.value, setNewImageUrl)}
+                      onPaste={(e) => handleImageInputPaste(e, setNewImageUrl)}
+                      onBlur={(e) => handleImageInputBlur(e.target.value, setNewImageUrl)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddImage();
+                        }
+                      }}
                       placeholder="Enter image URL to add..."
                       className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
@@ -105,7 +130,7 @@ export default function MediaModal({ variant, isEditing, onClose, onApply }) {
                   <PhotoProvider>
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                       {images.map((rawUrl, idx) => {
-                        const url = typeof rawUrl === 'string' ? rawUrl.trim() : "";
+                        const url = sanitizeImageSrc(rawUrl);
                         if (!url) return null;
 
                         const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=3840&q=75`;
