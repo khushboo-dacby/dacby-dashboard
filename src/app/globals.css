@@ -1,1 +1,122 @@
 @import "tailwindcss";
+
+/* iOS-inspired frosted surfaces for the live dashboard. */
+.ios-glass-dashboard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.ios-glass-dashboard::before,
+.ios-glass-dashboard::after {
+  position: fixed;
+  z-index: -1;
+  width: 38rem;
+  height: 38rem;
+  border-radius: 9999px;
+  content: "";
+  pointer-events: none;
+  filter: blur(24px);
+}
+
+.ios-glass-dashboard::before {
+  top: 2rem;
+  left: -18rem;
+  background: rgba(120, 166, 255, 0.22);
+}
+
+.ios-glass-dashboard::after {
+  top: 28rem;
+  right: -20rem;
+  background: rgba(198, 218, 255, 0.35);
+}
+
+.ios-glass-card,
+.ios-glass-control {
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.22) 44%, rgba(218, 232, 255, 0.30) 100%),
+    rgba(226, 237, 255, 0.18);
+  box-shadow:
+    0 16px 38px rgba(66, 92, 145, 0.12),
+    0 2px 8px rgba(95, 120, 165, 0.05),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.98),
+    inset 0 -1px 1px rgba(117, 149, 204, 0.12);
+  backdrop-filter: blur(36px) saturate(185%) brightness(1.07);
+  -webkit-backdrop-filter: blur(36px) saturate(185%) brightness(1.07);
+}
+
+.ios-glass-card::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.34), transparent 38%, rgba(255, 255, 255, 0.08) 72%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.ios-glass-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ios-glass-card:hover {
+  box-shadow:
+    0 22px 48px rgba(66, 92, 145, 0.16),
+    0 3px 10px rgba(95, 120, 165, 0.06),
+    inset 0 1.5px 1px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(117, 149, 204, 0.12);
+}
+
+@keyframes barGrow {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.scroll-grow {
+  display: block;
+  transform: scaleX(0) !important;
+  transform-origin: left center;
+  will-change: transform;
+  transition: transform 2200ms cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+.dashboard-bars-visible .scroll-grow {
+  transform: scaleX(1) !important;
+}
+
+.dashboard-bars-visible .scroll-grow:nth-child(2) {
+  transition-delay: 180ms;
+}
+
+.dashboard-bars-visible .scroll-grow:nth-child(3) {
+  transition-delay: 360ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-grow {
+    transform: none !important;
+  }
+
+  .dashboard-bars-visible .scroll-grow {
+    transition: none;
+  }
+}
