@@ -16,6 +16,8 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -24,6 +26,7 @@ import {
 import { motion } from "motion/react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import worldAtlas from "world-atlas/countries-110m.json";
+import { getOrdersAnalysis } from "./api/api";
 
 const trendData = [
   { day: "15 Sep", b2c: 4.6, b2b: 6.0, purchase: 6.2 },
@@ -197,56 +200,6 @@ function MotionBar({ percent, className = "", delay = 0 }) {
 function Title({ children, tag, id }) {
   const [salesPeriod, setSalesPeriod] = useState("Last 30 days");
   const displayTag = tag;
-
-  useEffect(() => {
-    if (id !== "overview") return undefined;
-
-    const targets = {
-      Overview: () => document.getElementById("overview"),
-      "B2C sales": () =>
-        [...document.querySelectorAll("h2")].filter(
-          (heading) => heading.textContent === "Sales",
-        )[0],
-      "B2B sales": () =>
-        [...document.querySelectorAll("h2")].filter(
-          (heading) => heading.textContent === "Sales",
-        )[1],
-      "B2C purchase": () =>
-        [...document.querySelectorAll("h2")].filter(
-          (heading) => heading.textContent === "Purchase",
-        )[0],
-      "B2B purchase": () =>
-        [...document.querySelectorAll("h2")].filter(
-          (heading) => heading.textContent === "Purchase",
-        )[1],
-      Inventory: () =>
-        [...document.querySelectorAll("h2")].find(
-          (heading) => heading.textContent === "Inventory",
-        ),
-      Returns: () =>
-        [...document.querySelectorAll("h2")].find(
-          (heading) => heading.textContent === "Returns",
-        ),
-    };
-
-    const handleTabClick = (event) => {
-      const button = event.target.closest("nav button");
-      const target = button && targets[button.textContent]?.();
-      if (!target) return;
-
-      event.stopPropagation();
-      document.querySelectorAll("nav button").forEach((item) => {
-        item.classList.remove("border-[#242b5c]", "text-[#242b5c]");
-        item.classList.add("border-transparent", "text-slate-500");
-      });
-      button.classList.remove("border-transparent", "text-slate-500");
-      button.classList.add("border-[#242b5c]", "text-[#242b5c]");
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-
-    document.addEventListener("click", handleTabClick, true);
-    return () => document.removeEventListener("click", handleTabClick, true);
-  }, [id]);
 
   return (
     <div id={id} className="flex scroll-mt-24 items-center gap-2">
@@ -974,6 +927,245 @@ function SalesPurchaseTrend() {
     </Card>
   );
 }
+
+const apiNumber = (source, key) => Number(source?.[key] ?? 0);
+
+function formatApiValue(value) {
+  const amount = Number(value ?? 0);
+  if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)}Cr`;
+  if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)}L`;
+  return `₹${Math.round(amount).toLocaleString("en-IN")}`;
+}
+
+function formatApiNumber(value) {
+  return Math.round(Number(value ?? 0)).toLocaleString("en-IN");
+}
+
+function toInputDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getPresetRange(preset) {
+  const end = new Date();
+  const start = new Date(end);
+  start.setDate(end.getDate() - (preset === "Today" ? 0 : preset === "Last 7 days" ? 6 : 29));
+  return { startDate: toInputDate(start), endDate: toInputDate(end) };
+}
+
+function buildOrderAnalytics(rows) {
+  const total = (side, key) => rows.reduce((sum, row) => sum + apiNumber(row[side], key), 0);
+  const daily = rows.map((row) => {
+    const buy = row.buy_orders ?? {};
+    const sell = row.sell_orders ?? {};
+    return {
+      date: row.date,
+      label: row.date?.slice(0, 5),
+      buyValue: apiNumber(buy, "total_value"),
+      buyCount: apiNumber(buy, "total_count"),
+      sellValue: apiNumber(sell, "total_value"),
+      sellCount: apiNumber(sell, "total_count"),
+      buyCancelledValue: apiNumber(buy, "cancelled_value"),
+      buyCancelledCount: apiNumber(buy, "cancelled_orders"),
+      sellCancelledValue: apiNumber(sell, "cancelled_value"),
+      sellCancelledCount: apiNumber(sell, "cancelled_orders"),
+    };
+  });
+
+  const b2cTotal = (side, field) =>
+    total(side, `app_${field}`) + total(side, `website_${field}`) + total(side, `b2c_${field}`);
+
+  return {
+    daily,
+    buy: { value: total("buy_orders", "total_value"), count: total("buy_orders", "total_count") },
+    sell: { value: total("sell_orders", "total_value"), count: total("sell_orders", "total_count") },
+    buyCancelled: { value: total("buy_orders", "cancelled_value"), count: total("buy_orders", "cancelled_orders") },
+    sellCancelled: { value: total("sell_orders", "cancelled_value"), count: total("sell_orders", "cancelled_orders") },
+    channels: ["website", "app"].map((channel) => ({
+      name: channel === "website" ? "Website" : "App",
+      buyValue: total("buy_orders", `${channel}_value`),
+      sellValue: total("sell_orders", `${channel}_value`),
+      buyCount: total("buy_orders", `${channel}_count`),
+      sellCount: total("sell_orders", `${channel}_count`),
+    })),
+    segments: [
+      {
+        name: "B2B",
+        buyValue: total("buy_orders", "b2b_value"),
+        sellValue: total("sell_orders", "b2b_value"),
+        buyCount: total("buy_orders", "b2b_count"),
+        sellCount: total("sell_orders", "b2b_count"),
+      },
+      {
+        name: "B2C",
+        buyValue: b2cTotal("buy_orders", "value"),
+        sellValue: b2cTotal("sell_orders", "value"),
+        buyCount: b2cTotal("buy_orders", "count"),
+        sellCount: b2cTotal("sell_orders", "count"),
+      },
+    ],
+  };
+}
+
+function ApiKpi({ label, value, count, color, values, icon: Icon }) {
+  const gradientId = `api-kpi-${label.replaceAll(" ", "-").toLowerCase()}`;
+  return (
+    <Card className="min-h-[176px] overflow-hidden p-4">
+      <div className="flex items-center gap-2">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${color}16`, color }}>
+          <Icon className="h-4 w-4" />
+        </span>
+        <p className="text-sm font-semibold text-[#52627e]">{label}</p>
+      </div>
+      <p className="mt-4 text-3xl font-bold tracking-[-0.03em] text-[#101a35]">{formatApiValue(value)}</p>
+      <p className="mt-1 text-sm font-semibold text-[#71809a]">{formatApiNumber(count)} orders</p>
+      <div className="mt-3 h-8">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={values.map((amount, index) => ({ index, amount }))}>
+            <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity={0.22} /><stop offset="100%" stopColor={color} stopOpacity={0} /></linearGradient></defs>
+            <Area type="monotone" dataKey="amount" stroke={color} strokeWidth={2.25} fill={`url(#${gradientId})`} animationDuration={900} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
+  );
+}
+
+function AnalyticsDateFilter({ filter, onChange }) {
+  const setPreset = (period) => {
+    if (period === "Custom") {
+      onChange((current) => ({ ...current, period }));
+      return;
+    }
+    onChange({ period, ...getPresetRange(period) });
+  };
+  const updateDate = (key) => (event) => {
+    onChange((current) => ({ ...current, period: "Custom", [key]: event.target.value }));
+  };
+
+  return (
+    <Card className="p-4 sm:p-5">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-bold tracking-[-0.025em] text-[#151c34]">Order analytics</h2>
+          <p className="mt-1 text-xs font-medium text-[#71809a]">Combined buy and sell order performance</p>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex rounded-lg bg-[#f1f4f9] p-0.5 text-[11px] font-bold">
+            {["Today", "Last 30 days", "Custom"].map((item) => (
+              <button key={item} type="button" onClick={() => setPreset(item)} className={`rounded-md px-3 py-1.5 transition ${filter.period === item ? "bg-white text-[#2865df] shadow-sm" : "text-[#71809a] hover:text-[#43527b]"}`}>{item}</button>
+            ))}
+          </div>
+          <label className="text-[11px] font-semibold text-[#71809a]">Start<input type="date" value={filter.startDate} max={filter.endDate} onChange={updateDate("startDate")} className="mt-1 block rounded-lg border border-[#dbe6fb] bg-white/80 px-2 py-1.5 text-xs font-semibold text-[#52627e] outline-none focus:border-[#3b82f6]" /></label>
+          <label className="text-[11px] font-semibold text-[#71809a]">End<input type="date" value={filter.endDate} min={filter.startDate} onChange={updateDate("endDate")} className="mt-1 block rounded-lg border border-[#dbe6fb] bg-white/80 px-2 py-1.5 text-xs font-semibold text-[#52627e] outline-none focus:border-[#3b82f6]" /></label>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function OrderAnalytics({ startDate, endDate }) {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [trendMetric, setTrendMetric] = useState("Value");
+
+  useEffect(() => {
+    if (!startDate || !endDate) return undefined;
+    const controller = new AbortController();
+    setLoading(true);
+    setError("");
+
+    getOrdersAnalysis({ startDate, endDate, signal: controller.signal })
+      .then((data) => setRows(Array.isArray(data) ? data : []))
+      .catch((requestError) => {
+        if (requestError?.name !== "AbortError") setError(requestError?.message || "Unable to load order analytics.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [startDate, endDate]);
+
+  const analytics = buildOrderAnalytics(rows);
+  const isCount = trendMetric === "Count";
+
+  return (
+    <section className="space-y-4">
+      <p className="text-xs font-medium text-[#71809a]">Buy and sell orders {rows.length ? `· ${rows.length} days loaded` : "· choose a date range"}</p>
+
+      {loading && !rows.length && <Card className="p-5 text-sm font-semibold text-[#71809a]">Loading order analytics…</Card>}
+      {error && <Card className="p-5 text-sm font-semibold text-rose-600">{error}</Card>}
+      {!!rows.length && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <ApiKpi label="Buy orders" value={analytics.buy.value} count={analytics.buy.count} color="#20bfa8" icon={ShoppingBag} values={analytics.daily.map((day) => day.buyValue)} />
+            <ApiKpi label="Sell orders" value={analytics.sell.value} count={analytics.sell.count} color="#377dff" icon={CircleDollarSign} values={analytics.daily.map((day) => day.sellValue)} />
+            <ApiKpi label="Buy cancellations" value={analytics.buyCancelled.value} count={analytics.buyCancelled.count} color="#f2b84b" icon={Activity} values={analytics.daily.map((day) => day.buyCancelledValue)} />
+            <ApiKpi label="Sell cancellations" value={analytics.sellCancelled.value} count={analytics.sellCancelled.count} color="#fb7185" icon={Activity} values={analytics.daily.map((day) => day.sellCancelledValue)} />
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[.9fr_1.1fr]">
+            <Card className="h-[385px] p-5 sm:p-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div><h3 className="text-base font-bold text-[#17213d]">Order value trend</h3><p className="text-xs font-medium text-[#8190aa]">Buy vs sell by day</p></div>
+                <div className="flex rounded-lg bg-[#f1f4f9] p-0.5 text-[11px] font-bold">{["Value", "Count"].map((item) => <button key={item} type="button" onClick={() => setTrendMetric(item)} className={`rounded-md px-3 py-1.5 transition ${trendMetric === item ? "bg-white text-[#2865df] shadow-sm" : "text-[#71809a]"}`}>{item}</button>)}</div>
+              </div>
+              <div className="h-64"><ResponsiveContainer width="100%" height="100%"><LineChart data={analytics.daily} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}><CartesianGrid vertical={false} stroke="#dbe6fb" strokeDasharray="3 5" /><XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "#91a0bc", fontSize: 11 }} /><YAxis tickLine={false} axisLine={false} tick={{ fill: "#91a0bc", fontSize: 11 }} tickFormatter={(value) => isCount ? formatApiNumber(value) : formatApiValue(value)} /><Tooltip formatter={(value, name) => [isCount ? formatApiNumber(value) : formatApiValue(value), name === (isCount ? "sellCount" : "sellValue") ? "Sell orders" : "Buy orders"]} contentStyle={{ borderRadius: 14, border: "1px solid #dbe6fb", boxShadow: "0 10px 26px rgba(45,73,130,.13)" }} /><Line type="monotone" dataKey={isCount ? "sellCount" : "sellValue"} stroke="#377dff" strokeWidth={2.5} dot={{ r: 3 }} animationDuration={900} /><Line type="monotone" dataKey={isCount ? "buyCount" : "buyValue"} stroke="#20bfa8" strokeWidth={2.5} dot={{ r: 3 }} animationDuration={1050} /></LineChart></ResponsiveContainer></div>
+              <div className="mt-3 flex gap-4 text-[11px] font-bold text-[#71809a]"><span><i className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-[#377dff]" />Sell orders</span><span><i className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-[#20bfa8]" />Buy orders</span></div>
+            </Card>
+            <DailyOrdersTable rows={analytics.daily} />
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-3">
+            <OrderBarChart title="Channel performance" data={analytics.channels} trendMetric={trendMetric} />
+            <OrderBarChart title="B2B vs B2C" data={analytics.segments} trendMetric={trendMetric} />
+            <CancellationTrend data={analytics.daily} trendMetric={trendMetric} />
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function DailyOrdersTable({ rows }) {
+  const totals = rows.reduce((sum, row) => Object.fromEntries(Object.keys(sum).map((key) => [key, sum[key] + apiNumber(row, key)])), { buyValue: 0, buyCount: 0, sellValue: 0, sellCount: 0, buyCancelledValue: 0, buyCancelledCount: 0, sellCancelledValue: 0, sellCancelledCount: 0 });
+  const format = (value) => formatApiNumber(value);
+  return (
+    <Card className="flex h-[385px] flex-col overflow-hidden p-0">
+      <div className="shrink-0 px-5 pb-3 pt-5">
+        <h3 className="text-base font-bold text-[#17213d]">Daily orders</h3>
+        <p className="text-xs font-medium text-[#8190aa]">Value and count</p>
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto">
+        <table className="min-w-[720px] w-full text-left text-[11px]">
+          <thead className="sticky top-0 z-10 border-y border-[#e5ecf9] bg-[#f8fbff]/95 text-[#52627e] backdrop-blur-sm">
+            <tr><th className="px-3 py-2 font-bold">Date</th><th className="px-3 py-2 font-bold">Buy value</th><th className="px-3 py-2 font-bold">Buy count</th><th className="px-3 py-2 font-bold">Sell value</th><th className="px-3 py-2 font-bold">Sell count</th><th className="px-3 py-2 font-bold">Buy cancelled</th><th className="px-3 py-2 font-bold">Sell cancelled</th></tr>
+          </thead>
+          <tbody className="divide-y divide-[#e8eef9] text-[#52627e]">
+            {rows.map((row) => <tr key={row.date}><td className="whitespace-nowrap px-3 py-2 font-semibold text-[#24304c]">{row.date}</td><td className="px-3 py-2">{format(row.buyValue)}</td><td className="px-3 py-2">{format(row.buyCount)}</td><td className="px-3 py-2">{format(row.sellValue)}</td><td className="px-3 py-2">{format(row.sellCount)}</td><td className="px-3 py-2">{format(row.buyCancelledValue)} · {format(row.buyCancelledCount)}</td><td className="px-3 py-2">{format(row.sellCancelledValue)} · {format(row.sellCancelledCount)}</td></tr>)}
+          </tbody>
+          <tfoot className="sticky bottom-0 z-10 bg-white/90 font-bold text-[#17213d] backdrop-blur-sm">
+            <tr><td className="px-3 py-2">Total</td><td className="px-3 py-2">{format(totals.buyValue)}</td><td className="px-3 py-2">{format(totals.buyCount)}</td><td className="px-3 py-2">{format(totals.sellValue)}</td><td className="px-3 py-2">{format(totals.sellCount)}</td><td className="px-3 py-2">{format(totals.buyCancelledValue)} · {format(totals.buyCancelledCount)}</td><td className="px-3 py-2">{format(totals.sellCancelledValue)} · {format(totals.sellCancelledCount)}</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
+function OrderBarChart({ title, data, trendMetric }) {
+  const isCount = trendMetric === "Count";
+  return <Card className="p-5"><h3 className="text-base font-bold text-[#17213d]">{title}</h3><p className="mt-1 text-xs font-medium text-[#8190aa]">Buy vs sell orders</p><div className="mt-4 h-52"><ResponsiveContainer width="100%" height="100%"><BarChart data={data} margin={{ top: 8, right: 2, left: -20, bottom: 0 }}><CartesianGrid vertical={false} stroke="#e5edfb" strokeDasharray="3 4" /><XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fill: "#71809a", fontSize: 11, fontWeight: 600 }} /><YAxis tickLine={false} axisLine={false} tick={{ fill: "#93a2bd", fontSize: 10 }} tickFormatter={(value) => isCount ? formatApiNumber(value) : formatApiValue(value)} /><Tooltip formatter={(value, name) => [isCount ? formatApiNumber(value) : formatApiValue(value), name === (isCount ? "sellCount" : "sellValue") ? "Sell orders" : "Buy orders"]} contentStyle={{ borderRadius: 12, border: "1px solid #dbe6fb" }} /><Bar dataKey={isCount ? "buyCount" : "buyValue"} fill="#20bfa8" radius={[5, 5, 0, 0]} animationDuration={850} /><Bar dataKey={isCount ? "sellCount" : "sellValue"} fill="#377dff" radius={[5, 5, 0, 0]} animationDuration={1050} /></BarChart></ResponsiveContainer></div><div className="mt-2 flex gap-3 text-[11px] font-bold text-[#71809a]"><span><i className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-[#20bfa8]" />Buy</span><span><i className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-[#377dff]" />Sell</span></div></Card>;
+}
+
+function CancellationTrend({ data, trendMetric }) {
+  const isCount = trendMetric === "Count";
+  return <Card className="p-5"><h3 className="text-base font-bold text-[#17213d]">Cancellation trend</h3><p className="mt-1 text-xs font-medium text-[#8190aa]">Buy vs sell cancellations</p><div className="mt-4 h-52"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 8, right: 2, left: -20, bottom: 0 }}><CartesianGrid vertical={false} stroke="#e5edfb" strokeDasharray="3 4" /><XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={18} tick={{ fill: "#71809a", fontSize: 10 }} /><YAxis tickLine={false} axisLine={false} tick={{ fill: "#93a2bd", fontSize: 10 }} tickFormatter={(value) => isCount ? formatApiNumber(value) : formatApiValue(value)} /><Tooltip formatter={(value, name) => [isCount ? formatApiNumber(value) : formatApiValue(value), name === (isCount ? "sellCancelledCount" : "sellCancelledValue") ? "Sell cancelled" : "Buy cancelled"]} contentStyle={{ borderRadius: 12, border: "1px solid #dbe6fb" }} /><Line type="monotone" dataKey={isCount ? "buyCancelledCount" : "buyCancelledValue"} stroke="#f2b84b" strokeWidth={2.5} dot={{ r: 2.5 }} animationDuration={900} /><Line type="monotone" dataKey={isCount ? "sellCancelledCount" : "sellCancelledValue"} stroke="#fb7185" strokeWidth={2.5} dot={{ r: 2.5 }} animationDuration={1050} /></LineChart></ResponsiveContainer></div><div className="mt-2 flex gap-3 text-[11px] font-bold text-[#71809a]"><span><i className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-[#f2b84b]" />Buy cancelled</span><span><i className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-[#fb7185]" />Sell cancelled</span></div></Card>;
+}
 function CancellationRate() {
   const rates = [
     {
@@ -1080,7 +1272,7 @@ function Snapshots() {
   );
 }
 
-function Overview() {
+function Overview({ analyticsFilter }) {
   const rows = [
     ["Sales", "₹4.82L", "vs ₹4.27L avg", "113%", 82, "blue"],
     ["Orders", "172", "vs 166 avg", "104%", 67, "blue"],
@@ -1093,6 +1285,7 @@ function Overview() {
       <Title id="overview" tag="B2C + B2B">
         Overview
       </Title>
+      <OrderAnalytics startDate={analyticsFilter.startDate} endDate={analyticsFilter.endDate} />
       <div className="grid gap-4 xl:grid-cols-[1fr_1.15fr_1.4fr]">
         <Card className="p-5 sm:p-6">
           <div className="mb-3 flex items-start justify-between gap-3">
@@ -1602,36 +1795,10 @@ function Returns() {
   );
 }
 export default function Live_Data_Industry() {
-  const [tab, setTab] = useState("Overview");
-  const tabs = [
-    "Overview",
-    "B2C sales",
-    "B2B sales",
-    "B2C purchase",
-    "B2B purchase",
-    "Inventory",
-    "Returns",
-  ];
-  const body =
-    tab === "Overview" ? (
-      <>
-        <Overview />
-        <Sales />
-        <Purchases />
-        <Inventory />
-        <Returns />
-      </>
-    ) : tab.includes("sales") ? (
-      <Sales />
-    ) : tab.includes("purchase") ? (
-      <Purchases />
-    ) : tab === "Inventory" ? (
-      <Inventory />
-    ) : tab === "Returns" ? (
-      <Returns />
-    ) : (
-      <Sales />
-    );
+  const [analyticsFilter, setAnalyticsFilter] = useState({ period: "Last 30 days", startDate: "", endDate: "" });
+  useEffect(() => {
+    setAnalyticsFilter({ period: "Last 30 days", ...getPresetRange("Last 30 days") });
+  }, []);
   return (
     <main className="ios-glass-dashboard min-h-screen bg-[#f5f8ff] font-sans text-slate-800">
       <header className="px-5 pt-4 sm:px-7">
@@ -1650,25 +1817,13 @@ export default function Live_Data_Industry() {
           </div>
         </div>
       </header>
-      <nav className="px-5 py-3 sm:px-7">
-        <div className="ios-glass-control mx-auto flex max-w-[1560px] gap-2 overflow-x-auto rounded-[26px] px-4">
-          <span className="flex items-center text-sm font-bold text-[#242b5c]">
-            Dacby<span className="text-slate-400">Operations</span>
-          </span>
-          {tabs.map((item) => (
-            <button
-              onClick={() => setTab(item)}
-              key={item}
-              className={`my-1 whitespace-nowrap rounded-xl border px-3 py-2.5 text-xs font-bold transition ${tab === item ? "border-white/85 bg-white/65 text-[#2865df] shadow-[0_4px_14px_rgba(45,73,130,.10)] backdrop-blur-xl" : "border-transparent text-slate-500 hover:bg-white/35 hover:text-slate-900"}`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-      </nav>
       <div className="mx-auto max-w-[1560px] space-y-10 p-5 pb-12 sm:p-7 sm:pb-16">
-        {tab === "Overview" && <Snapshots />}
-        {body}
+        <AnalyticsDateFilter filter={analyticsFilter} onChange={setAnalyticsFilter} />
+        <Overview analyticsFilter={analyticsFilter} />
+        <Sales />
+        <Purchases />
+        <Inventory />
+        <Returns />
       </div>
     </main>
   );
