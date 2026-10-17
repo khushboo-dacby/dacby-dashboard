@@ -51,6 +51,8 @@ const metrics = {
   b2cSalesCancelled: { label: "Cancelled B2C Sales Orders", values: byPeriod(["₹21K", "9 units"], ["₹6.4L", "281 units"], ["₹2.8L", "116 units"]) },
   b2bSalesCancelled: { label: "Cancelled B2B Sales Orders", values: byPeriod(["₹0", "0 units"], ["₹3.2L", "14 units"], ["₹1.4L", "6 units"]) },
   b2cPurchaseCancelled: { label: "Cancelled B2C Purchase Orders", values: byPeriod(["₹18K", "7 units"], ["₹5.1L", "214 units"], ["₹2.2L", "94 units"]) },
+  olxOrders: { label: "OLX Orders", values: byPeriod(["₹7.6L", "37 units"], ["₹1.45Cr", "648 units"], ["₹63.4L", "287 units"]) },
+  olxTotalOrders: { label: "OLX Total Orders", values: byPeriod(["32", "orders"], ["510", "orders"], ["224", "orders"]) },
   dispatchVolume: { label: "Daily Dispatch Volume", values: byPeriod(null, ["171 units", "₹4.9L / day"], ["164 units", "₹4.5L / day"]) },
   paymentReleasedPerDay: { label: "Daily Payments Released", values: byPeriod(["₹2.7L", "today"], ["₹74L", "last 30 days"], ["₹31.6L", "selected range"]) },
   b2bPaymentReleased: { label: "B2B Payment Released", values: byPeriod(["₹18L", "today"], null, ["₹47.5L", "selected range"]) },
@@ -117,7 +119,7 @@ const channelTrendSeries = [
 ];
 
 function Card({ children, className = "" }) {
-  return <section className={`relative isolate overflow-hidden rounded-[22px] border text-[#18213b] shadow-[0_12px_34px_rgba(32,68,128,0.11)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(32,68,128,0.14)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-white/90 [&>*]:relative [&>*]:z-10 ${className}`} style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.84), rgba(250,252,255,0.65) 48%, rgba(238,246,255,0.58))", borderColor: "rgba(255,255,255,0.92)" }}>{children}</section>;
+  return <section className={`relative isolate overflow-hidden rounded-[22px] border text-[#18213b] shadow-[0_12px_34px_rgba(32,68,128,0.11)] backdrop-blur-2xl backdrop-saturate-150 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(32,68,128,0.14)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-white/70 [&>*]:relative [&>*]:z-10 ${className}`} style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.60), rgba(250,252,255,0.36) 48%, rgba(238,246,255,0.26))", borderColor: "rgba(255,255,255,0.66)" }}>{children}</section>;
 }
 
 function SectionHeading({ badge, title, description, live = false }) {
@@ -218,16 +220,17 @@ function CommercialPerformance({ period, segment, customDates }) {
     { segment: "b2b", metric: metrics.b2bSales, icon: CircleDollarSign, tone: "violet", orderMetric: metrics.b2bSalesOrders },
     { segment: "b2c", metric: metrics.b2cPurchase, icon: ShoppingBag, tone: "teal", orderMetric: metrics.b2cPurchaseOrders },
     { segment: "b2b", metric: metrics.b2bPurchase, icon: ShoppingBag, tone: "amber", orderMetric: metrics.b2bPurchaseOrders },
+    { segment: "all", row: "cancellation", metric: metrics.olxOrders, orderMetric: metrics.olxTotalOrders, icon: ShoppingBag, tone: "blue" },
     { segment: "b2b", metric: metrics.b2bSalesCancelled, icon: ArrowDownRight, tone: "rose" },
     { segment: "b2c", metric: metrics.b2cSalesCancelled, icon: ArrowDownRight, tone: "rose" },
     { segment: "b2c", metric: metrics.b2cPurchaseCancelled, icon: ArrowDownRight, tone: "rose" },
   ];
   const visibleCards = segment === "all" ? cards : cards.filter((card) => card.segment === segment);
-  const primaryCards = visibleCards.filter((card) => card.tone !== "rose");
-  const cancellationCards = visibleCards.filter((card) => card.tone === "rose");
+  const primaryCards = visibleCards.filter((card) => card.row !== "cancellation" && card.tone !== "rose");
+  const cancellationCards = visibleCards.filter((card) => card.row === "cancellation" || card.tone === "rose");
   const title = segment === "all" ? "B2C / B2B Commercial Performance" : `${segment.toUpperCase()} Commercial Performance`;
 
-  return <section className="space-y-5"><SectionHeading badge="Sales & Purchase" title={title} description="Sales, purchase value, units, orders, and cancellations." /><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{primaryCards.map((card) => <MetricCard key={card.metric.label} metric={card.metric} period={period} icon={card.icon} tone={card.tone} orderMetric={card.orderMetric} />)}</div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{cancellationCards.map((card) => <MetricCard key={card.metric.label} metric={card.metric} period={period} icon={card.icon} tone={card.tone} orderMetric={card.orderMetric} />)}</div><ChannelMix period={period} segment={segment} /><ChannelDailyTrends period={period} customDates={customDates} segment={segment} /><DailyTrends period={period} customDates={customDates} segment={segment} /></section>;
+  return <section className="space-y-5"><SectionHeading badge="Sales & Purchase" title={title} description="Sales, purchase value, units, orders, and cancellations." /><div className={`grid gap-4 md:grid-cols-2 ${primaryCards.length > 4 ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}>{primaryCards.map((card) => <MetricCard key={card.metric.label} metric={card.metric} period={period} icon={card.icon} tone={card.tone} orderMetric={card.orderMetric} />)}</div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{cancellationCards.map((card) => <MetricCard key={card.metric.label} metric={card.metric} period={period} icon={card.icon} tone={card.tone} orderMetric={card.orderMetric} />)}</div><ChannelMix period={period} segment={segment} /><ChannelDailyTrends period={period} customDates={customDates} segment={segment} /><DailyTrends period={period} customDates={customDates} segment={segment} /></section>;
 }
 
 function DemandInsights({ period }) {
@@ -256,7 +259,7 @@ export default function Live_Data_Industry() {
   const segment = "all";
   const [customDates, setCustomDates] = useState({ start: "2026-09-18", end: "2026-10-17" });
   const updateDate = (field, value) => setCustomDates((current) => ({ ...current, [field]: value }));
-  return <main className="relative isolate min-h-screen overflow-hidden font-sans text-slate-800" style={{ background: "radial-gradient(circle at 4% 8%, rgba(42,103,236,.16), transparent 24%), radial-gradient(circle at 96% 9%, rgba(19,184,155,.14), transparent 22%), radial-gradient(circle at 82% 65%, rgba(112,76,243,.10), transparent 28%), linear-gradient(180deg, #FAFCFF 0%, #F3F7FC 56%, #F7FAFE 100%)" }}><div aria-hidden="true" className="pointer-events-none absolute left-[4%] top-[8%] h-72 w-72 rounded-full bg-[#2A67EC]/12 blur-3xl" /><div aria-hidden="true" className="pointer-events-none absolute right-[2%] top-[22%] h-80 w-80 rounded-full bg-[#13B89B]/10 blur-3xl" /><div aria-hidden="true" className="pointer-events-none absolute bottom-[12%] left-[28%] h-96 w-96 rounded-full bg-[#704CF3]/8 blur-3xl" /><header className="relative z-10 px-5 pt-4 sm:px-7"><div className="mx-auto flex max-w-[1560px] flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/45 px-4 py-3 shadow-[0_8px_26px_rgba(32,68,128,.06)] backdrop-blur-xl sm:px-5"><div><p className="text-[11px] font-black uppercase tracking-[.16em] text-[#2A67EC]">DACBY OPERATIONS</p><h1 className="text-xl font-bold tracking-tight text-[#151D35]">Live Data</h1></div><div className="flex items-center gap-2 rounded-full border border-[#B7F1CD] bg-[#ECFBF3]/85 px-3 py-1.5 text-xs font-bold text-[#157348]"><i className="h-2 w-2 rounded-full bg-[#16B879]" />Live Operations</div></div></header><div className="relative z-10 mx-auto max-w-[1560px] space-y-12 p-5 pb-16 sm:p-7"><DateFilters period={period} onChange={setPeriod} customDates={customDates} onDateChange={updateDate} />
+  return <main className="glass-image-page font-sans text-slate-800"><header className="relative z-10 px-5 pt-4 sm:px-7"><div className="mx-auto flex max-w-[1560px] flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/45 px-4 py-3 shadow-[0_8px_26px_rgba(32,68,128,.06)] backdrop-blur-xl sm:px-5"><div><p className="text-[11px] font-black uppercase tracking-[.16em] text-[#2A67EC]">DACBY OPERATIONS</p><h1 className="text-xl font-bold tracking-tight text-[#151D35]">Live Data</h1></div><div className="flex items-center gap-2 rounded-full border border-[#B7F1CD] bg-[#ECFBF3]/85 px-3 py-1.5 text-xs font-bold text-[#157348]"><i className="h-2 w-2 rounded-full bg-[#16B879]" />Live Operations</div></div></header><div className="relative z-10 mx-auto max-w-[1560px] space-y-12 p-5 pb-16 sm:p-7"><DateFilters period={period} onChange={setPeriod} customDates={customDates} onDateChange={updateDate} />
 
     <CommercialPerformance period={period} segment={segment} customDates={customDates} />
 
