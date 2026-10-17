@@ -1,7 +1,7 @@
 import LiveDataIndustry from "./Live_Data_Industry";
 
 export const metadata = {
-  title: "Live Operations Dashboard | DACBY",
+  title: "Live Data | DACBY",
   description: "Live B2C, B2B, fulfilment, purchase, and inventory metrics.",
 };
 
