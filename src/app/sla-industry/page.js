@@ -1,3 +1,4 @@
+import "./sla-industry.css";
 import Sla_Industry from "./Sla_Industry";
 
 export const metadata = {

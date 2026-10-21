@@ -1,3 +1,4 @@
+import "./live-data-industry.css";
 import LiveDataIndustry from "./Live_Data_Industry";
 
 export const metadata = {

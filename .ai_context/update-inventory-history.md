@@ -1,5 +1,67 @@
 # Update Inventory History
 
+## 2026-10-19
+
+### Live Data Industry Operations & Analytics Dashboard (`/live-data-industry`)
+- **Daily Sales Velocity Bar Chart (`DailySalesBarChart.jsx`)**:
+  - Implemented daily revenue velocity analytics broken down by DACBY category codes (Consoles, Games, Controllers, Accessories, etc.) and volume units.
+  - Added multi-mode toggle controls: Total Sales, Stacked (B2C + B2B), B2C Only, and B2B Only.
+  - Built custom hover tooltip (`DailySalesCustomTooltip`) displaying category breakdown, rupee turnover, unit counts, and B2C vs B2B distribution.
+  - Included executive summary KPI chips (Total Turnover in Lakhs/Cr, Daily Average, and Units) alongside dynamic Y-axis scaling and peak day record indicators.
+  - Added category processing helpers in `utils/categoryUtils.js` for simulated turnover distribution and category code mappings.
+
+- **Order Value Velocity Line Chart (`OrderValueVelocityChart.jsx`)**:
+  - Implemented month-over-month order velocity benchmark comparison with previous month baseline (dashed line) and current month progress (solid line).
+  - Built interactive hover tooltip showing day-of-month order values, historical benchmarks, and absolute/percentage differences with positive/negative color accents.
+  - Added segment toggling (All, B2C, B2B) and metric filters (Total Sales, Total Orders, Average Order Value).
+  - Integrated live highlights tracking the highest single day turnover and largest daily jump with date timestamps.
+  - Connected with the live order analysis API in `api/orderAnalysisApi.js` with comprehensive loading, error retry, and empty states.
+
+- **Live Data Industry Page Architecture & Enhancements (`Live_Data_Industry.jsx`)**:
+  - **Filter Enhancements**: Updated reporting period controls (`today`, `yesterday`, `last7`, `last30`, `custom`) so that selecting "Today" retains key visual analytics (such as the Channel Mix circular donut chart) alongside metric cards.
+  - **Live Operations Removal**: Removed the legacy live operations section to streamline dashboard focus on core commercial metrics and demand velocity.
+  - **Descriptive Headings & Semantic Hierarchy**: Overhauled section headings, cards, and labels across Commercial Performance, Channel Mix, Daily Trends, Channel Trends, City Demand, and Inventory/Returns status with clear, readable titles, descriptive subtitles, and operational status badges.
+  - **Typography & Contrast Audit**: Audited typography and upgraded contrast across subtitles, micro-labels, axis ticks, and metrics using Tailwind CSS utility classes directly on elements without modifying global stylesheets.
+
+## 2026-10-18
+
+### Customer Profile Overview & Left Sidebar Restructure (`/customers`)
+- **2-Column SaaS CRM Layout Overhaul**:
+  - Moved the full profile section to the left sidebar ([`CustomerProfileSidebar.jsx`](file:///Users/dacby/dacby-dashboard/src/app/customers/components/CustomerProfileSidebar.jsx)) matching the SaaS CRM layout (circular avatar, quick circular buttons for Note/Email/Call/Wallet/More, collapsible contact details, financial standing, and push notification tokens).
+  - Added modern top bar ([`CustomerTopNav.jsx`](file:///Users/dacby/dacby-dashboard/src/app/customers/components/CustomerTopNav.jsx)) with breadcrumbs, centered search input with `⌘K` shortcut hint, action controls, and an "Add Funds" modal button.
+  - Removed the Analytics tab per request, leaving a streamlined navigation tab bar (Overview, Orders, Wallet & B2B, Addresses, Payments).
+- **Overview & Sidebar De-duplication**:
+  - Removed fields from [`CustomerOverview.jsx`](file:///Users/dacby/dacby-dashboard/src/app/customers/components/CustomerOverview.jsx) that already exist on the left sidebar ([`CustomerProfileSidebar.jsx`](file:///Users/dacby/dacby-dashboard/src/app/customers/components/CustomerProfileSidebar.jsx)):
+    - Removed `Contact Phone` (already in sidebar quick-call button & Contact Details).
+    - Removed `Source` (already in sidebar as `Channel Source`).
+    - Removed `Account Tier` (already in sidebar header badge).
+    - Removed duplicate `UPI Settlement ID` & `Bank Account` rows from the Profile Overview key-value table, and removed duplicate payment pills from the sidebar so that Payment Details live exclusively in the dedicated **Payment & Settlement Details** card section in Overview.
+    - Updated the Operational Facility card in Overview to focus on order fulfilment volume & delivery SLA pipeline rather than repeating the wallet balance from the sidebar.
+
+## 2026-10-17
+
+### Customer Profile & Operations Architecture (`/customers`)
+- **Concurrent Data Fetching (`Promise.all`)**:
+  - Refactored `Customer.jsx` and added `getCustomerWithOrders` in `src/app/customers/api.js` to execute `getUserDetails` and `fetchUserOrders` concurrently via `Promise.all`.
+  - Passed `initialOrders` into `CustomerOrders` and `CustomerAnalytics` to eliminate duplicate redundant network requests across tab switches.
+- **Industry-Level Customer Analytics Tab**:
+  - Implemented `src/app/customers/components/CustomerAnalytics.jsx` deriving all analytical metrics directly from live API data.
+  - Added summary KPIs for gross spend, completed orders, cancellations, and sell revenue.
+  - Added real Order Frequency breakdown (Monthly averages, Quarterly volumes, Half-Yearly H1/H2, Yearly summary).
+  - Integrated interactive Recharts Area Chart with metric toggle (Gross Spend vs Order Count Velocity) and customized tooltips.
+  - Implemented Top Purchasing Categories ranker with percentage progress bars and Payment Method Distribution Donut Chart.
+- **B2B Credit Facility & Conditional Wallet Switcher**:
+  - Added B2B Credit Facility support inside `src/app/customers/components/CustomerWallet.jsx` alongside the standard retail store wallet.
+  - Displays total facility limit, available-to-draw, on-hold reserves, and a dedicated searchable/paginated ledger for wholesale transactions (recharges, order hold transfers, UTR tracking).
+  - Implemented conditional rendering (`hasB2BWallet`): when customer is not a vendor (`!isVendor` or absent `b2b_wallet`), the dual-card switcher is completely hidden, directly presenting a clean **Customer Store Wallet** view with an informative retail account badge.
+- **Order Details Modal & Media Integration**:
+  - Cleaned up `OrderDetailModal.jsx` by removing raw JSON response displays and aligning badge layout hierarchies.
+  - Resolved product image rendering using Next.js `Image` (`next/image`) with pre-configured `remotePatterns` for `dacby-database.web.app/cdn/**`, resolving browser `Cross-Origin-Resource-Policy: same-origin` blocks without manual URL transformations.
+- **Full DACBY Design System Alignment**:
+  - Conducted a comprehensive color audit of all files in `src/app/customers/` against `.ai_context/color-palette.md`.
+  - Replaced arbitrary `slate-*`, `gray-*`, `amber-*`, and non-palette colors across `Customer.jsx`, `CustomerHeader.jsx`, `CustomerTabs.jsx`, `CustomerOverview.jsx`, `CustomerOrders.jsx`, `CustomerPayments.jsx`, `CustomerAnalytics.jsx`, and `OrderDetailModal.jsx`.
+  - Aligned surfaces to `#F6F8FC` / `#FFFFFF` / `#F2F5FA`, borders to `#DCE5F1`, text to `#151D35` / `#53647F` / `#71809A`, buttons to `#2A67EC` hover `#1E57D2`, and chart palette to DACBY multi-series tokens.
+
 ## 2026-10-13
 
 ### SLA Industry Operations Dashboard (`/sla-industry`)

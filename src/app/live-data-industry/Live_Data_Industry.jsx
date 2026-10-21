@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Activity,
   ArrowDownRight,
@@ -29,6 +29,9 @@ import {
   YAxis,
 } from "recharts";
 import { analyticsPalette } from "./AnalyticsPaletteContext";
+import DailySalesBarChart from "./components/DailySalesBarChart";
+import OrderValueVelocityChart from "./components/OrderValueVelocityChart";
+import { safeParseDate } from "./utils/categoryUtils";
 
 const PERIODS = [
   { id: "today", label: "Today" },
@@ -142,45 +145,274 @@ function LiveKpiCard({ metric, icon: Icon = Activity, tone = "teal" }) {
 
 function formatReportingDate(date) {
   if (!date) return "date not selected";
-  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" }).format(new Date(`${date}T00:00:00`));
+  try {
+    const parsed = safeParseDate(date, null);
+    if (!parsed || isNaN(parsed.getTime())) return "date not selected";
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(parsed);
+  } catch {
+    return "date not selected";
+  }
 }
 
 function DateFilters({ period, onChange, customDates, onDateChange }) {
+  const [localStart, setLocalStart] = useState(customDates?.start || "2026-09-18");
+  const [localEnd, setLocalEnd] = useState(customDates?.end || "2026-10-17");
+
+  useEffect(() => {
+    if (customDates?.start) setLocalStart(customDates.start);
+    if (customDates?.end) setLocalEnd(customDates.end);
+  }, [customDates?.start, customDates?.end]);
+
+  const handleApply = (event) => {
+    if (event && event.preventDefault) event.preventDefault();
+    if (!localStart || !localEnd) return;
+
+    let s = localStart;
+    let e = localEnd;
+    const parsedS = safeParseDate(s, null);
+    const parsedE = safeParseDate(e, null);
+
+    if (parsedS && parsedE && parsedS.getTime() > parsedE.getTime()) {
+      const temp = s;
+      s = e;
+      e = temp;
+      setLocalStart(s);
+      setLocalEnd(e);
+    }
+
+    if (onDateChange) {
+      onDateChange("range", { start: s, end: e });
+    }
+  };
+
   const selectedRange = period === "today"
     ? "Selected reporting period: Today"
     : period === "last30"
       ? "Selected reporting period: Last 30 Days"
-      : `Selected reporting period: ${formatReportingDate(customDates.start)} – ${formatReportingDate(customDates.end)}`;
+      : `Selected reporting period: ${formatReportingDate(customDates?.start)} – ${formatReportingDate(customDates?.end)}`;
 
-  return <Card className="p-4 sm:p-5"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#2A67EC]">Analytics Controls</p><h2 className="mt-1 text-lg font-bold text-[#151D35]">Reporting Period</h2></div><div className="flex flex-wrap items-end justify-end gap-3"><div className="flex rounded-xl bg-[#EFF3F8] p-1 text-xs font-bold">{PERIODS.map((item) => <button key={item.id} type="button" onClick={() => onChange(item.id)} className={`rounded-lg px-3 py-2 transition ${period === item.id ? "bg-white text-[#2A67EC] shadow-[0_2px_8px_rgba(32,68,128,0.12)]" : "text-[#71809A] hover:text-[#53647F]"}`}>{item.label}</button>)}</div>{period === "custom" && <div className="flex flex-wrap items-end gap-2 rounded-xl border border-[#DCE5F1]/90 bg-white/45 p-2"><label className="text-[11px] font-bold text-[#71809A]">Start<input type="date" value={customDates.start} onChange={(event) => onDateChange("start", event.target.value)} className="mt-1 block w-[140px] rounded-lg border border-[#DCE5F1] bg-white/80 px-2 py-1.5 text-xs text-[#53647F] outline-none focus:border-[#2A67EC]" /></label><label className="text-[11px] font-bold text-[#71809A]">End<input type="date" value={customDates.end} onChange={(event) => onDateChange("end", event.target.value)} className="mt-1 block w-[140px] rounded-lg border border-[#DCE5F1] bg-white/80 px-2 py-1.5 text-xs text-[#53647F] outline-none focus:border-[#2A67EC]" /></label></div>}</div></div><p className="mt-4 border-t border-[#DCE5F1]/80 pt-4 text-sm font-bold text-[#2459C4]">{selectedRange}<span className="ml-2 font-medium text-[#71809A]">· Live operational cards reflect current status.</span></p></Card>;
+  return (
+    <Card className="p-4 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#2A67EC]">
+            Analytics Controls
+          </p>
+          <h2 className="mt-1 text-lg font-bold text-[#151D35]">Reporting Period</h2>
+        </div>
+        <div className="flex flex-wrap items-end justify-end gap-3">
+          <div className="flex rounded-xl bg-[#EFF3F8] p-1 text-xs font-bold">
+            {PERIODS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onChange(item.id)}
+                className={`rounded-lg px-3 py-2 transition ${period === item.id
+                  ? "bg-white text-[#2A67EC] shadow-[0_2px_8px_rgba(32,68,128,0.12)]"
+                  : "text-[#71809A] hover:text-[#53647F]"
+                  }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          {period === "custom" && (
+            <form
+              onSubmit={handleApply}
+              className="flex flex-wrap items-end gap-2.5 rounded-xl border border-[#DCE5F1]/90 bg-white/70 p-2 shadow-sm"
+            >
+              <label className="text-[11px] font-bold text-[#71809A]">
+                Start
+                <input
+                  type="date"
+                  value={localStart}
+                  onChange={(event) => setLocalStart(event.target.value)}
+                  className="mt-1 block w-[140px] rounded-lg border border-[#DCE5F1] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#151D35] outline-none transition focus:border-[#2A67EC] focus:ring-1 focus:ring-[#2A67EC]"
+                />
+              </label>
+              <label className="text-[11px] font-bold text-[#71809A]">
+                End
+                <input
+                  type="date"
+                  value={localEnd}
+                  onChange={(event) => setLocalEnd(event.target.value)}
+                  className="mt-1 block w-[140px] rounded-lg border border-[#DCE5F1] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#151D35] outline-none transition focus:border-[#2A67EC] focus:ring-1 focus:ring-[#2A67EC]"
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={!localStart || !localEnd}
+                className="h-[34px] rounded-lg bg-[#2A67EC] px-4 text-xs font-bold text-white shadow-[0_2px_8px_rgba(42,103,236,0.28)] transition hover:bg-[#1E56D0] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Apply
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+      <p className="mt-4 border-t border-[#DCE5F1]/80 pt-4 text-sm font-bold text-[#2459C4]">
+        {selectedRange}
+        <span className="ml-2 font-medium text-[#71809A]">
+          · Live operational cards reflect current status.
+        </span>
+      </p>
+    </Card>
+  );
 }
 
 function BarPanel({ title, description, data, color, controls }) {
-  return <Card className="p-5 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><h3 className="text-base font-bold text-[#151D35]">{title}</h3><p className="mt-1 text-xs font-medium text-[#71809A]">{description}</p></div>{controls}</div><div className="mt-5 h-64"><ResponsiveContainer width="100%" height="100%"><BarChart data={data} layout="vertical" margin={{ top: 0, right: 24, left: 18, bottom: 0 }}><CartesianGrid horizontal={false} stroke={analyticsPalette.chart.grid} strokeDasharray="3 4" /><XAxis type="number" tickLine={false} axisLine={false} tick={{ fill: analyticsPalette.chart.axis, fontSize: 11 }} tickFormatter={(value) => `${value}%`} /><YAxis type="category" dataKey="name" width={110} tickLine={false} axisLine={false} tick={{ fill: analyticsPalette.text.secondary, fontSize: 11, fontWeight: 600 }} /><Tooltip cursor={{ fill: "rgba(42,103,236,.06)" }} formatter={(value) => [`${value}%`, "% of value"]} contentStyle={{ borderRadius: 12, border: `1px solid ${analyticsPalette.surface.border}`, boxShadow: "0 10px 24px rgba(32,68,128,.12)" }} /><Bar dataKey="value" fill={color} radius={[0, 7, 7, 0]} /></BarChart></ResponsiveContainer></div></Card>;
+  return (
+    <Card className="p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-bold text-[#151D35]">{title}</h3>
+          <p className="mt-1 text-xs font-medium text-[#71809A]">{description}</p>
+        </div>
+        {controls}
+      </div>
+      <div className="mt-5 h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} layout="vertical" margin={{ top: 0, right: 24, left: 18, bottom: 0 }}>
+            <CartesianGrid horizontal={false} stroke={analyticsPalette.chart.grid} strokeDasharray="3 4" />
+            <XAxis
+              type="number"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: analyticsPalette.chart.axis, fontSize: 11 }}
+              tickFormatter={(value) => `${value}%`}
+            />
+            <YAxis
+              type="category"
+              dataKey="name"
+              width={110}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: analyticsPalette.text.secondary, fontSize: 11, fontWeight: 600 }}
+            />
+            <Tooltip
+              cursor={{ fill: "rgba(42,103,236,.06)" }}
+              formatter={(value) => [`${value}%`, "% of value"]}
+              contentStyle={{
+                borderRadius: 12,
+                border: `1px solid ${analyticsPalette.surface.border}`,
+                boxShadow: "0 10px 24px rgba(32,68,128,.12)",
+              }}
+            />
+            <Bar dataKey="value" fill={color} radius={[0, 7, 7, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
+  );
 }
 
 function ChannelMix({ period, segment }) {
-  const visible = period !== "today";
+  const isToday = period === "today";
   const segmentLabel = segment === "all" ? "" : `${segment.toUpperCase()} `;
   const channelMix = {
     all: { sales: [64, 36], purchase: [46, 54] },
     b2c: { sales: [64, 36], purchase: [46, 54] },
     b2b: { sales: [31, 69], purchase: [22, 78] },
   }[segment];
-  const salesMix = [{ name: "App", value: channelMix.sales[0], color: "#2A67EC" }, { name: "Web", value: channelMix.sales[1], color: "#13B89B" }];
-  const purchaseMix = [{ name: "App", value: channelMix.purchase[0], color: "#2A67EC" }, { name: "Web", value: channelMix.purchase[1], color: "#13B89B" }];
-  const donut = (title, data) => <Card className="p-5"><h3 className="text-base font-bold text-[#151D35]">{title}</h3><p className="mt-1 text-xs font-medium text-[#71809A]">% of Value</p>{visible ? <div className="mt-4 flex items-center gap-5"><div className="h-32 w-32 shrink-0"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data} dataKey="value" innerRadius={38} outerRadius={58} paddingAngle={3} stroke="none">{data.map((item) => <Cell key={item.name} fill={item.color} />)}</Pie></PieChart></ResponsiveContainer></div><div className="space-y-3">{data.map((item) => <p key={item.name} className="flex items-center gap-2 text-sm font-bold text-[#53647F]"><i className="h-2.5 w-2.5 rounded-full" style={{ background: item.color }} />{item.name} <span className="text-[#151D35]">{item.value}%</span></p>)}</div></div> : <p className="mt-7 text-sm font-semibold text-[#8190A9]">Available for Last 30 Days and Custom Ranges.</p>}</Card>;
-  return <div className="grid gap-4 md:grid-cols-2">{donut(`${segmentLabel}Sales by Channel`, salesMix)}{donut(`${segmentLabel}Purchases by Channel`, purchaseMix)}</div>;
+  const salesMix = [
+    { name: "App", value: channelMix.sales[0], color: "#2A67EC" },
+    { name: "Web", value: channelMix.sales[1], color: "#13B89B" },
+  ];
+  const purchaseMix = [
+    { name: "App", value: channelMix.purchase[0], color: "#2A67EC" },
+    { name: "Web", value: channelMix.purchase[1], color: "#13B89B" },
+  ];
+
+  const donut = (title, data) => (
+    <Card className="p-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-bold text-[#151D35]">{title}</h3>
+          <p className="mt-1 text-xs font-medium text-[#71809A]">% of Value</p>
+        </div>
+        {isToday && (
+          <span className="rounded-full border border-[#DCE5F1] bg-[#F8FAFC] px-2.5 py-0.5 text-[10px] font-bold text-[#53647F]">
+            Today's Mix
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center gap-5">
+        <div className="h-32 w-32 shrink-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={data} dataKey="value" innerRadius={38} outerRadius={58} paddingAngle={3} stroke="none">
+                {data.map((item) => (
+                  <Cell key={item.name} fill={item.color} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="space-y-3">
+          {data.map((item) => (
+            <p key={item.name} className="flex items-center gap-2 text-sm font-bold text-[#53647F]">
+              <i className="h-2.5 w-2.5 rounded-full" style={{ background: item.color }} />
+              {item.name} <span className="text-[#151D35]">{item.value}%</span>
+            </p>
+          ))}
+        </div>
+      </div>
+    </Card>
+  );
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {donut(`${segmentLabel}Sales by Channel`, salesMix)}
+      {donut(`${segmentLabel}Purchases by Channel`, purchaseMix)}
+    </div>
+  );
 }
 
 function buildTrendDates(period, customDates, count) {
-  const start = new Date(`${period === "custom" ? customDates.start : "2026-09-18"}T00:00:00`);
-  const end = new Date(`${period === "custom" ? customDates.end : "2026-10-17"}T00:00:00`);
-  const step = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000 / (count - 1)));
+  if (!count || count <= 0) return [];
+  const defaultStart = new Date("2026-09-18T00:00:00");
+  const defaultEnd = new Date("2026-10-17T00:00:00");
+
+  let start =
+    period === "custom"
+      ? safeParseDate(customDates?.start, defaultStart)
+      : defaultStart;
+  let end =
+    period === "custom"
+      ? safeParseDate(customDates?.end, defaultEnd)
+      : defaultEnd;
+
+  if (start.getTime() > end.getTime()) {
+    const temp = start;
+    start = end;
+    end = temp;
+  }
+
+  const diffMs = end.getTime() - start.getTime();
+  const step = Math.max(
+    1,
+    Math.round(diffMs / 86400000 / Math.max(1, count - 1))
+  );
+
   return Array.from({ length: count }, (_, index) => {
-    const date = new Date(start);
-    date.setDate(start.getDate() + index * step);
-    return new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short" }).format(date);
+    try {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index * step);
+      if (isNaN(date.getTime())) {
+        return `Day ${index + 1}`;
+      }
+      return new Intl.DateTimeFormat("en-IN", {
+        day: "2-digit",
+        month: "short",
+      }).format(date);
+    } catch {
+      return `Day ${index + 1}`;
+    }
   });
 }
 
@@ -193,10 +425,118 @@ function DailyTrendCard({ trend, period, customDates, bar = false, cancellation 
 }
 
 function DailyTrends({ period, customDates, segment }) {
-  const trendPeriodLabel = period === "last30" ? "Last 30 Days" : period === "custom" ? "Custom Range" : "Select a Date Range";
+  const isToday = period === "today";
+  const trendPeriodLabel = isToday ? "Today" : period === "last30" ? "Last 30 Days" : period === "custom" ? "Custom Range" : "Select a Date Range";
   const visibleTrends = segment === "all" ? dailyTrendSeries : dailyTrendSeries.filter((trend) => trend.key.startsWith(segment));
   const visibleCancellations = segment === "all" ? cancellationTrendSeries : cancellationTrendSeries.filter((trend) => trend.key.startsWith(segment));
-  return <div className="mt-7"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-base font-bold text-[#151D35]">Sales and Purchase Activity by Day</h3><p className="mt-1 text-xs font-medium text-[#71809A]">Track daily sales and purchase value across B2C and B2B for the selected reporting period.</p></div><span className="rounded-full border border-[#C9DCFF] bg-[#EDF3FF] px-3 py-1 text-[11px] font-bold text-[#2459C4]">{trendPeriodLabel}</span></div>{period === "today" ? <Card className="p-5 text-sm font-semibold text-[#71809A]">Daily sales and purchase performance is available for Last 30 days and Custom range.</Card> : <><div className="grid gap-4 md:grid-cols-2">{visibleTrends.map((trend) => <DailyTrendCard key={trend.key} trend={trend} period={period} customDates={customDates} />)}</div><div className="mt-8 rounded-[24px] border border-white/85 bg-white/30 p-4 shadow-[0_14px_34px_rgba(125,44,62,0.05)] sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><span className="inline-flex rounded-full bg-[#FFF0F2] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#B83852]">Exceptions</span><h3 className="mt-2 text-base font-bold text-[#151D35]">Cancelled Orders by Day</h3><p className="mt-1 text-xs font-medium text-[#71809A]">Review the value associated with cancelled sales and purchase orders.</p></div><span className="rounded-full border border-[#F5C7CE] bg-white/70 px-3 py-1 text-[11px] font-bold text-[#B83852]">₹ lakh</span></div><div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{visibleCancellations.map((trend) => <DailyTrendCard key={trend.key} trend={trend} period={period} customDates={customDates} bar cancellation />)}</div></div></>}</div>;
+
+  return (
+    <div className="mt-7">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="text-base font-bold text-[#151D35]">Sales and Purchase Activity by Day</h3>
+          <p className="mt-1 text-xs font-medium text-[#71809A]">
+            Track daily sales and purchase value across B2C and B2B for the selected reporting period.
+          </p>
+        </div>
+        <span className="rounded-full border border-[#C9DCFF] bg-[#EDF3FF] px-3 py-1 text-[11px] font-bold text-[#2459C4]">
+          {trendPeriodLabel}
+        </span>
+      </div>
+
+      {isToday ? (
+        /* If filter is selected today, show values only, not graph */
+        <div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {visibleTrends.map((trend) => {
+              const todayVal = trend.values[trend.values.length - 1];
+              return (
+                <Card key={trend.key} className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-base font-bold text-[#151D35]">{trend.title}</h3>
+                      <p className="mt-1 text-xs font-medium text-[#71809A]">Today's Recorded Value</p>
+                    </div>
+                    <i className="mt-1 h-2.5 w-2.5 rounded-full" style={{ background: trend.color }} />
+                  </div>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="text-3xl font-black text-[#151D35]">₹{todayVal}L</span>
+                    <span className="text-xs font-bold text-[#71809A]">today</span>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 rounded-[24px] border border-white/85 bg-white/30 p-4 shadow-[0_14px_34px_rgba(125,44,62,0.05)] sm:p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <span className="inline-flex rounded-full bg-[#FFF0F2] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#B83852]">
+                  Exceptions
+                </span>
+                <h3 className="mt-2 text-base font-bold text-[#151D35]">Cancelled Orders Today</h3>
+                <p className="mt-1 text-xs font-medium text-[#71809A]">
+                  Review the value associated with cancelled sales and purchase orders today.
+                </p>
+              </div>
+              <span className="rounded-full border border-[#F5C7CE] bg-white/70 px-3 py-1 text-[11px] font-bold text-[#B83852]">
+                ₹ lakh
+              </span>
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {visibleCancellations.map((trend) => {
+                const todayVal = trend.values[trend.values.length - 1];
+                return (
+                  <Card key={trend.key} className="p-4 border-white/80 shadow-[0_10px_28px_rgba(125,44,62,0.08)]">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="text-sm font-bold text-[#151D35]">{trend.title}</h4>
+                        <p className="mt-0.5 text-xs text-[#71809A]">Cancelled Value</p>
+                      </div>
+                      <span className="h-2 w-2 rounded-full" style={{ background: trend.color }} />
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-1.5">
+                      <span className="text-xl font-black text-[#B83852]">₹{todayVal}L</span>
+                      <span className="text-[11px] font-medium text-[#71809A]">today</span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-4 md:grid-cols-2">
+            {visibleTrends.map((trend) => (
+              <DailyTrendCard key={trend.key} trend={trend} period={period} customDates={customDates} />
+            ))}
+          </div>
+          <div className="mt-8 rounded-[24px] border border-white/85 bg-white/30 p-4 shadow-[0_14px_34px_rgba(125,44,62,0.05)] sm:p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <span className="inline-flex rounded-full bg-[#FFF0F2] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#B83852]">
+                  Exceptions
+                </span>
+                <h3 className="mt-2 text-base font-bold text-[#151D35]">Cancelled Orders by Day</h3>
+                <p className="mt-1 text-xs font-medium text-[#71809A]">
+                  Review the value associated with cancelled sales and purchase orders.
+                </p>
+              </div>
+              <span className="rounded-full border border-[#F5C7CE] bg-white/70 px-3 py-1 text-[11px] font-bold text-[#B83852]">
+                ₹ lakh
+              </span>
+            </div>
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {visibleCancellations.map((trend) => (
+                <DailyTrendCard key={trend.key} trend={trend} period={period} customDates={customDates} bar cancellation />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 function ChannelComparisonCard({ title, appValues, websiteValues, period, customDates }) {
@@ -206,12 +546,96 @@ function ChannelComparisonCard({ title, appValues, websiteValues, period, custom
 }
 
 function ChannelDailyTrends({ period, customDates, segment }) {
+  const isToday = period === "today";
   const getTrend = (key) => channelTrendSeries.find((trend) => trend.key === key).values;
   const aggregate = (metric) => getTrend(`b2c${metric}`).map((value, index) => value + getTrend(`b2b${metric}`)[index]);
   const valuesFor = (metric) => segment === "all" ? aggregate(metric) : getTrend(`${segment}${metric}`);
   const segmentLabel = segment === "all" ? "" : segment.toUpperCase();
 
-  return <div className="mt-7"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-base font-bold text-[#151D35]">App and Website Performance by Day</h3><p className="mt-1 text-xs font-medium text-[#71809A]">Compare daily sales and purchase value across the App and Website.</p></div></div>{period === "today" ? <Card className="p-5 text-sm font-semibold text-[#71809A]">Channel performance is available for Last 30 days and Custom range.</Card> : <div className="grid gap-4 md:grid-cols-2"><ChannelComparisonCard title={segmentLabel ? `${segmentLabel} Sales by Channel` : "Sales by Channel"} appValues={valuesFor("AppSales")} websiteValues={valuesFor("WebsiteSales")} period={period} customDates={customDates} /><ChannelComparisonCard title={segmentLabel ? `${segmentLabel} Purchases by Channel` : "Purchases by Channel"} appValues={valuesFor("AppPurchase")} websiteValues={valuesFor("WebsitePurchase")} period={period} customDates={customDates} /></div>}</div>;
+  return (
+    <div className="mt-7">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="text-base font-bold text-[#151D35]">App and Website Performance by Day</h3>
+          <p className="mt-1 text-xs font-medium text-[#71809A]">
+            Compare daily sales and purchase value across the App and Website.
+          </p>
+        </div>
+        {isToday && (
+          <span className="rounded-full border border-[#C9DCFF] bg-[#EDF3FF] px-2.5 py-0.5 text-[11px] font-bold text-[#2459C4]">
+            Today's Channel Values
+          </span>
+        )}
+      </div>
+
+      {isToday ? (
+        /* If filter is selected today, show values only, not graph */
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="p-5">
+            <div>
+              <h3 className="text-base font-bold text-[#151D35]">
+                {segmentLabel ? `${segmentLabel} Sales by Channel` : "Sales by Channel"}
+              </h3>
+              <p className="mt-1 text-xs font-medium text-[#71809A]">Today's Recorded Value · ₹ Lakh</p>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-[#DCE5F1]/80 bg-white/70 p-3.5 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#53647F]">
+                  <span className="h-2 w-2 rounded-full bg-[#2A67EC]" /> App Sales
+                </span>
+                <p className="mt-1.5 text-xl font-extrabold text-[#151D35]">₹{valuesFor("AppSales").slice(-1)[0]}L</p>
+              </div>
+              <div className="rounded-xl border border-[#DCE5F1]/80 bg-white/70 p-3.5 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#53647F]">
+                  <span className="h-2 w-2 rounded-full bg-[#13B89B]" /> Website Sales
+                </span>
+                <p className="mt-1.5 text-xl font-extrabold text-[#151D35]">₹{valuesFor("WebsiteSales").slice(-1)[0]}L</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-5">
+            <div>
+              <h3 className="text-base font-bold text-[#151D35]">
+                {segmentLabel ? `${segmentLabel} Purchases by Channel` : "Purchases by Channel"}
+              </h3>
+              <p className="mt-1 text-xs font-medium text-[#71809A]">Today's Recorded Value · ₹ Lakh</p>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-[#DCE5F1]/80 bg-white/70 p-3.5 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#53647F]">
+                  <span className="h-2 w-2 rounded-full bg-[#2A67EC]" /> App Purchases
+                </span>
+                <p className="mt-1.5 text-xl font-extrabold text-[#151D35]">₹{valuesFor("AppPurchase").slice(-1)[0]}L</p>
+              </div>
+              <div className="rounded-xl border border-[#DCE5F1]/80 bg-white/70 p-3.5 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#53647F]">
+                  <span className="h-2 w-2 rounded-full bg-[#13B89B]" /> Website Purchases
+                </span>
+                <p className="mt-1.5 text-xl font-extrabold text-[#151D35]">₹{valuesFor("WebsitePurchase").slice(-1)[0]}L</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          <ChannelComparisonCard
+            title={segmentLabel ? `${segmentLabel} Sales by Channel` : "Sales by Channel"}
+            appValues={valuesFor("AppSales")}
+            websiteValues={valuesFor("WebsiteSales")}
+            period={period}
+            customDates={customDates}
+          />
+          <ChannelComparisonCard
+            title={segmentLabel ? `${segmentLabel} Purchases by Channel` : "Purchases by Channel"}
+            appValues={valuesFor("AppPurchase")}
+            websiteValues={valuesFor("WebsitePurchase")}
+            period={period}
+            customDates={customDates}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function CommercialPerformance({ period, segment, customDates }) {
@@ -230,7 +654,59 @@ function CommercialPerformance({ period, segment, customDates }) {
   const cancellationCards = visibleCards.filter((card) => card.row === "cancellation" || card.tone === "rose");
   const title = segment === "all" ? "B2C / B2B Commercial Performance" : `${segment.toUpperCase()} Commercial Performance`;
 
-  return <section className="space-y-5"><SectionHeading badge="Sales & Purchase" title={title} description="Sales, purchase value, units, orders, and cancellations." /><div className={`grid gap-4 md:grid-cols-2 ${primaryCards.length > 4 ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}>{primaryCards.map((card) => <MetricCard key={card.metric.label} metric={card.metric} period={period} icon={card.icon} tone={card.tone} orderMetric={card.orderMetric} />)}</div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{cancellationCards.map((card) => <MetricCard key={card.metric.label} metric={card.metric} period={period} icon={card.icon} tone={card.tone} orderMetric={card.orderMetric} />)}</div><ChannelMix period={period} segment={segment} /><ChannelDailyTrends period={period} customDates={customDates} segment={segment} /><DailyTrends period={period} customDates={customDates} segment={segment} /></section>;
+  return (
+    <section className="space-y-5">
+      <SectionHeading
+        badge="Sales & Purchase"
+        title={title}
+        description="Sales, purchase value, units, orders, and cancellations."
+      />
+      <div
+        className={`grid gap-4 md:grid-cols-2 ${primaryCards.length > 4 ? "xl:grid-cols-5" : "xl:grid-cols-4"
+          }`}
+      >
+        {primaryCards.map((card) => (
+          <MetricCard
+            key={card.metric.label}
+            metric={card.metric}
+            period={period}
+            icon={card.icon}
+            tone={card.tone}
+            orderMetric={card.orderMetric}
+          />
+        ))}
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {cancellationCards.map((card) => (
+          <MetricCard
+            key={card.metric.label}
+            metric={card.metric}
+            period={period}
+            icon={card.icon}
+            tone={card.tone}
+            orderMetric={card.orderMetric}
+          />
+        ))}
+      </div>
+
+      <OrderValueVelocityChart period={period} customDates={customDates} />
+
+      {/* Daily Sales Velocity Bar Chart */}
+      <DailySalesBarChart period={period} customDates={customDates} />
+
+      <ChannelMix period={period} segment={segment} />
+      <ChannelDailyTrends
+        period={period}
+        customDates={customDates}
+        segment={segment}
+      />
+      <DailyTrends
+        period={period}
+        customDates={customDates}
+        segment={segment}
+      />
+    </section>
+  );
 }
 
 function DemandInsights({ period }) {
@@ -241,9 +717,64 @@ function DemandInsights({ period }) {
   const cityRanking = demandRankings.b2c[cityTransactionType].cities;
   const productSelectionLabel = `${productBusinessType.toUpperCase()} ${productTransactionType === "sales" ? "Sales" : "Purchase"}`;
   const citySelectionLabel = `B2C ${cityTransactionType === "sales" ? "Sales" : "Purchase"}`;
-  const controls = (label, value, onChange, options) => <div className="flex items-center gap-2"><span className="text-[11px] font-black uppercase tracking-[0.1em] text-[#71809A]">{label}</span><div className="flex rounded-lg bg-[#EFF3F8] p-1 text-xs font-bold">{options.map((option) => <button key={option.id} type="button" onClick={() => onChange(option.id)} className={`rounded-md px-3 py-1.5 transition ${value === option.id ? "bg-white text-[#2A67EC] shadow-sm" : "text-[#71809A] hover:text-[#53647F]"}`}>{option.label}</button>)}</div></div>;
+  const controls = (label, value, onChange, options) => (
+    <div className="flex items-center gap-2">
+      <span className="text-[11px] font-black uppercase tracking-[0.1em] text-[#71809A]">{label}</span>
+      <div className="flex rounded-lg bg-[#EFF3F8] p-1 text-xs font-bold">
+        {options.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            onClick={() => onChange(option.id)}
+            className={`rounded-md px-3 py-1.5 transition ${value === option.id ? "bg-white text-[#2A67EC] shadow-sm" : "text-[#71809A] hover:text-[#53647F]"
+              }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
-  return <section className="space-y-5"><SectionHeading badge="Top Products & Cities" title="Demand Distribution" description="Product rankings support B2C and B2B. City rankings cover B2C sales and purchase activity." />{period === "today" ? <Card className="p-6 text-sm font-semibold text-[#71809A]">Product and city insights are available for Last 30 days and custom date ranges.</Card> : <div className="grid gap-4 xl:grid-cols-2"><BarPanel title="Top 7 Products" description={`${productSelectionLabel} · Share of Value`} data={productRanking.map(([name, value]) => ({ name, value }))} color={analyticsPalette.chart.primary} controls={<div className="flex flex-wrap gap-3">{controls("Business", productBusinessType, setProductBusinessType, [{ id: "b2c", label: "B2C" }, { id: "b2b", label: "B2B" }])}{controls("Type", productTransactionType, setProductTransactionType, [{ id: "sales", label: "Sales" }, { id: "purchase", label: "Purchase" }])}</div>} /><BarPanel title="Top 7 Cities" description={`${citySelectionLabel} · Share of Value`} data={cityRanking.map(([name, value]) => ({ name, value }))} color={analyticsPalette.chart.secondary} controls={controls("Type", cityTransactionType, setCityTransactionType, [{ id: "sales", label: "Sales" }, { id: "purchase", label: "Purchase" }])} /></div>}</section>;
+  return (
+    <section className="space-y-5">
+      <SectionHeading
+        badge="Top Products & Cities"
+        title="Demand Distribution"
+        description="Product rankings support B2C and B2B. City rankings cover B2C sales and purchase activity."
+      />
+      <div className="grid gap-4 xl:grid-cols-2">
+        <BarPanel
+          title="Top 7 Products"
+          description={`${productSelectionLabel} · Share of Value`}
+          data={productRanking.map(([name, value]) => ({ name, value }))}
+          color={analyticsPalette.chart.primary}
+          controls={
+            <div className="flex flex-wrap gap-3">
+              {controls("Business", productBusinessType, setProductBusinessType, [
+                { id: "b2c", label: "B2C" },
+                { id: "b2b", label: "B2B" },
+              ])}
+              {controls("Type", productTransactionType, setProductTransactionType, [
+                { id: "sales", label: "Sales" },
+                { id: "purchase", label: "Purchase" },
+              ])}
+            </div>
+          }
+        />
+        <BarPanel
+          title="Top 7 Cities"
+          description={`${citySelectionLabel} · Share of Value`}
+          data={cityRanking.map(([name, value]) => ({ name, value }))}
+          color={analyticsPalette.chart.secondary}
+          controls={controls("Type", cityTransactionType, setCityTransactionType, [
+            { id: "sales", label: "Sales" },
+            { id: "purchase", label: "Purchase" },
+          ])}
+        />
+      </div>
+    </section>
+  );
 }
 
 function InventoryStatus() {
@@ -258,20 +789,40 @@ export default function Live_Data_Industry() {
   const [period, setPeriod] = useState("last30");
   const segment = "all";
   const [customDates, setCustomDates] = useState({ start: "2026-09-18", end: "2026-10-17" });
-  const updateDate = (field, value) => setCustomDates((current) => ({ ...current, [field]: value }));
-  return <main className="glass-image-page font-sans text-slate-800"><header className="relative z-10 px-5 pt-4 sm:px-7"><div className="mx-auto flex max-w-[1560px] flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/45 px-4 py-3 shadow-[0_8px_26px_rgba(32,68,128,.06)] backdrop-blur-xl sm:px-5"><div><p className="text-[11px] font-black uppercase tracking-[.16em] text-[#2A67EC]">DACBY OPERATIONS</p><h1 className="text-xl font-bold tracking-tight text-[#151D35]">Live Data</h1></div><div className="flex items-center gap-2 rounded-full border border-[#B7F1CD] bg-[#ECFBF3]/85 px-3 py-1.5 text-xs font-bold text-[#157348]"><i className="h-2 w-2 rounded-full bg-[#16B879]" />Live Operations</div></div></header><div className="relative z-10 mx-auto max-w-[1560px] space-y-12 p-5 pb-16 sm:p-7"><DateFilters period={period} onChange={setPeriod} customDates={customDates} onDateChange={updateDate} />
+  const updateDate = (field, value) => {
+    if (field === "range") {
+      setCustomDates(value);
+    } else {
+      setCustomDates((current) => ({ ...current, [field]: value }));
+    }
+  };
 
-    <CommercialPerformance period={period} segment={segment} customDates={customDates} />
+  return (
+    <main className="glass-image-page font-sans text-slate-800">
+      <header className="relative z-10 px-5 pt-4 sm:px-7">
+        <div className="mx-auto flex max-w-[1560px] flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/45 px-4 py-3 shadow-[0_8px_26px_rgba(32,68,128,.06)] backdrop-blur-xl sm:px-5">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[.16em] text-[#2A67EC]">DACBY OPERATIONS</p>
+            <h1 className="text-xl font-bold tracking-tight text-[#151D35]">Live Data</h1>
+          </div>
+        </div>
+      </header>
+      <div className="relative z-10 mx-auto max-w-[1560px] space-y-12 p-5 pb-16 sm:p-7">
+        <DateFilters period={period} onChange={setPeriod} customDates={customDates} onDateChange={updateDate} />
 
-    <DemandInsights period={period} />
+        <CommercialPerformance period={period} segment={segment} customDates={customDates} />
 
-    {(segment === "all" || segment === "b2c") && <section className="space-y-5"><SectionHeading badge="B2C Sales Volume" title="Fulfilment" description="Live order queues plus filtered dispatch throughput. KPI cards only." live /><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"><LiveKpiCard metric={liveMetrics.pendingDispatch} icon={Truck} /><LiveKpiCard metric={liveMetrics.inTransit} icon={Truck} tone="teal" /><LiveKpiCard metric={liveMetrics.inReturn} icon={RotateCcw} tone="rose" /><MetricCard metric={metrics.dispatchVolume} period={period} icon={Activity} tone="violet" /></div></section>}
+        <DemandInsights period={period} />
 
-    {(segment === "all" || segment === "b2c") && <section className="space-y-5"><SectionHeading badge="B2C Purchase" title="Purchase Operations" description="Payment release is range-aware; receiving and logistics exceptions are live." live /><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"><MetricCard metric={metrics.paymentReleasedPerDay} period={period} icon={CircleDollarSign} tone="teal" /><LiveKpiCard metric={liveMetrics.pickedUp} icon={Truck} /><LiveKpiCard metric={liveMetrics.paymentPending} icon={Clock3} tone="amber" /><LiveKpiCard metric={liveMetrics.delayedDelivery} icon={Clock3} tone="rose" /><LiveKpiCard metric={liveMetrics.logisticsUnpicked} icon={Activity} tone="violet" /></div></section>}
+        {(segment === "all" || segment === "b2c") && <section className="space-y-5"><SectionHeading badge="B2C Sales Volume" title="Fulfilment" description="Live order queues plus filtered dispatch throughput. KPI cards only." live /><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"><LiveKpiCard metric={liveMetrics.pendingDispatch} icon={Truck} /><LiveKpiCard metric={liveMetrics.inTransit} icon={Truck} tone="teal" /><LiveKpiCard metric={liveMetrics.inReturn} icon={RotateCcw} tone="rose" /><MetricCard metric={metrics.dispatchVolume} period={period} icon={Activity} tone="violet" /></div></section>}
 
-    {(segment === "all" || segment === "b2b") && <section className="space-y-5"><SectionHeading badge="B2B Purchase" title="Vendor Payments" description="Vendor overpayment is live; payment released follows the applicable date filter." live /><div className="grid gap-4 md:grid-cols-2"><LiveKpiCard metric={liveMetrics.vendorOverpayment} icon={ArrowUpRight} tone="rose" /><MetricCard metric={metrics.b2bPaymentReleased} period={period} icon={CircleDollarSign} tone="teal" /></div></section>}
+        {(segment === "all" || segment === "b2c") && <section className="space-y-5"><SectionHeading badge="B2C Purchase" title="Purchase Operations" description="Payment release is range-aware; receiving and logistics exceptions are live." live /><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"><MetricCard metric={metrics.paymentReleasedPerDay} period={period} icon={CircleDollarSign} tone="teal" /><LiveKpiCard metric={liveMetrics.pickedUp} icon={Truck} /><LiveKpiCard metric={liveMetrics.paymentPending} icon={Clock3} tone="amber" /><LiveKpiCard metric={liveMetrics.delayedDelivery} icon={Clock3} tone="rose" /><LiveKpiCard metric={liveMetrics.logisticsUnpicked} icon={Activity} tone="violet" /></div></section>}
 
-    <section className="space-y-5"><SectionHeading badge="Inventory Data" title="Warehouse Inventory" description="All inventory fields are live snapshots and do not respond to the date filter." live /><InventoryStatus /></section>
-    <section className="space-y-5"><SectionHeading badge="Return" title="Return Quality" description="Return-reason percentages are live and independent of the reporting period." live /><ReturnsPanel /></section>
-  </div></main>;
+        {(segment === "all" || segment === "b2b") && <section className="space-y-5"><SectionHeading badge="B2B Purchase" title="Vendor Payments" description="Vendor overpayment is live; payment released follows the applicable date filter." live /><div className="grid gap-4 md:grid-cols-2"><LiveKpiCard metric={liveMetrics.vendorOverpayment} icon={ArrowUpRight} tone="rose" /><MetricCard metric={metrics.b2bPaymentReleased} period={period} icon={CircleDollarSign} tone="teal" /></div></section>}
+
+        <section className="space-y-5"><SectionHeading badge="Inventory Data" title="Warehouse Inventory" description="All inventory fields are live snapshots and do not respond to the date filter." live /><InventoryStatus /></section>
+        <section className="space-y-5"><SectionHeading badge="Return" title="Return Quality" description="Return-reason percentages are live and independent of the reporting period." live /><ReturnsPanel /></section>
+      </div>
+    </main>
+  );
 }
