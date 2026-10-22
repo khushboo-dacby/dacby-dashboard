@@ -1,5 +1,22 @@
 # Update Inventory History
 
+## 2026-10-21
+
+### Buy Orders & Sell Orders Module (`/buy-orders`, `/sell-orders`)
+- **Consolidated Structure**: Cleaned up duplicate directories into `src/app/buy-orders/` with `forward/` (`{ return: false }`), `returns/` (`{ return: true }`), and centralized `apis/api.js`.
+- **Sell Orders Pipeline**: Added outbound customer fulfillment tracking at `/sell-orders`.
+
+### Unified Global Operations Sidebar (`GlobalSidebar.jsx` & `GlobalAppShell.jsx`)
+- **Persistent App Shell**: Integrated into `RootLayout` with expand (`w-[264px]`) and collapse (`w-[76px]`) modes, royal blue active pills (`#2A67EC`), and collapsible menu groups.
+- **Contracted Hover Popovers**: Added floating white popover boxes on collapsed icons for 1-click sub-page navigation.
+
+### Forward Buy Orders SWR Caching & UI Polish (`/buy-orders/forward`)
+- **SWR Caching**: Implemented `useSWR` with isolated composite keys (`buy-orders:forward:${status}:${page}:${cursor}`) and `revalidateIfStale: false` for instant cached loads and zero redundant API calls.
+- **Cache Purge on Refresh**: Clicking "Refresh" clears all `buy-orders:forward` cache keys and re-fetches live data fresh.
+- **Dynamic Status Column**: Conditionally renders a 7th column for "Last Updated Timestamp" with status badges when a status filter is applied.
+- **Grid & Spacing Optimization**: Re-engineered 6-col / 7-col CSS grid templates, added `pl-8` Customer Details clearance for the sticky divider, and enforced single-line `whitespace-nowrap` on all dates with right-aligned Created At.
+- **Badges & Status Polish**: Restored `B2C`/`B2B` customer pill badges and simplified milestone "Pending" status to clean amber text.
+
 ## 2026-10-19
 
 ### Live Data Industry Operations & Analytics Dashboard (`/live-data-industry`)
