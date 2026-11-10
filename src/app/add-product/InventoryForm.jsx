@@ -237,6 +237,114 @@ export default function InventoryForm() {
     description,
   ]);
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // TEMPORARY — Pre-populate Smartphones form fields
+  // When the category is switched to "Smartphones" and each section is still
+  // empty, auto-fill the following:
+  //
+  //   Variant & Combination Builder attributes:
+  //     • color              (empty — user fills in their own values)
+  //     • storage            (empty — user fills in their own values)
+  //     • physical_condition (pre-filled: "Very Light Marks", "Light Marks")
+  //
+  //   Configuration Icons:
+  //     Storage, Ram, Physical Condition, Battery Health
+  //
+  //   Questions (Q&A tab):
+  //     q1 — powers on, q2 — performance issues, q3 — accessories missing
+  //
+  //   What's in the Box:
+  //     Smartphone + Charging Cable
+  //
+  //   Minimum Price: 1000
+  //
+  // TODO: Delete this entire useEffect block once it is no longer needed.
+  // ─────────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const isSmartphones =
+      String(fields.category_name || "").trim().toLowerCase() === "smartphones";
+
+    if (!isSmartphones) return;
+
+    // — Attribute definitions ------------------------------------------------
+    if ((specification.attributeDefinitions || []).length === 0) {
+      setSpecification((prev) => ({
+        ...prev,
+        attributeDefinitions: [
+          { key: "color",              icon: "", values: [],                                  input: "" },
+          { key: "storage",            icon: "", values: [],                                  input: "" },
+          { key: "physical_condition", icon: "", values: ["Very Light Marks", "Light Marks"], input: "" },
+        ],
+      }));
+    }
+
+    // — Configuration icons --------------------------------------------------
+    if ((configurationIcons || []).length === 0) {
+      resetConfigurationIcons([
+        { label: "Storage",            value: "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fstorage_icon.png?alt=media&token=06fd3c54-774f-404c-b721-219274614ceb" },
+        { label: "Ram",                value: "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fram_icon.png?alt=media&token=7dae249e-1fb1-4ce2-9ce8-0fbba3ff572d" },
+        { label: "Physical Condition", value: "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fphysical_condition_icon.png?alt=media&token=1d568f91-0c48-49ff-a2c7-4c36710b3360" },
+        { label: "Battery health",     value: "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fbattery_health_icon.png?alt=media&token=b26ade4a-433c-40db-9ee5-1994d81e4b3b" },
+      ]);
+    }
+
+    // — Questions ------------------------------------------------------------
+    if ((questions || []).length === 0) {
+      resetQuestions([
+        {
+          id: "smartphones-q1",
+          type: "radio",
+          isRequired: true,
+          question: "Does the phone power on and boot to Android without issues?",
+          description: "",
+          deduction: 0,
+          options: ["Yes", "No"],
+        },
+        {
+          id: "smartphones-q2",
+          type: "radio",
+          isRequired: true,
+          question: "Are there any performance, display, camera, fingerprint sensor, speaker, charging, or network issues?",
+          description: "",
+          deduction: 0,
+          options: ["Yes", "No"],
+        },
+        {
+          id: "smartphones-q3",
+          type: "checkbox",
+          isRequired: false,
+          question: "Accessories Missing",
+          description: "Please choose the accessories missing",
+          options: [
+            { icon: "Icons.cable", deduction: 800, label: "USB-C Cable Missing" },
+          ],
+        },
+      ]);
+    }
+
+    // — What's in the Box ----------------------------------------------------
+    if ((whatsInTheBox || []).length === 0) {
+      resetWhatsInTheBox([
+        {
+          image_url: "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2Fquestions%2Fphones%2Fsmartphone%20(2).png?alt=media&token=3f9af994-446d-42c2-91a3-301b0f44ff61",
+          label: "Smartphone",
+        },
+        {
+          image_url: "https://dacby-database.web.app/cdn/1%20NEW%20WEBSITE%20LISTING%2FIcons%2Fusb_c_cable_icon.png?alt=media&token=c3faf90a-30eb-49af-9f7f-b4f562bb96d6",
+          label: "Charging\nCable",
+        },
+      ]);
+    }
+
+    // — Minimum Price --------------------------------------------------------
+    if (!fields.minimum_price) {
+      setField("minimum_price", 1000);
+    }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields.category_name]);
+  // ─── END TEMPORARY Smartphones form pre-population ───────────────────────
+
   function setField(key, value) {
     setFields((prevFields) => {
       const nextFields = { ...prevFields, [key]: value };

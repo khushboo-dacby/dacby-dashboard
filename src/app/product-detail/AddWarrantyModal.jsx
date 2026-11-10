@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { addWarranty } from "@/app/apis/api";
 const WARRANTY_OPTIONS = [
-  { id: "1-year", label: "1 Year Total Warranty", months: 12 },
+  { id: "1-year", label: "12 Months Extended Warranty", months: 12 },
   { id: "7-months", label: "7 Months Total Warranty", months: 7 },
-  { id: "6-months", label: "6 Months Total Warranty", months: 6 },
+  { id: "6-months", label: "6 Months Extended Warranty", months: 6 },
   { id: "other", label: "Other" },
 ];
 

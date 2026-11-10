@@ -150,6 +150,53 @@ export default function CombinationVariantsTable({
               
               const handleUpdate = (updates) => {
                 onSaveVariant(vendorIndex, row, { ...item, ...updates }, false);
+
+                // ─────────────────────────────────────────────────────────────
+                // TEMPORARY — Smartphones same-storage auto-fill
+                // When mrp or price (buy price) or sell_price is filled for a
+                // row, automatically apply that value to every other row that
+                // shares the same storage value.
+                // TODO: Delete this block once the feature is no longer needed.
+                // ─────────────────────────────────────────────────────────────
+                const isSmartphoneCategory =
+                  String(fields.category_name || "").trim().toLowerCase() === "smartphones";
+
+                const affectedFields = ["mrp", "price", "sell_price"];
+                const hasPriceUpdate = affectedFields.some(
+                  (f) => f in updates && updates[f] !== "" && updates[f] !== undefined
+                );
+
+                if (isSmartphoneCategory && hasPriceUpdate) {
+                  const currentStorage = String(
+                    row.attributes?.storage ?? ""
+                  ).trim().toLowerCase();
+
+                  if (currentStorage) {
+                    rows.forEach((siblingRow) => {
+                      if (siblingRow.key === row.key) return; // skip current row
+
+                      const siblingStorage = String(
+                        siblingRow.attributes?.storage ?? ""
+                      ).trim().toLowerCase();
+
+                      if (siblingStorage === currentStorage) {
+                        const siblingItem = getDraft(siblingRow);
+                        // Only apply the price fields that were actually changed
+                        const pricePatch = {};
+                        affectedFields.forEach((f) => {
+                          if (f in updates) pricePatch[f] = updates[f];
+                        });
+                        onSaveVariant(
+                          vendorIndex,
+                          siblingRow,
+                          { ...siblingItem, ...pricePatch },
+                          false
+                        );
+                      }
+                    });
+                  }
+                }
+                // ─── END TEMPORARY same-storage auto-fill ───────────────────
               };
 
               return (

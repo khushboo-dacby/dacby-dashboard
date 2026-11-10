@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, Trash2 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Eye, Trash2, Code2, ChevronDown, ChevronUp, Check } from "lucide-react";
 import DescriptionPreviewModal from "@/components/description-preview/DescriptionPreviewModal";
 
 const editorStyle =
@@ -218,10 +218,51 @@ export default function DescriptionEditor({
   updateDescriptionFieldKey,
   updateDescriptionFieldValue,
   removeDescriptionField,
+  resetDescription,
   readOnly = false,
 }) {
   const descriptionState = description ?? {};
   const [showPreview, setShowPreview] = useState(false);
+
+  // ── JSON panel state ──────────────────────────────────────────────────────
+  const [showJson, setShowJson] = useState(false);
+  const [jsonText, setJsonText] = useState("");
+  const [jsonError, setJsonError] = useState("");
+  const [jsonApplied, setJsonApplied] = useState(false);
+  // Keep the textarea in sync whenever the description state changes externally,
+  // but only when the user is NOT actively editing it (panel is closed or just opened).
+  const jsonFocused = useRef(false);
+
+  useEffect(() => {
+    if (!showJson || jsonFocused.current) return;
+    try {
+      setJsonText(createDescriptionJson(descriptionState));
+    } catch {
+      // silently ignore
+    }
+  // We intentionally exclude jsonFocused from deps — it's a ref.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showJson, descriptionState]);
+
+  function handleJsonApply() {
+    setJsonError("");
+    const { parsed, error } = parseJsonWithLocation(jsonText);
+    if (error) {
+      setJsonError(error);
+      return;
+    }
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      setJsonError("JSON must be an object, e.g. { \"summary\": \"...\", ... }");
+      return;
+    }
+    if (resetDescription) {
+      resetDescription(convertDescriptionObjectToFormState(parsed));
+      setJsonError("");
+      setJsonApplied(true);
+      setTimeout(() => setJsonApplied(false), 2000);
+    }
+  }
+  // ── end JSON panel state ──────────────────────────────────────────────────
 
   const flatFields = (descriptionState.fields || []).map((field, index) => ({
     id: `field-${index}`,
@@ -264,14 +305,83 @@ export default function DescriptionEditor({
     <div className="w-full">
       <div className="mb-6 flex items-center justify-between gap-3">
         <h3 className="text-xl font-semibold text-slate-950">Description Editor</h3>
-        <button
-          type="button"
-          onClick={() => setShowPreview(true)}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
-        >
-          <Eye className="h-4 w-4" /> Preview
-        </button>
+        <div className="flex items-center gap-2">
+          {/* JSON import/export toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const next = !showJson;
+              setShowJson(next);
+              setJsonError("");
+              // Sync textarea when opening
+              if (next) {
+                try { setJsonText(createDescriptionJson(descriptionState)); } catch { /* ignore */ }
+              }
+            }}
+            className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
+              showJson
+                ? "border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <Code2 className="h-4 w-4" />
+            JSON
+            {showJson ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+          >
+            <Eye className="h-4 w-4" /> Preview
+          </button>
+        </div>
       </div>
+
+      {/* ── JSON panel ──────────────────────────────────────────────────── */}
+      {showJson && (
+        <div className="mb-6 rounded-xl border border-violet-200 bg-violet-50/40 p-4">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-violet-600">
+              Paste or edit description JSON — click Apply to load into the form
+            </p>
+            <button
+              type="button"
+              onClick={handleJsonApply}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+                jsonApplied
+                  ? "bg-emerald-500 text-white"
+                  : "bg-violet-600 text-white hover:bg-violet-700"
+              }`}
+            >
+              {jsonApplied ? (
+                <><Check className="h-3.5 w-3.5" /> Applied</>
+              ) : (
+                "Apply"
+              )}
+            </button>
+          </div>
+          <textarea
+            className="w-full rounded-lg border border-violet-300 bg-slate-950 px-4 py-3 font-mono text-sm text-slate-100 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-300/40"
+            rows={18}
+            spellCheck={false}
+            value={jsonText}
+            onFocus={() => { jsonFocused.current = true; }}
+            onBlur={() => { jsonFocused.current = false; }}
+            onChange={(e) => {
+              setJsonText(e.target.value);
+              setJsonError("");
+            }}
+            placeholder={'{\n  "summary": "...",\n  "Performance": {\n    "Processor": "..."\n  }\n}'}
+          />
+          {jsonError && (
+            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600 border border-red-200">
+              ⚠ {jsonError}
+            </p>
+          )}
+        </div>
+      )}
+      {/* ── end JSON panel ─────────────────────────────────────────────── */}
 
       <div className="space-y-8">
         <section>

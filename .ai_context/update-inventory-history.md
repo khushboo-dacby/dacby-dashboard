@@ -1,5 +1,48 @@
 # Update Inventory History
 
+## 2026-11-02
+
+### Blogs & Articles Management Studio (`/blogs`, `/blogs/[id]`, `/blogs/add`)
+- **Modular Feature Architecture**:
+  - Built isolated Next.js feature folder `src/app/blogs/` with CSS Modules (`blogs.module.css`, `blogDetail.module.css`, `addBlog.module.css`), strictly adhering to `AGENTS.md`.
+  - Added mock dataset and localStorage storage engine (`mockBlogs.js`) with CDN image assets, date formatting helpers, and dynamic append helpers.
+- **Blog Listing Page (`/blogs`)**:
+  - Styled dark navy/indigo gradient header banner matching the DACBY inventory/product banner aesthetic.
+  - Implemented high-contrast white CTA button with deep indigo typography (`#1e1b4b`), subtle border, and **`Post Blog`** action text linking to `/blogs/add`.
+  - Responsive cards grid (`BlogCard.jsx`) featuring cover banners, category hashtag badges, excerpt, publish date, and `Read Article ↗` link.
+- **Blog Detail & Article Viewer (`/blogs/[id]`)**:
+  - Complete article view with breadcrumb navigation (`Home` → `Blogs & Articles` → `Article`), author attribution, read time, and publish dates.
+  - Multi-section body renderer with subheadings, body paragraphs, and fallback section images.
+  - **Inline Backlinks Engine (`InlineBacklinksText.jsx`)**: Intelligent keyword parser that detects defined anchor keywords inside body text and transforms them into interactive blue internal Next.js `<Link>` elements.
+- **Enterprise Blog Creation & Section Append Studio (`/blogs/add`)**:
+  - **Dual Mode Switcher**:
+    - `Create New Blog` mode for fresh articles (Title, Slug, Read Time, Category, Cover Image URL, Meta description, Keywords).
+    - `Add to Existing Blog` mode for appending sections to existing articles.
+  - **Existing Blog Target Preview Card**: Enterprise preview card surfacing blog cover thumbnail, publish date, current section count, and a direct `View Blog ↗` link.
+  - **1-Based Sequential Section Numbering**: Automatically offsets section index by existing content length (e.g., if a blog already has 5 sections, the first added section displays as `Section 6`).
+  - **Live Section Image Preview**: Real-time thumbnail preview rendered immediately upon entering/pasting valid image URLs.
+  - **Backlinks Manager**: Interactive keyword and target URL pairing builder for article backlink automation.
+  - **Always-Visible Red Delete Buttons**: Styled section deletion buttons in prominent red (`#e11d48`, background `#fff1f2`, border `#fecdd3`) for high visibility without requiring hover.
+  - **Refined Typography & Inputs**: High-contrast placeholder text (`#64748b`), 1px input borders, subtle elevation shadows, and borderless pill mode switcher tabs.
+
+### Add Product — Smartphone Form Auto-Fill (`InventoryForm.jsx`)
+- **Smartphones Category Pre-population**:
+  - Added dynamic `useEffect` listener on category switch to automatically populate required fields when "Smartphones" is selected:
+    - **Attribute Definitions**: Pre-populates `color` (empty), `storage` (empty), and `physical_condition` (pre-filled with `"Very Light Marks"` and `"Light Marks"`).
+    - **Configuration Icons**: Automatically configures CDN URLs for `Storage`, `Ram`, `Physical Condition`, and `Battery health`.
+    - **Q&A Tab Questions**: Configures boot status radio (q1), hardware/display/camera defect check (q2), and Accessories Missing checkbox with USB-C cable deduction (q3).
+    - **What's in the Box**: Auto-fills icons and labels for Smartphone and Charging Cable.
+    - **Minimum Price**: Defaults minimum price to ₹1,000.
+
+### Combination Variants Table — Same-Storage Auto-Fill (`CombinationVariantsTable.jsx`)
+- **Bulk Variant Pricing Synchronization**:
+  - Added same-storage auto-fill logic: updating pricing fields (`mrp`, `sell_price`, `price`, `stocks`, `weight`, etc.) for any combination item automatically patches sibling variants that share the same storage specification, streamlining batch inventory pricing.
+
+### Description Editor — JSON Mode & Synchronization (`DescriptionEditor.jsx`)
+- **Interactive JSON Panel**:
+  - Added a toggleable `JSON` button alongside `Preview` featuring an expandable mono code editor.
+  - Implemented bidirectional synchronization: loads formatted JSON from the active form state and applies user JSON modifications back to the structured form state with error validation and success feedback.
+
 ## 2026-10-21
 
 ### Buy Orders & Sell Orders Module (`/buy-orders`, `/sell-orders`)
