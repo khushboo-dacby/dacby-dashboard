@@ -1,6 +1,75 @@
 # Update Inventory History
 
-## 2026-11-02
+## 2026-11-12
+
+### Blogs Module — Global History, Drag-and-Drop & Backlink Hardening
+- **Centralized Global Undo / Redo (`src/app/blogs/blogHistory.js`, `add/page.js`, `addBlog.module.css`)**:
+  - Built `useBlogHistory` hook tracking full blog state (category, cover image, section headings, Tiptap markdown content, section images, section additions/removals, and drag-and-drop reordering).
+  - Maintained isolated history stacks per session (`new_blog`, `edit_${blogId}`, `existing_${blogId}`).
+  - Added 600ms rapid keystroke debouncing for smooth typing milestones, with instant snapshots for structural actions.
+  - Embedded Undo and Redo buttons in both the top main toolbar and bottom actions bar with active/disabled states.
+  - Added global keyboard shortcuts for `Ctrl+Z` / `Cmd+Z` (Undo) and `Ctrl+Shift+Z` / `Cmd+Shift+Z` / `Ctrl+Y` (Redo).
+  - Synchronized external undo/redo state into active Tiptap editors in real time.
+- **Vertical Drag-and-Drop Section Reordering (`SortableSectionCard.jsx`, `@dnd-kit`)**:
+  - Integrated `@dnd-kit/core` and `@dnd-kit/sortable` for fluid vertical section reordering.
+  - Scoped drag handle strictly to `GripVertical` button, keeping inputs and Tiptap editors fully interactive.
+  - Added dragging overlay, dashed drop indicator, and dynamic section re-numbering.
+- **Tiptap Content Editor Undo / Redo Click Fix (`SectionRichTextEditor.jsx`, `tiptapEditor.module.css`)**:
+  - Replaced HTML `disabled` attributes with `.toolBtnDisabled` CSS styling so toolbar clicks execute reliably.
+  - Bound `canUndo` and `canRedo` reactively to Tiptap editor transactions (`transaction`, `update`, `selectionUpdate`).
+- **Canonical Backlink Deduplication & Nested Link Prevention (`add/page.js`, `InlineBacklinksText.jsx`)**:
+  - Added `cleanAnchorText` and `unwrapNestedMarkdownLinks` to strip raw markdown links from anchors and eliminate recursive link nesting (e.g. `[[[anchor](url)](url)](url)` $\to$ `anchor`).
+  - Enforced canonical anchor deduplication (`getCanonicalAnchorKey`) stripping formatting marks, accents/diacritics, and case variations.
+  - Intercepted copy/cut/paste events in Tiptap to prevent raw URLs from entering paragraph text.
+
+## 2026-11-11
+
+### Blogs Module — SWR Caching, Tiptap Integration & Markdown Rendering
+- **Navigation Origin Memory & SWR Caching (`/blogs`, `/blogs/[id]`, `/blogs/add`)**:
+  - Added origin tracking (`from` param and `blog_nav_source`) so "Cancel" and back buttons return accurately to the originating view.
+  - Migrated `/blogs/[id]` to `useSWR` with sessionStorage fallback for instantaneous loads with zero redundant fetches.
+  - Added top header manual `Refresh` button with spinning icon in `/blogs/[id]`.
+- **Responsive Padding & Layout Optimizations (<=768px & <=425px)**:
+  - Reduced outer container gutters and card padding across `/blogs`, `/blogs/[id]`, and `/blogs/add` for tablet and mobile devices.
+- **Tiptap Markdown Rich Text Editor Integration (`SectionRichTextEditor.jsx`, `/blogs/add`)**:
+  - Replaced plain textareas with Tiptap editor supporting headings (H2/H3), bold, italic, strikethrough, bullet/numbered lists, blockquotes, undo/redo, and inline hyperlinks.
+  - Streamlined backlinks: removed separate custom backlinks card; inline links are auto-extracted into the payload `backlinks` array.
+  - Payload formatting: sanitized `para` to store formatted text (`*italic*`, `**bold**`, `***bold+italic***`, `• ` bullets, `\n`) while storing URLs strictly in `backlinks`.
+- **Public Blog Markdown Renderer (`InlineBacklinksText.jsx`, `blogDetail.module.css`)**:
+  - Integrated `Marked` (GFM) renderer in `/blogs/[id]` to render bold, italic, bold+italic, links, and bullet points cleanly with `overflow-wrap: anywhere` preventing layout clipping.
+
+## 2026-11-10
+
+### Blogs & Articles Management Studio — Real API Integration, SWR Caching & Responsive Overhaul (`/blogs`, `/blogs/[id]`, `/blogs/add`)
+- **Cloud Functions & Real Database Integration (`apis/api.js`, `helper.js`)**:
+  - Replaced mock handlers with live Cloud Functions endpoints (`getBlogs`, `getBlogById`, `addBlog`, `editBlog`, `deleteBlog`) using Bearer token authentication.
+  - Implemented `toCDN()` helper in `helper.js` converting Firebase Storage asset URLs to fast, cached Dacby CDN endpoints with image fallback safety.
+  - Built `DeleteBlogModal.jsx` confirmation modal with visual warning styling, loading spinner, and automated error/success sonner toast notifications.
+
+- **SWR Caching & Seamless List Revalidation (`/blogs`, `BlogCard.jsx`)**:
+  - Integrated `useSWR("blogs-list")` with `revalidateIfStale: false`, `revalidateOnFocus: false`, and `revalidateOnReconnect: false` to ensure returning from blog detail to the list does not trigger redundant network requests.
+  - Added a top-right banner **Refresh** button with a spinning `RotateCw` icon alongside `+ Post Blog` for manual on-demand revalidation.
+  - Added `sessionStorage` synchronization flag (`"refresh_blogs": "true"`): automatically invalidates and refreshes the SWR blogs cache whenever a blog is created, edited, or deleted.
+  - Expanded listing container: removed rigid `max-width: 1400px` to let the cards grid span fluidly across widescreen monitors with proportional responsive padding (`padding: 1.5rem 1rem` on mobile, scaling up to `3.5rem` and `4.5rem` on wide displays).
+  - Enhanced card heading hover interactions with title underline formatting.
+
+- **Blog Detail UI, Shimmer Loading & Responsive Header (`/blogs/[id]`)**:
+  - Built full **Shimmer Skeleton Loading Screen (`BlogDetailSkeleton.jsx`)** with animated shimmer gradients matching the exact layout of the article viewer (breadcrumbs, action pills, title, date badges, cover banner, subheadings, and body text) eliminating visual layout shifts.
+  - **Responsive Header Action Controls (<768px)**:
+    - Ensured top action buttons (`Edit`, `Delete`, `+ Add Section`, `All Blogs`) always remain pinned to the right.
+    - Added responsive collapsing for screens below `768px`: text labels hide cleanly, transforming actions into compact 36×36px icon-only square buttons (`Pencil`, `Trash2`, `Plus`, `ArrowLeft`) with `padding: 0.5rem` to prevent header overflow.
+
+- **Blog Add/Edit Studio — Instant Pre-fill & Responsive Backlinks (`/blogs/add`)**:
+  - **Instant UI Details Pre-filling (0ms Delay)**:
+    - Implemented synchronous pre-fill on "Edit" and "+ Add Section" using `sessionStorage.setItem("active_blog_data", ...)` and SWR cache.
+    - Synchronously initializes General Details (Category / Hashtags, Cover Image URL, preview thumbnail) and Content Sections (headings, paragraphs, section images, backlinks) on frame 1 without any blank form delay.
+    - Pre-populates the Target Blog dropdown and preview card in "Add to Existing Blog" mode, and calculates the next section index (`+ Add Section N`) immediately.
+  - **Target Blog Preview Card Polish**:
+    - Built responsive preview card featuring cover image, heading, category badges, section count, and direct `View Blog ↗` link.
+    - Enforced full-width flex wrapping and text ellipsis on hashtag badges and headings to prevent horizontal overflow on smaller screens.
+  - **Responsive Backlinks Manager (<768px & <425px)**:
+    - Re-engineered backlink rows from a rigid single-line horizontal flex into a mobile-first 2-row layout: Anchor Text on row 1, and Destination URL alongside a compact 42×42px delete button on row 2.
+    - Resolved card bottom padding inconsistencies when empty versus when links are populated.
 
 ### Blogs & Articles Management Studio (`/blogs`, `/blogs/[id]`, `/blogs/add`)
 - **Modular Feature Architecture**:

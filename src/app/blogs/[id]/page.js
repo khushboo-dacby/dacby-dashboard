@@ -2,35 +2,142 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowLeft, Plus } from "lucide-react";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, Plus, Pencil, Trash2, Image as ImageIcon, RotateCw } from "lucide-react";
+import { toast } from "sonner";
+import useSWR, { mutate } from "swr";
 import styles from "./styles/blogDetail.module.css";
 import InlineBacklinksText from "../components/InlineBacklinksText";
-import { getStoredBlogs, formatBlogDate, DUMMY_BLOG_IMAGE } from "../data/mockBlogs";
+import { getStoredBlogs, formatBlogDate } from "../data/mockBlogs";
+import { getBlogById, deleteBlog } from "../apis/api";
+import { toCDN } from "../helper";
+import DeleteBlogModal from "../components/DeleteBlogModal";
+import BlogDetailSkeleton from "../components/BlogDetailSkeleton";
+
+const fetchBlogDetail = async (blogId) => {
+  if (!blogId) return null;
+  try {
+    const liveBlog = await getBlogById(blogId);
+    if (liveBlog) return liveBlog;
+  } catch (err) {
+    console.warn("Failed to fetch live blog detail, using fallback:", err);
+  }
+  const allBlogs = getStoredBlogs();
+  const matched = allBlogs.find((b) => String(b.id) === String(blogId));
+  return matched || null;
+};
 
 export default function BlogDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id;
-  const [blog, setBlog] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  const {
+    data: blog,
+    isLoading,
+    isValidating,
+    mutate: mutateBlog,
+  } = useSWR(id ? `blog-detail:${id}` : null, () => fetchBlogDetail(id), {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+    fallbackData: (() => {
+      if (typeof window !== "undefined") {
+        try {
+          const stored = sessionStorage.getItem("active_blog_data");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && String(parsed.id) === String(id)) return parsed;
+          }
+        } catch {}
+      }
+      return undefined;
+    })(),
+  });
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [topImgError, setTopImgError] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      const allBlogs = getStoredBlogs();
-      const matched = allBlogs.find((b) => String(b.id) === String(id));
-      setBlog(matched || null);
-      setLoading(false);
-    }
-  }, [id]);
+    setTopImgError(false);
+  }, [id, blog?.top_image]);
 
-  if (loading) {
-    return (
-      <div className={styles.pageWrapper}>
-        <div className={styles.notFoundCard}>
-          <p className="text-slate-500 font-medium">Loading article details...</p>
-        </div>
-      </div>
-    );
+  // If an edit or section was submitted, refresh blog detail from server
+  useEffect(() => {
+    if (typeof window !== "undefined" && id) {
+      const shouldRefresh = sessionStorage.getItem(`refresh_blog_${id}`);
+      if (shouldRefresh === "true") {
+        sessionStorage.removeItem(`refresh_blog_${id}`);
+        mutateBlog();
+      }
+    }
+  }, [id, mutateBlog]);
+
+  useEffect(() => {
+    if (blog && typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("active_blog_data", JSON.stringify(blog));
+      } catch (err) {}
+    }
+  }, [blog]);
+
+  const handleSaveActiveBlog = () => {
+    if (blog && typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("active_blog_data", JSON.stringify(blog));
+        sessionStorage.setItem("blog_nav_source", `/blogs/${blog.id}`);
+      } catch (err) {}
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      await mutateBlog();
+      toast.success("Blog details refreshed");
+    } catch {
+      toast.error("Failed to refresh blog details");
+    }
+  };
+
+  const handleDeleteClick = () => {
+    if (!blog?.id || isDeleting) return;
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!blog?.id || isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await deleteBlog(blog.id);
+      if (res?.success) {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("refresh_blogs", "true");
+        }
+        mutate(
+          "blogs-list",
+          (current) =>
+            (current || []).filter((b) => String(b.id) !== String(blog.id)),
+          false
+        );
+        toast.success(res.message || "Blog deleted successfully.");
+        setShowDeleteModal(false);
+        router.push("/blogs");
+      } else {
+        toast.error(res?.message || "Failed to delete blog.");
+      }
+    } catch (err) {
+      toast.error(err?.message || "Error deleting blog.");
+      console.error("Delete blog error:", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (isLoading && !blog) {
+    return <BlogDetailSkeleton styles={styles} />;
   }
 
   if (!blog) {
@@ -75,33 +182,114 @@ export default function BlogDetailPage() {
           </span>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className={styles.topActions}>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isValidating}
+            className={styles.backButton}
+            style={{ color: "#475569", borderColor: "#cbd5e1" }}
+            title="Refresh blog details"
+            aria-label="Refresh blog details"
+          >
+            <RotateCw size={15} className={isValidating ? styles.spinIcon : ""} />
+            <span className={styles.actionBtnLabel}>Refresh</span>
+          </button>
           <Link
-            href={`/blogs/add?blogId=${blog.id}`}
+            href={`/blogs/add?edit=true&blogId=${blog.id}&from=${encodeURIComponent(`/blogs/${blog.id}`)}`}
+            onClick={handleSaveActiveBlog}
             className={styles.backButton}
             style={{ color: "#2563eb", borderColor: "#bfdbfe" }}
+            title="Edit this blog"
+            aria-label="Edit this blog"
+          >
+            <Pencil size={15} />
+            <span className={styles.actionBtnLabel}>Edit</span>
+          </Link>
+          <button
+            type="button"
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+            className={styles.backButton}
+            style={{ color: "#e11d48", borderColor: "#fecdd3" }}
+            title="Delete this blog"
+            aria-label="Delete this blog"
+          >
+            <Trash2 size={15} />
+            <span className={styles.actionBtnLabel}>Delete</span>
+          </button>
+          <Link
+            href={`/blogs/add?blogId=${blog.id}&from=${encodeURIComponent(`/blogs/${blog.id}`)}`}
+            onClick={handleSaveActiveBlog}
+            className={styles.backButton}
+            style={{ color: "#475569", borderColor: "#cbd5e1" }}
+            title="Add a new section to this blog"
+            aria-label="Add a new section to this blog"
           >
             <Plus size={16} />
-            <span>Add Section</span>
+            <span className={styles.actionBtnLabel}>Add Section</span>
           </Link>
-          <Link href="/blogs" className={styles.backButton}>
+          <Link
+            href="/blogs"
+            className={styles.backButton}
+            title="All Blogs"
+            aria-label="All Blogs"
+          >
             <ArrowLeft size={16} />
-            <span>All Blogs</span>
+            <span className={styles.actionBtnLabel}>All Blogs</span>
           </Link>
         </div>
       </div>
 
       {/* Main Content Card Container */}
       <article className={styles.articleCard}>
-        {/* Top Banner / Image */}
-        <div className={styles.topImageWrapper}>
-          <img
-            src={DUMMY_BLOG_IMAGE}
-            alt={mainTitle}
-            className={styles.topImage}
-            loading="eager"
-          />
-        </div>
+        {/* Top Banner / Image - only shown if really available, falls back to blank dummy image on error */}
+        {blog.top_image && blog.top_image.trim() !== "" && (
+          // <div className={styles.topImageWrapper}>
+          //   {!topImgError ? (
+              
+          //     <Image
+          //       src={toCDN(blog.top_image.trim())}
+          //       alt={mainTitle}
+          //       width={1200}
+          //       height={800}
+          //       priority
+          //       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+          //       className={styles.topImage}
+          //       style={{ width: "100%", height: "auto", objectFit: "contain" }}
+          //       onError={() => setTopImgError(true)}
+          //     />
+          //   ) : (
+          //     <div className={styles.imageFallback}>
+          //       <ImageIcon className="w-16 h-16 opacity-30" />
+          //     </div>
+          //   )}
+          // </div>
+
+<div className={styles.topImageWrapper}>
+  {!topImgError ? (
+    <Image
+      src={toCDN(blog.top_image.trim())}
+      alt={mainTitle}
+      width={1200}
+      height={800}
+      priority
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+      className={styles.topImage}
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+      }}
+      onError={() => setTopImgError(true)}
+    />
+  ) : (
+    <div className={styles.imageFallback}>
+      <ImageIcon className="w-16 h-16 opacity-30" />
+    </div>
+  )}
+</div>
+        )}
 
         {/* Category Tag & Date Meta Row */}
         <div className={styles.metaRow}>
@@ -112,7 +300,7 @@ export default function BlogDetailPage() {
         {/* Main Title */}
         <h1 className={styles.mainTitle}>{mainTitle}</h1>
 
-        <hr className={styles.divider} />
+        {/* <hr className={styles.divider} /> */}
 
         {/* Content Stream */}
         {contentList.map((doc, idx) => (
@@ -122,38 +310,49 @@ export default function BlogDetailPage() {
               <h2 className={styles.sectionHeading}>{doc.heading}</h2>
             )}
 
-            {/* Section paragraph with inline interactive backlinks */}
+            {/* Section content with rich text formatting and inline links */}
             {doc.para && (
-              <p className={styles.sectionPara}>
+              <div className={styles.sectionPara}>
                 <InlineBacklinksText para={doc.para} backlinks={doc.backlinks || []} />
-              </p>
+              </div>
             )}
 
-            {/* Section image: uses doc.image or falls back to cover dummy image */}
-            {(() => {
-              const sectionImg =
-                doc.image && doc.image.trim() !== ""
-                  ? doc.image
-                  : idx > 0
-                  ? DUMMY_BLOG_IMAGE
-                  : null;
-
-              if (!sectionImg) return null;
-
-              return (
-                <div className={styles.sectionImageWrapper}>
-                  <img
-                    src={sectionImg}
-                    alt={doc.heading || `Section ${idx + 1}`}
-                    className={styles.sectionImage}
-                    loading="lazy"
-                  />
-                </div>
-              );
-            })()}
+            {/* Section image - only shown if really available */}
+            {doc.image && doc.image.trim() !== "" && (
+              <div className={styles.sectionImageWrapper}>
+               
+                 <Image
+    src={toCDN(doc.image.trim())}
+    alt={doc.heading || `Section ${idx + 1}`}
+    width={1200}
+    height={800}
+    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+    className={styles.sectionImage}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+    }}
+    onError={(e) => {
+      if (e.currentTarget?.parentElement) {
+        e.currentTarget.parentElement.style.display = "none";
+      }
+    }}
+  />
+              </div>
+            )}
           </section>
         ))}
       </article>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteBlogModal
+        isOpen={showDeleteModal}
+        blogTitle={mainTitle}
+        isDeleting={isDeleting}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

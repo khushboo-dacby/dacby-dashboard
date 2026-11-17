@@ -1,13 +1,30 @@
 .pageWrapper {
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 4rem 1rem;
+  box-sizing: border-box;
+  padding: 1.75rem 2rem 5rem 2rem;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1024px) {
   .pageWrapper {
-    padding: 2rem 2rem 5rem 2rem;
+    padding: 2rem 3.5rem 5rem 3.5rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .pageWrapper {
+    padding: 2.25rem 4.5rem 5rem 4.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageWrapper {
+    padding: 1.25rem 0.875rem 3.5rem 0.875rem;
+  }
+}
+
+@media (max-width: 425px) {
+  .pageWrapper {
+    padding: 1rem 0.5rem 2.5rem 0.5rem;
   }
 }
 
@@ -53,9 +70,21 @@
   max-width: 320px;
 }
 
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.actionBtnLabel {
+  display: inline;
+}
+
 .backButton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.375rem;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -67,6 +96,7 @@
   text-decoration: none;
   transition: all 0.15s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
 }
 
 .backButton:hover {
@@ -75,28 +105,66 @@
   border-color: #cbd5e1;
 }
 
+.spinIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .topActions {
+    margin-left: auto;
+    gap: 0.375rem;
+  }
+
+  .actionBtnLabel {
+    display: none;
+  }
+
+  .backButton {
+    padding: 0.5rem;
+    min-width: 36px;
+    height: 36px;
+    gap: 0;
+  }
+}
+
 /* Main Detail Card container */
 .articleCard {
   background-color: #ffffff;
   border: 1px solid #e2e8f0; /* border-slate-200 */
   border-radius: 1rem; /* rounded-2xl */
-  padding: 1.75rem;
+  padding: 2.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
 
-@media (min-width: 640px) {
+@media (max-width: 768px) {
   .articleCard {
-    padding: 2.5rem;
+    padding: 1.375rem 1.125rem;
+    border-radius: 0.875rem;
+  }
+}
+
+@media (max-width: 425px) {
+  .articleCard {
+    padding: 1.125rem 0.875rem;
+    border-radius: 0.75rem;
   }
 }
 
 .topImageWrapper {
   width: 100%;
-  max-height: 480px;
   border-radius: 0.75rem; /* rounded-xl */
   overflow: hidden;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  /* background-color: #f8fafc; */
+  /* border: 1px solid #e2e8f0; */
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
@@ -104,13 +172,30 @@
 }
 
 .topImage {
-  width: 100%;
+  width: 85%;
+  max-width: 1000px;
+  max-height: 400px;
   height: auto;
-  max-height: 480px;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  margin: 0 auto;
+}
+.imageFallback {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  color: #94a3b8;
 }
 
+@media (max-width: 768px) {
+  .topImageWrapper {
+    aspect-ratio: 4 / 3;
+    max-height: 280px;
+  }
+}
 .metaRow {
   display: flex;
   align-items: center;
@@ -174,24 +259,128 @@
   line-height: 1.75;
   color: #475569; /* text-slate-600 */
   margin: 0 0 1rem 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-.sectionImageWrapper {
+.sectionPara strong {
+  font-weight: 700;
+  color: #0f172a; /* text-slate-900 */
+}
+
+.sectionPara em {
+  font-style: italic;
+  color: inherit;
+}
+
+.sectionPara a {
+  color: #1a56db;
+  text-decoration: underline;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.sectionPara a:hover {
+  color: #0c326f;
+}
+
+.sectionPara a strong {
+  color: inherit;
+}
+
+.sectionPara ul {
+  list-style-type: disc;
+  padding-left: 1.375rem;
+  margin: 0.875rem 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sectionPara ol {
+  list-style-type: decimal;
+  padding-left: 1.375rem;
+  margin: 0.875rem 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sectionPara li {
+  line-height: 1.65;
+  padding-left: 0.25rem;
+  margin-bottom: 0.375rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sectionPara blockquote {
+  border-left: 4px solid #2563eb;
+  background-color: #f8fafc;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  font-style: italic;
+  color: #334155;
+  margin: 0.875rem 0;
+}
+
+.sectionPara h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 1.25rem 0 0.5rem 0;
+  line-height: 1.35;
+}
+
+.sectionPara h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.35;
+}
+
+.sectionPara p {
+  margin-bottom: 0.875rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sectionPara p:last-child {
+  margin-bottom: 0;
+}
+
+.sectionPara del {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.sectionPara code {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  font-size: 0.875em;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+/* .sectionImageWrapper {
   margin: 1.5rem 0;
   border-radius: 0.75rem;
   overflow: hidden;
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
-  max-height: 400px;
-}
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
 
-.sectionImage {
+/* .sectionImage {
   width: 100%;
   height: auto;
-  max-height: 400px;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-}
+} */
 
 .notFoundCard {
   background-color: #ffffff;
@@ -199,4 +388,178 @@
   border-radius: 1rem;
   padding: 4rem 2rem;
   text-align: center;
+}
+.sectionImageWrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 450px;
+  margin: 20px auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background: #f8f9fa; */
+  border-radius: 12px;
+}
+
+.sectionImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   Shimmer Loading Skeleton
+   ========================================================================== */
+
+@keyframes shimmerWave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmerBase {
+  background: linear-gradient(
+    90deg,
+    #f1f5f9 0%,
+    #f1f5f9 25%,
+    #ffffff 50%,
+    #f1f5f9 75%,
+    #f1f5f9 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerWave 1.6s ease-in-out infinite;
+}
+
+.skeletonBreadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.skeletonBreadcrumbItem {
+  height: 0.875rem;
+  border-radius: 0.25rem;
+}
+
+.skeletonActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.skeletonButton {
+  height: 2rem;
+  border-radius: 0.625rem;
+}
+
+.skeletonButtonEdit {
+  width: 66px;
+}
+
+.skeletonButtonDelete {
+  width: 78px;
+}
+
+.skeletonButtonAdd {
+  width: 110px;
+}
+
+.skeletonButtonAll {
+  width: 92px;
+}
+
+@media (max-width: 768px) {
+  .skeletonActions {
+    margin-left: auto;
+    gap: 0.375rem;
+  }
+
+  .skeletonButton {
+    width: 36px !important;
+    height: 36px;
+  }
+}
+
+.skeletonTopImage {
+  width: 85%;
+  max-width: 1000px;
+  height: 380px;
+  border-radius: 0.75rem;
+  margin: 0 auto 2rem auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .skeletonTopImage {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    max-height: 280px;
+  }
+}
+
+.skeletonBadge {
+  width: 70px;
+  height: 22px;
+  border-radius: 0.5rem;
+}
+
+.skeletonDate {
+  width: 105px;
+  height: 16px;
+  border-radius: 0.375rem;
+}
+
+.skeletonTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeletonTitleLine {
+  height: 2rem;
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .skeletonTitleLine {
+    height: 1.625rem;
+  }
+}
+
+.skeletonTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeletonLine {
+  height: 1rem;
+  border-radius: 0.375rem;
+}
+
+.skeletonSectionGroup {
+  margin-top: 2rem;
+}
+
+.skeletonSectionHeading {
+  height: 1.5rem;
+  border-radius: 0.5rem;
+  margin: 2rem 0 1rem 0;
+}
+
+.skeletonSectionImage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 450px;
+  margin: 20px auto;
+  border-radius: 12px;
 }
