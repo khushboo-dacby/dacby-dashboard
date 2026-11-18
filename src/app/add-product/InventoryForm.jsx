@@ -116,6 +116,30 @@ function hasValidCombinationAttributes(combination) {
   });
 }
 
+function expandCombinationAttributes(attributes, index = 0, current = {}) {
+  if (index === attributes.length) return [current];
+  const attribute = attributes[index];
+  const key = normalizeAttributeKey(attribute?.key);
+  const values = (attribute?.values || []).filter((value) => String(value ?? "").trim());
+  if (!key || values.length === 0) return expandCombinationAttributes(attributes, index + 1, current);
+
+  return values.flatMap((value) =>
+    expandCombinationAttributes(attributes, index + 1, { ...current, [key]: value })
+  );
+}
+
+function getResolvedCombinationRows(combinations) {
+  return (combinations || [])
+    .filter(hasValidCombinationAttributes)
+    .flatMap((combination) =>
+      expandCombinationAttributes(combination.attributes || []).map((attributes) => ({
+        key: `${combination.name}:${Object.entries(attributes).map(([key, value]) => `${key}=${value}`).join("|")}`,
+        combinationName: combination.name,
+        attributes,
+      }))
+    );
+}
+
 export default function InventoryForm() {
 
   const [resp, setResp] = useState(null);
@@ -420,13 +444,14 @@ export default function InventoryForm() {
     const defs = (attributeDefinitions || []).filter((attr) => {
       const key = String(attr.key || "").trim();
       const values = Array.isArray(attr.values) ? attr.values : [];
-      return key && key.toLowerCase() !== "color" && values.length > 0;
+      return key && values.length > 0;
     });
 
     if (!defs.length) return "";
 
     const hasAllValues = defs.every((attr) => {
-      const value = attributes?.[attr.key];
+      const normKey = normalizeAttributeKey(attr.key);
+      const value = attributes?.[attr.key] ?? attributes?.[normKey];
       return value !== undefined && value !== null && String(value).trim();
     });
 
@@ -434,13 +459,17 @@ export default function InventoryForm() {
 
     const match = (combinations || []).find((comb) =>
       defs.every((attr) => {
+        const normKey = normalizeAttributeKey(attr.key);
         const selected =
-          comb.selectedValues && comb.selectedValues[attr.key] !== undefined
+          comb.selectedValues?.[attr.key] !== undefined
             ? comb.selectedValues[attr.key]
-            : (comb.attributes || []).find((a) => a.key === attr.key)
+            : comb.selectedValues?.[normKey] !== undefined
+            ? comb.selectedValues[normKey]
+            : (comb.attributes || []).find((a) => normalizeAttributeKey(a.key) === normKey)
               ?.values?.[0];
 
-        return String(selected || "") === String(attributes[attr.key] || "");
+        const itemAttrValue = attributes?.[attr.key] ?? attributes?.[normKey];
+        return String(selected || "") === String(itemAttrValue || "");
       }),
     );
 
@@ -797,21 +826,7 @@ export default function InventoryForm() {
 
     if (!defs.length) return [];
 
-    const colorAttribute = defs.find(
-      (attr) => normalizeAttributeKey(attr.key) === "color",
-    );
-    const commonAttribute =
-      colorAttribute && colorAttribute.values.length >= 2
-        ? colorAttribute
-        : defs.reduce((largest, attribute) =>
-          attribute.values.length > largest.values.length
-            ? attribute
-            : largest,
-        );
-    const combinationDefs = defs.filter(
-      (attribute) => attribute !== commonAttribute,
-    );
-    const valueGroups = combinationDefs.map((attribute) =>
+    const valueGroups = defs.map((attribute) =>
       attribute.values
         .map((value) => String(value).trim())
         .filter(Boolean),
@@ -832,26 +847,14 @@ export default function InventoryForm() {
     walk();
 
     return generated.map((values, index) => {
-      const attributes = [
-        {
-          key: commonAttribute.key,
-          values: [...commonAttribute.values],
-        },
-      ];
-
-      combinationDefs.forEach((attribute, attributeIndex) => {
-        attributes.push({
-          key: attribute.key,
-          values: [values[attributeIndex]],
-        });
-      });
+      const attributes = defs.map((attribute, attributeIndex) => ({
+        key: attribute.key,
+        values: [values[attributeIndex]],
+      }));
 
       const selectedValues = {};
       attributes.forEach((attribute) => {
-        selectedValues[attribute.key] =
-          attribute === attributes[0]
-            ? [...attribute.values]
-            : attribute.values[0];
+        selectedValues[attribute.key] = attribute.values[0];
       });
 
       return {
@@ -958,6 +961,48 @@ export default function InventoryForm() {
     }
 
     updateCombinations(() => generated);
+
+    setVendors((currentVendors) =>
+      currentVendors.map((vendor) => {
+        const existingItems = vendor.items || [];
+        const nextItems = generated.map((comb) => {
+          const attrs = {};
+          (comb.attributes || []).forEach((a) => {
+            const k = normalizeAttributeKey(a.key);
+            if (k) attrs[k] = a.values?.[0] || "";
+          });
+          const rowKey = `${comb.name}:${Object.entries(attrs).map(([k, v]) => `${k}=${v}`).join("|")}`;
+          const existing = existingItems.find(
+            (it) =>
+              it._variantKey === rowKey ||
+              (it.combination_name === comb.name &&
+                it.attributes &&
+                Object.entries(attrs).every(([k, v]) => String(it.attributes[k] ?? "") === String(v))),
+          );
+          if (existing) {
+            return {
+              ...existing,
+              combination_name: comb.name,
+              attributes: attrs,
+              _variantKey: rowKey,
+            };
+          }
+          const draft = {
+            ...emptyItem(),
+            combination_name: comb.name,
+            attributes: attrs,
+            _variantKey: rowKey,
+            mrp: fields.mrp ? Number(fields.mrp) : "",
+            price: fields.price ? Number(fields.price) : "",
+            sell_price: fields.price ? Number(fields.price) : 1000,
+          };
+          draft.sku = generateVisibleSku(fields, draft, specification.attributeDefinitions);
+          return draft;
+        });
+        return { ...vendor, items: nextItems.length ? nextItems : [emptyItem()] };
+      }),
+    );
+
     toast.success(
       `${generated.length} combination${generated.length === 1 ? "" : "s"} regenerated from scratch`,
     );
@@ -1051,6 +1096,7 @@ export default function InventoryForm() {
       name: v.name || undefined,
       vendor_note: v.vendor_note || undefined,
       items: v.items.map((it) => ({
+        _variantKey: it._variantKey || undefined,
         sku: it.sku || undefined,
         combination_name: it.combination_name || undefined,
         attributes:
@@ -1073,9 +1119,6 @@ export default function InventoryForm() {
           : undefined,
       })),
     }));
-    const hasSellableItem = vendorsNormalized.some((vendor) =>
-      (vendor.items || []).some((item) => !!item.sell),
-    );
 
     const descriptionNormalized = serializeDescriptionState(description);
     const images = fields.imagesText
@@ -1117,10 +1160,59 @@ export default function InventoryForm() {
     const isPreOrder = fields.category_name === "Pre Orders";
     const isCd = isCdCategory(fields.category_name);
 
+    const activeCombinationRows = getResolvedCombinationRows(specification.combinations || []);
+
     const vendorsTransformed = (vendorsNormalized || []).reduce(
       (acc, vendor, vi) => {
         const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
-        const combination_offered = (vendor.items || []).reduce(
+        const sourceItems = vendor.items || [];
+
+        const itemsToTransform = activeCombinationRows.length
+          ? activeCombinationRows.map((row) => {
+              const matchedItem = sourceItems.find(
+                (it) =>
+                  it._variantKey === row.key ||
+                  (it.combination_name === row.combinationName &&
+                    it.attributes &&
+                    Object.entries(row.attributes).every(
+                      ([k, v]) => String(it.attributes[k] ?? "") === String(v),
+                    )),
+              );
+
+              if (matchedItem) {
+                return {
+                  ...matchedItem,
+                  combination_name: row.combinationName,
+                  attributes: { ...row.attributes, ...(matchedItem.attributes || {}) },
+                };
+              }
+
+              const draftSku = generateVisibleSku(
+                fields,
+                { combination_name: row.combinationName, attributes: row.attributes },
+                specification.attributeDefinitions,
+              );
+              const colorKey = normalizeAttributeKey(row.attributes.color || "");
+              const colorImages = (variantImagesByColor && variantImagesByColor[colorKey]) || [];
+
+              return {
+                combination_name: row.combinationName,
+                attributes: row.attributes,
+                sku: draftSku,
+                sell_price: fields.price ? Number(fields.price) : 0,
+                mrp: fields.mrp ? Number(fields.mrp) : 0,
+                price: fields.price ? Number(fields.price) : 0,
+                weight: 0.5,
+                stocks: 0,
+                sell: false,
+                rating: 4.5,
+                rating_count: 110,
+                images: colorImages,
+              };
+            })
+          : sourceItems;
+
+        const combination_offered = itemsToTransform.reduce(
           (cAcc, it) => {
             const combName = it.combination_name || "combination_1";
             if (!cAcc[combName]) cAcc[combName] = {};
@@ -1202,9 +1294,24 @@ export default function InventoryForm() {
       },
       {},
     );
-    const inStock = (vendorsNormalized || []).some((vendor) =>
-      (vendor.items || []).some((item) => Number(item.stocks) > 0),
-    );
+    const inStock =
+      Object.values(vendorsTransformed).some((vendor) =>
+        Object.values(vendor.combination_offered || {}).some((comb) =>
+          Object.values(comb || {}).some((item) => Number(item.stocks) > 0),
+        ),
+      ) ||
+      (vendorsNormalized || []).some((vendor) =>
+        (vendor.items || []).some((item) => Number(item.stocks) > 0),
+      );
+    const hasSellableItem =
+      Object.values(vendorsTransformed).some((vendor) =>
+        Object.values(vendor.combination_offered || {}).some((comb) =>
+          Object.values(comb || {}).some((item) => !!item.sell),
+        ),
+      ) ||
+      vendorsNormalized.some((vendor) =>
+        (vendor.items || []).some((item) => !!item.sell),
+      );
     const preOrderVendorsTransformed = (vendorsNormalized || []).reduce(
       (acc, vendor, vi) => {
         const vendorKey = `VENDOR_${String(vi + 1).padStart(3, "0")}`;
